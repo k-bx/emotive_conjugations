@@ -20,7 +20,7 @@ import os
 import sys
 import datetime
 
-from newsplease.crawler import commoncrawl_crawler as commoncrawl_crawler
+from newsplease.crawler import commoncrawl_crawler
 
 
 ############ YOUR CONFIG ############
@@ -38,7 +38,7 @@ my_filter_valid_hosts = ['nytimes.com', 'cnn.com', 'washingtonpost.com', 'msnbc.
 my_filter_start_date = datetime.datetime(2018, 5, 1)
 # end date (if None, any date is OK as end date), as datetime
 # my_filter_end_date = None  # datetime.datetime(2016, 12, 31)
-my_filter_end_date = datetime.datetime(2016, 6, 1)
+my_filter_end_date = datetime.datetime(2018, 6, 1)
 # if date filtering is strict and news-please could not detect the date of an article, the article will be discarded
 my_filter_strict_date = True
 # if True, the script checks whether a file has been downloaded already and uses that file instead of downloading
@@ -59,6 +59,8 @@ my_delete_warc_after_extraction = False
 # if True, will continue extraction from the latest fully downloaded but not fully extracted WARC files and then
 # crawling new WARC files. This assumes that the filter criteria have not been changed since the previous run!
 my_continue_process = True
+# filter warc filenames
+warc_filter = lambda x: '201905' in x or '201906' in x
 ############ END YOUR CONFIG #########
 
 
@@ -157,7 +159,7 @@ def main():
                                                number_of_extraction_processes=my_number_of_extraction_processes,
                                                log_level=my_log_level,
                                                delete_warc_after_extraction=delete_warc_after_extraction,
-                                               continue_process=True)
+                                               continue_process=True, warc_filter=warc_filter)
 
 
 if __name__ == "__main__":

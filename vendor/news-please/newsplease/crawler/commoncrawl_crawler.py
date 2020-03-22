@@ -212,7 +212,7 @@ def crawl_from_commoncrawl(callback_on_article_extracted, callback_on_warc_compl
                            start_date=None, end_date=None, strict_date=True, reuse_previously_downloaded_files=True,
                            local_download_dir_warc=None, continue_after_error=True, show_download_progress=False,
                            number_of_extraction_processes=4, log_level=logging.ERROR,
-                           delete_warc_after_extraction=True, continue_process=True):
+                           delete_warc_after_extraction=True, continue_process=True, warc_filter=None):
     """
     Crawl and extract articles form the news crawl provided by commoncrawl.org. For each article that was extracted
     successfully the callback function callback_on_article_extracted is invoked where the first parameter is the
@@ -228,6 +228,7 @@ def crawl_from_commoncrawl(callback_on_article_extracted, callback_on_warc_compl
     :param reuse_previously_downloaded_files:
     :param local_download_dir_warc:
     :param continue_after_error:
+    :param warc_filter:
     :param show_download_progress:
     :param log_level:
     :return:
@@ -262,6 +263,8 @@ def crawl_from_commoncrawl(callback_on_article_extracted, callback_on_warc_compl
         else:
             # if not continue process, then always add
             warc_download_urls.append(warc_download_url)
+    if warc_filter:
+        warc_download_urls = filter(warc_filter, warc_download_urls)
 
     # run the crawler in the current, single process if number of extraction processes is set to 1
     if number_of_extraction_processes > 1:
