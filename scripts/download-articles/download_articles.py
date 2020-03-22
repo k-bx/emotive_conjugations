@@ -12,37 +12,33 @@ CommonCrawlCrawler provided in newsplease.crawler.commoncrawl_crawler.py
 In case the script crashes and contains a log message in the beginning that states that only 1 file on AWS storage
 was found, make sure that awscli was correctly installed. You can check that by running aws --version from a terminal.
 If aws is not installed, you can (on Ubuntu) also install it using sudo apt-get install awscli.
-
-This script uses relative imports to ensure that the latest, local version of news-please is used, instead of the one
-that might have been installed with pip. Hence, you must run this script following this workflow.
-git clone https://github.com/fhamborg/news-please.git
-cd news-please
-python3 -m newsplease.examples.commoncrawl
 """
 import hashlib
 import json
 import logging
 import os
 import sys
+import datetime
 
-from ..crawler import commoncrawl_crawler as commoncrawl_crawler
-
-__author__ = "Felix Hamborg"
-__copyright__ = "Copyright 2017"
-__credits__ = ["Sebastian Nagel"]
+from newsplease.crawler import commoncrawl_crawler as commoncrawl_crawler
 
 
 ############ YOUR CONFIG ############
 # download dir for warc files
-my_local_download_dir_warc = './cc_download_warc/'
+# my_local_download_dir_warc = './cc_download_warc/'
+my_local_download_dir_warc = '/media/kb/stick/emotive_conjugations/cc_download_warc/'
 # download dir for articles
-my_local_download_dir_article = './cc_download_articles/'
+# my_local_download_dir_article = './cc_download_articles/'
+my_local_download_dir_article = '/media/kb/stick/emotive_conjugations/cc_download_articles/'
 # hosts (if None or empty list, any host is OK)
-my_filter_valid_hosts = []  # example: ['elrancaguino.cl']
+# my_filter_valid_hosts = []  # example: ['elrancaguino.cl']
+my_filter_valid_hosts = ['nytimes.com', 'cnn.com', 'washingtonpost.com', 'msnbc.com', 'foxnews.com']
 # start date (if None, any date is OK as start date), as datetime
-my_filter_start_date = None  # datetime.datetime(2016, 1, 1)
+# my_filter_start_date = None  # datetime.datetime(2016, 1, 1)
+my_filter_start_date = datetime.datetime(2018, 5, 1)
 # end date (if None, any date is OK as end date), as datetime
-my_filter_end_date = None  # datetime.datetime(2016, 12, 31)
+# my_filter_end_date = None  # datetime.datetime(2016, 12, 31)
+my_filter_end_date = datetime.datetime(2016, 6, 1)
 # if date filtering is strict and news-please could not detect the date of an article, the article will be discarded
 my_filter_strict_date = True
 # if True, the script checks whether a file has been downloaded already and uses that file instead of downloading
@@ -57,9 +53,9 @@ my_log_level = logging.INFO
 # json export style
 my_json_export_style = 1  # 0 (minimize), 1 (pretty)
 # number of extraction processes
-my_number_of_extraction_processes = 1
+my_number_of_extraction_processes = 8
 # if True, the WARC file will be deleted after all articles have been extracted from it
-my_delete_warc_after_extraction = True
+my_delete_warc_after_extraction = False
 # if True, will continue extraction from the latest fully downloaded but not fully extracted WARC files and then
 # crawling new WARC files. This assumes that the filter criteria have not been changed since the previous run!
 my_continue_process = True
