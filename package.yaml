@@ -23,11 +23,58 @@ dependencies:
 - base
 - bytestring
 - lens
+- monoidal-containers
+- network-uri
 - pipes
 - pipes-bytestring
+- pipes-zlib
+- pretty-simple
 - rio
 - string-class
+- text
 - warc
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wpartial-fields
+- -Wredundant-constraints
+
+library:
+  source-dirs: src
+  dependencies:
+    - optparse-applicative
+
+executables:
+  conj:
+    main:                Main.hs
+    source-dirs:         app
+    dependencies:
+    - emotive-conjugations
+    - optparse-applicative
+    - optparse-simple
+
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O
+
+tests:
+  emotive-conjugations-test:
+    main:                Spec.hs
+    source-dirs:         test
+    dependencies:
+    - emotive-conjugations
+    - hspec
+
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
 
 default-extensions:
 - BangPatterns
@@ -61,51 +108,10 @@ default-extensions:
 - PolyKinds
 - RankNTypes
 - RecordWildCards
+- StrictData
 - ScopedTypeVariables
 - StandaloneDeriving
 - TupleSections
 - TypeFamilies
 - TypeSynonymInstances
 - ViewPatterns
-
-
-ghc-options:
-- -Wall
-- -Wcompat
-- -Widentities
-- -Wincomplete-record-updates
-- -Wincomplete-uni-patterns
-- -Wpartial-fields
-- -Wredundant-constraints
-
-library:
-  source-dirs: src
-  dependencies:
-    - optparse-applicative
-
-executables:
-  emotive-conjugations-exe:
-    main:                Main.hs
-    source-dirs:         app
-    dependencies:
-    - emotive-conjugations
-    - optparse-applicative
-    - optparse-simple
-
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-
-tests:
-  emotive-conjugations-test:
-    main:                Spec.hs
-    source-dirs:         test
-    dependencies:
-    - emotive-conjugations
-    - hspec
-
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N

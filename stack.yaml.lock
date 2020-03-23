@@ -18,6 +18,13 @@ packages:
       sha256: 0133c5eace1f5b3537e4e432bb42317d611adb46d1b8e3ef0818b82234ce9321
   original:
     hackage: pipes-zlib-0.4.4.2@sha256:f23fb0695f5613d04566c53c16fe14c6cd674bb607b5874b5fd8c49fe6b78ed8,1836
+- completed:
+    hackage: monoidal-containers-0.6.0.1@sha256:7d776942659eb4d70d8b8da5d734396374a6eda8b4622df9e61e26b24e9c8e40,2501
+    pantry-tree:
+      size: 569
+      sha256: c354e916cb3aa9a0728a60f08440dc589a9e6d8275f047dbe9ab73f168247561
+  original:
+    hackage: monoidal-containers-0.6.0.1@sha256:7d776942659eb4d70d8b8da5d734396374a6eda8b4622df9e61e26b24e9c8e40,2501
 snapshots:
 - completed:
     size: 491372
