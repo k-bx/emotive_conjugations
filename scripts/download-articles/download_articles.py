@@ -32,7 +32,7 @@ my_local_download_dir_warc = '/media/kb/stick/emotive_conjugations/cc_download_w
 my_local_download_dir_article = '/media/kb/stick/emotive_conjugations/cc_download_articles/'
 # hosts (if None or empty list, any host is OK)
 # my_filter_valid_hosts = []  # example: ['elrancaguino.cl']
-my_filter_valid_hosts = ['nytimes.com', 'cnn.com', 'washingtonpost.com', 'msnbc.com', 'foxnews.com']
+my_filter_valid_hosts = ['nytimes.com', 'cnn.com', 'washingtonpost.com', 'msnbc.com', 'foxnews.com', 'bbc.com']
 # start date (if None, any date is OK as start date), as datetime
 # my_filter_start_date = None  # datetime.datetime(2016, 1, 1)
 my_filter_start_date = datetime.datetime(2018, 5, 1)
