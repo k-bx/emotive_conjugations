@@ -1,0 +1,72 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: f173dcda92bf7bb00d4b2b0cee0ad39f47325c6a0c044afffc9e360eafd9610a
+
+name:           emotive-conjugations
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/githubuser/emotive-conjugations#readme>
+homepage:       https://github.com/githubuser/emotive-conjugations#readme
+bug-reports:    https://github.com/githubuser/emotive-conjugations/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/emotive-conjugations
+
+library
+  exposed-modules:
+      Import
+      Run
+      Types
+      Util
+  other-modules:
+      Paths_emotive_conjugations
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.11 && <10
+    , rio >=0.1.12.0
+  default-language: Haskell2010
+
+executable emotive-conjugations-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_emotive_conjugations
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.11 && <10
+    , emotive-conjugations
+    , optparse-simple
+    , rio >=0.1.12.0
+  default-language: Haskell2010
+
+test-suite emotive-conjugations-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      UtilSpec
+      Paths_emotive_conjugations
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.11 && <10
+    , emotive-conjugations
+    , hspec
+    , rio >=0.1.12.0
+  default-language: Haskell2010
