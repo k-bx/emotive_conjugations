@@ -9,3 +9,14 @@ install_python:
 	# mkdir -p vendor
 	# test -d vendor/news-please || (cd vendor && git clone https://github.com/fhamborg/news-please.git)
 	cd vendor/news-please && $(pip) install -r ./requirements.txt && $(python) setup.py install
+
+.PHONY: tags
+tags:
+	hasktags -e .
+	mv TAGS TAGS01
+	find . -type f -name "*.elm" -print | etags --language=none --regex=@elm.tags -
+	mv TAGS TAGS02
+	cat TAGS02 >> TAGS
+	rm TAGS02
+	cat TAGS01 >> TAGS
+	rm TAGS01

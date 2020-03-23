@@ -4,16 +4,14 @@ import RIO
 import RIO.Process
 
 -- | Command line arguments
-data Options
-  = Options
-      { optionsVerbose :: !Bool
-      }
+data Config
+  = Config
 
 data App
   = App
       { appLogFunc :: !LogFunc,
         appProcessContext :: !ProcessContext,
-        appOptions :: !Options
+        appConfig :: !Config
         -- Add other app-specific configuration information here
       }
 

@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: warc-1.0.4@sha256:fc56a30a86b981d3d66b96568d1d7a29664c3720f711cb58ab03ef43cfe7a1c8,2418
+    pantry-tree:
+      size: 324
+      sha256: d62d9e66998e71ab338be993efc2f18fc72ea3ad2dfc2b544fd8d2472d032417
+  original:
+    hackage: warc-1.0.4
+- completed:
+    hackage: pipes-zlib-0.4.4.2@sha256:f23fb0695f5613d04566c53c16fe14c6cd674bb607b5874b5fd8c49fe6b78ed8,1836
+    pantry-tree:
+      size: 470
+      sha256: 0133c5eace1f5b3537e4e432bb42317d611adb46d1b8e3ef0818b82234ce9321
+  original:
+    hackage: pipes-zlib-0.4.4.2@sha256:f23fb0695f5613d04566c53c16fe14c6cd674bb607b5874b5fd8c49fe6b78ed8,1836
 snapshots:
 - completed:
     size: 491372

@@ -3,3 +3,4 @@ venv
 *.egg-info/
 vendor/news-please/build
 vendor/news-please/dist
+TAGS
