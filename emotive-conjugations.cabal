@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 77869b9885bb8ccca7d08428709a7be2b75e4ccb6bd05b156221dce1f1c3031d
+-- hash: 7f23e8efbb7a2eefdbfa89404d6a406dc5caab9f45631319c6c14bd489218c34
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Le.CommonCrawl
+      Le.Config
       Le.Import
       Le.Run
       Le.Types

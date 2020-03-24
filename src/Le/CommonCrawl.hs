@@ -7,23 +7,15 @@ import qualified Data.List
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Data.Warc
+import qualified Le.Config
 import Le.Import
 import Network.URI
 import qualified Pipes as P
 import qualified Pipes.ByteString
 import qualified Pipes.GZip
 import qualified System.IO
-import Text.Pretty.Simple (pShow)
 
-newsHosts :: [Text]
-newsHosts =
-  [ "nytimes.com",
-    "cnn.com",
-    "washingtonpost.com",
-    "msnbc.com",
-    "foxnews.com",
-    "bbc.com"
-  ]
+-- import Text.Pretty.Simple (pShow)
 
 extractExampleWarc :: RIO App ()
 extractExampleWarc = do
@@ -52,9 +44,9 @@ extractExampleWarc = do
     logInfo $
       "> domains: "
         <> display
-          ( pShow
+          ( tshow
               ( take
-                  20
+                  100
                   ( Data.List.sortBy
                       (flip compare `on` snd)
                       (MH.toList domainsV)
@@ -79,15 +71,20 @@ iterFunc hOut domains record@Record {..} = do
   let mIsHttp =
         recHeader ^. recHeaders . at "Content-Type" <&> S.toText
           <&> ("application/http" `T.isInfixOf`)
+  let newsHostsWWW = map ("www." <>) Le.Config.newsHosts
   case mIsHttp of
     Nothing -> skip
     Just False -> skip
     Just True -> do
       case mhost of
         Nothing -> skip
-        Just root -> do
-          modifyIORef domains (MH.modify (+ 1) root)
-          liftIO $ P.runEffect $ encodeRecord record P.>-> Pipes.ByteString.toHandle hOut
+        Just host -> do
+          modifyIORef domains (MH.modify (+ 1) host)
+          if host `elem` Le.Config.newsHosts
+            || host `elem` newsHostsWWW
+            then do
+              liftIO $ P.runEffect $ encodeRecord record P.>-> Pipes.ByteString.toHandle hOut
+            else skip
   where
     skip = do
       r <- liftIO $ P.runEffect $ P.for recContent $ \x -> x `seq` return ()
