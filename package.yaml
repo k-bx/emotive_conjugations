@@ -24,18 +24,32 @@ dependencies:
 - amazonka
 - amazonka-s3
 - bytestring
+- directory
+- dhall
 - lens
 - monoidal-containers
 - network-uri
+- persistent
+- persistent-sqlite
 - pipes
 - pipes-bytestring
 - pipes-zlib
 - pretty-simple
 - rio
 - resourcet
+- servant
+- servant-client
+- servant-server
 - string-class
+- transformers
 - text
 - warc
+- wai
+- wai-app-static
+- wai-middleware-static
+- wai-extra
+- warp
+- warp-tls
 
 ghc-options:
 - -Wall

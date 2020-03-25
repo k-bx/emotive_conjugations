@@ -1,11 +1,13 @@
 module Le.Run where
 
 import qualified Data.String.Class as S
+import qualified Dhall
 import qualified Le.CommonCrawl
 import Le.Import
 import qualified Network.AWS as AWS
 import Options.Applicative
 import RIO.Process
+import qualified System.Directory
 
 main :: String -> IO ()
 main ver = join (customExecParser (prefs (showHelpOnError <> showHelpOnEmpty)) (info (helper <*> hsubparser (commands ver)) imod))
@@ -28,8 +30,7 @@ run act = withApp $ \env -> runRIO env act
 
 withApp :: (App -> IO a) -> IO a
 withApp f = do
-  -- cfg <- liftIO readConfig
-  let cfg = Config
+  cfg <- liftIO readConfig
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
   withLogFunc lo $ \lf -> do
@@ -41,3 +42,8 @@ withApp f = do
             appAwsEnv = awsEnv
           }
     f app
+
+readConfig :: IO Config
+readConfig = do
+  h <- System.Directory.getHomeDirectory
+  Dhall.input Dhall.auto (S.toText (h <> "/conj.dhall"))

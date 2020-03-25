@@ -1,12 +1,20 @@
 module Le.Types where
 
+import qualified Dhall
 import qualified Network.AWS
 import RIO
 import RIO.Process
 
+type AppM = RIO App
+
 -- | Command line arguments
 data Config
   = Config
+      { cfgHttpPort :: Maybe Natural
+      }
+  deriving (Generic)
+
+instance Dhall.FromDhall Config
 
 data App
   = App
