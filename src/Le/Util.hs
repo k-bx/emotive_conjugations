@@ -6,5 +6,5 @@ module Le.Util where
 
 import Le.Import
 
-plus2 :: Int -> Int
-plus2 = (+ 2)
+eitherErr :: Either String c -> c
+eitherErr = either error id

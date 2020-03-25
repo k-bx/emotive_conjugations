@@ -10,6 +10,8 @@ import qualified System.Directory
 
 type AppM = RIO App
 
+type Le = RIO App
+
 -- | Command line arguments
 data Config
   = Config
@@ -24,7 +26,8 @@ data App
       { appLogFunc :: !LogFunc,
         appProcessContext :: !ProcessContext,
         appConfig :: !Config,
-        appAwsEnv :: Network.AWS.Env
+        appAwsEnv :: Network.AWS.Env,
+        appTempDir :: FilePath
         -- Add other app-specific configuration information here
       }
 
@@ -42,15 +45,23 @@ withApp f = do
   withLogFunc lo $ \lf -> do
     -- awsEnv <- AWS.newEnv AWS.Discover
     awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
-    let app = App
-          { appLogFunc = lf,
-            appProcessContext = pc,
-            appConfig = cfg,
-            appAwsEnv = awsEnv
-          }
-    f app
+    -- let tempDirPath = h <> "/tmp/conj-webapp"
+    withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
+      let app = App
+            { appLogFunc = lf,
+              appProcessContext = pc,
+              appConfig = cfg,
+              appAwsEnv = awsEnv,
+              appTempDir = tempDirPath
+            }
+      f app
 
 readConfig :: IO Config
 readConfig = do
   h <- System.Directory.getHomeDirectory
   Dhall.input Dhall.auto (S.toText (h <> "/conj.dhall"))
+
+aws :: AWS.AWS a -> Le a
+aws action = do
+  App {appAwsEnv} <- ask
+  Network.AWS.runResourceT $ AWS.runAWS appAwsEnv action

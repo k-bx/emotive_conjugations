@@ -21,11 +21,16 @@ description:         Please see the README on Github at <https://github.com/gith
 
 dependencies:
 - base
+- aeson
 - amazonka
+- amazonka-core
 - amazonka-s3
 - bytestring
+- conduit
 - directory
 - dhall
+- http-media
+- http-types
 - lens
 - monoidal-containers
 - network-uri
@@ -96,6 +101,7 @@ tests:
 default-extensions:
 - BangPatterns
 - BinaryLiterals
+- BlockArguments
 - ConstraintKinds
 - DataKinds
 - DefaultSignatures
@@ -129,6 +135,7 @@ default-extensions:
 - ScopedTypeVariables
 - StandaloneDeriving
 - TupleSections
+- TypeApplications
 - TypeFamilies
 - TypeSynonymInstances
 - ViewPatterns

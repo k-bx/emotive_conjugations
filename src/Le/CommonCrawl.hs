@@ -8,53 +8,60 @@ import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Data.Warc
 import qualified Le.Config
+import Le.Files
 import Le.Import
+import Le.S3Loc
 import qualified Network.AWS as AWS
 import qualified Network.AWS.S3 as S3
 import Network.URI
 import qualified Pipes as P
 import qualified Pipes.ByteString
 import qualified Pipes.GZip
+import qualified System.Directory
 import qualified System.IO
-
--- import Text.Pretty.Simple (pShow)
 
 extractExampleWarc :: RIO App ()
 extractExampleWarc = do
-  let file = "/home/kb/tmp/emotive-conj/CC-NEWS-20180712154111-00005.warc.gz"
-      -- fileOutUncompressed = "/home/kb/tmp/emotive-conj/CC-NEWS-20180712154111-00005-filtered.warc"
-      fileOutCompressed = "/home/kb/tmp/emotive-conj/CC-NEWS-20180712154111-00005-filtered.warc.gz"
-  domains <- newIORef (MH.fromList [])
-  withSystemTempFile "conj-warc-tmp" $ \_fpath hOutUnc -> do
-    withRunInIO $ \runInIO -> do
-      withFile file ReadMode $ \h -> do
+  h <- liftIO $ System.Directory.getHomeDirectory
+  void $ extractWarc (h <> "/tmp/") "s3://commoncrawl/crawl-data/CC-NEWS/2018/07/CC-NEWS-20180712154111-00005.warc.gz"
+
+extractWarc :: FilePath -> S3Loc -> Le FilePath
+extractWarc tempDir loc = do
+  logInfo $ "> extracting " <> display (tshow loc)
+  let inPath = tempDir <> "/" <> "in.warc.gz"
+  aws $ s3download loc inPath
+  withFile "in.warc.gz" ReadMode $ \h -> do
+    domains <- newIORef (MH.fromList [])
+    withFile "out-uncompressed.warc" WriteMode $ \hOutUnc -> do
+      withRunInIO $ \runInIO -> do
         _ <-
           liftIO $
             iterRecords
               (\r -> runInIO (iterFunc hOutUnc domains r))
               (parseWarc (decompressAll (Pipes.ByteString.fromHandle h)))
         return ()
-      hSeek hOutUnc System.IO.AbsoluteSeek 0
-      withFile fileOutCompressed WriteMode $ \hOutComp -> do
-        liftIO $ P.runEffect $
-          ( Pipes.GZip.compress
-              Pipes.GZip.defaultCompression
-              (Pipes.ByteString.fromHandle hOutUnc)
-          )
-            P.>-> (Pipes.ByteString.toHandle hOutComp)
-    domainsV <- readIORef domains
-    logInfo $
-      "> domains: "
-        <> display
-          ( tshow
-              ( take
-                  100
-                  ( Data.List.sortBy
-                      (flip compare `on` snd)
-                      (MH.toList domainsV)
-                  )
-              )
-          )
+        hSeek hOutUnc System.IO.AbsoluteSeek 0
+        withFile "out.warc.gz" WriteMode $ \hOutComp -> do
+          liftIO $ P.runEffect $
+            ( Pipes.GZip.compress
+                Pipes.GZip.defaultCompression
+                (Pipes.ByteString.fromHandle hOutUnc)
+            )
+              P.>-> (Pipes.ByteString.toHandle hOutComp)
+      domainsV <- readIORef domains
+      logInfo $
+        "> domains: "
+          <> display
+            ( tshow
+                ( take
+                    100
+                    ( Data.List.sortBy
+                        (flip compare `on` snd)
+                        (MH.toList domainsV)
+                    )
+                )
+            )
+  pure "out.warc.gz"
 
 iterFunc ::
   Handle ->
