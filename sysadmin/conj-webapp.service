@@ -4,8 +4,8 @@ Description=conj-webapp
 [Service]
 ExecStart=/home/ubuntu/conj/conj webapp
 Restart=always
-User=kb
-Group=kb
+User=ubuntu
+Group=ubuntu
 RestartSec=5s
 WorkingDirectory=/home/ubuntu/conj/
 #EnvironmentFile=/etc/meetup.env
