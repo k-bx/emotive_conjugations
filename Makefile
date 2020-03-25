@@ -20,3 +20,16 @@ tags:
 	rm TAGS02
 	cat TAGS01 >> TAGS
 	rm TAGS01
+
+.PHONY: clean
+clean:
+	stack clean
+
+.PHONY: prod
+prod:
+	stack build
+	stack install
+
+.PHONY: deploy
+deploy:
+	./sysadmin/deploy.sh

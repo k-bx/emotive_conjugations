@@ -40,7 +40,8 @@ withApp f = do
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
   withLogFunc lo $ \lf -> do
-    awsEnv <- AWS.newEnv AWS.Discover
+    -- awsEnv <- AWS.newEnv AWS.Discover
+    awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
     let app = App
           { appLogFunc = lf,
             appProcessContext = pc,

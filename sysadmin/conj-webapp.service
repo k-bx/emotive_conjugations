@@ -1,0 +1,14 @@
+[Unit]
+Description=conj-webapp
+
+[Service]
+ExecStart=/home/ubuntu/conj/conj webapp
+Restart=always
+User=kb
+Group=kb
+RestartSec=5s
+WorkingDirectory=/home/ubuntu/conj/
+#EnvironmentFile=/etc/meetup.env
+
+[Install]
+WantedBy=multi-user.target
