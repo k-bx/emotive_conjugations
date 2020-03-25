@@ -6,7 +6,6 @@ import GHC.Conc (numCapabilities)
 import GHC.Stack
 import Le.Import
 import Le.Routes
-import qualified Le.Run
 import qualified Network.Wai as Wai
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Network.Wai.Middleware.Gzip as Gzip
@@ -45,7 +44,7 @@ run = do
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir
-  Le.Run.withApp $ \env -> do
+  withApp $ \env -> do
     let cfg = appConfig env
     cacheContainer <- liftIO $ MStatic.initCaching MStatic.PublicStaticCaching
     let staticOptions =
