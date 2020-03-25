@@ -7,6 +7,7 @@ module Le.Import
   )
 where
 
+import Control.Monad.Trans.Resource as X
 import Data.Monoid as X (Sum (..))
 import Le.Types
 import RIO

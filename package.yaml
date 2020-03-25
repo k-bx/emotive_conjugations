@@ -21,6 +21,8 @@ description:         Please see the README on Github at <https://github.com/gith
 
 dependencies:
 - base
+- amazonka
+- amazonka-s3
 - bytestring
 - lens
 - monoidal-containers
@@ -30,6 +32,7 @@ dependencies:
 - pipes-zlib
 - pretty-simple
 - rio
+- resourcet
 - string-class
 - text
 - warc

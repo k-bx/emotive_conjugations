@@ -5,4 +5,6 @@ extra-deps:
 - warc-1.0.4
 - pipes-zlib-0.4.4.2@sha256:f23fb0695f5613d04566c53c16fe14c6cd674bb607b5874b5fd8c49fe6b78ed8,1836
 - monoidal-containers-0.6.0.1@sha256:7d776942659eb4d70d8b8da5d734396374a6eda8b4622df9e61e26b24e9c8e40,2501
+- ../amazonka-k-bx/amazonka
+- ../amazonka-k-bx/amazonka-s3
 allow-newer: true

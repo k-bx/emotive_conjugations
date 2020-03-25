@@ -3,6 +3,7 @@ module Le.Run where
 import qualified Data.String.Class as S
 import qualified Le.CommonCrawl
 import Le.Import
+import qualified Network.AWS as AWS
 import Options.Applicative
 import RIO.Process
 
@@ -17,6 +18,7 @@ commands ver =
   mempty
     <> cmd "version" "Show version" (pure (run $ logInfo $ "Version " <> display (S.toText ver)))
     <> cmd "extract-example-warc" "Extract example warc" (pure (run Le.CommonCrawl.extractExampleWarc))
+    <> cmd "ls-news-warcs" "List common crawl news warcs" (pure (run Le.CommonCrawl.listNewsWarcs))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))
@@ -31,9 +33,11 @@ withApp f = do
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
   withLogFunc lo $ \lf -> do
+    awsEnv <- AWS.newEnv AWS.Discover
     let app = App
           { appLogFunc = lf,
             appProcessContext = pc,
-            appConfig = cfg
+            appConfig = cfg,
+            appAwsEnv = awsEnv
           }
     f app

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7f23e8efbb7a2eefdbfa89404d6a406dc5caab9f45631319c6c14bd489218c34
+-- hash: be1d4406f762d63cc71150e76a5cd6ec303664c059cb15d4fb01603e63a8efb8
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -40,7 +40,9 @@ library
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards StrictData ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base
+      amazonka
+    , amazonka-s3
+    , base
     , bytestring
     , lens
     , monoidal-containers
@@ -50,6 +52,7 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resourcet
     , rio
     , string-class
     , text
@@ -65,7 +68,9 @@ executable conj
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards StrictData ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N -O
   build-depends:
-      base
+      amazonka
+    , amazonka-s3
+    , base
     , bytestring
     , emotive-conjugations
     , lens
@@ -77,6 +82,7 @@ executable conj
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resourcet
     , rio
     , string-class
     , text
@@ -94,7 +100,9 @@ test-suite emotive-conjugations-test
   default-extensions: BangPatterns BinaryLiterals ConstraintKinds DataKinds DefaultSignatures DeriveDataTypeable DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable DoAndIfThenElse EmptyDataDecls ExistentialQuantification FlexibleContexts FlexibleInstances FunctionalDependencies GADTs GeneralizedNewtypeDeriving InstanceSigs KindSignatures LambdaCase MultiParamTypeClasses MultiWayIf NamedFieldPuns NoImplicitPrelude OverloadedStrings PartialTypeSignatures PatternGuards PolyKinds RankNTypes RecordWildCards StrictData ScopedTypeVariables StandaloneDeriving TupleSections TypeFamilies TypeSynonymInstances ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base
+      amazonka
+    , amazonka-s3
+    , base
     , bytestring
     , emotive-conjugations
     , hspec
@@ -105,6 +113,7 @@ test-suite emotive-conjugations-test
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resourcet
     , rio
     , string-class
     , text

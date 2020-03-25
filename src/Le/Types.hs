@@ -1,5 +1,6 @@
 module Le.Types where
 
+import qualified Network.AWS
 import RIO
 import RIO.Process
 
@@ -11,7 +12,8 @@ data App
   = App
       { appLogFunc :: !LogFunc,
         appProcessContext :: !ProcessContext,
-        appConfig :: !Config
+        appConfig :: !Config,
+        appAwsEnv :: Network.AWS.Env
         -- Add other app-specific configuration information here
       }
 

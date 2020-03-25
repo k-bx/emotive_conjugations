@@ -1,6 +1,6 @@
 module Le.CommonCrawl where
 
-import Control.Lens (at)
+import Control.Lens ((.~), at)
 import Control.Monad.IO.Class
 import qualified Data.HashMap.Monoidal as MH
 import qualified Data.List
@@ -9,6 +9,8 @@ import qualified Data.Text as T
 import Data.Warc
 import qualified Le.Config
 import Le.Import
+import qualified Network.AWS as AWS
+import qualified Network.AWS.S3 as S3
 import Network.URI
 import qualified Pipes as P
 import qualified Pipes.ByteString
@@ -103,3 +105,15 @@ decompressAll p = do
 -- "org"
 extractHostRoot :: Text -> Text
 extractHostRoot = Data.List.last . T.splitOn "."
+
+listNewsWarcs :: RIO App ()
+listNewsWarcs = do
+  awsEnv <- asks appAwsEnv
+  withRunInIO $ \runInIO -> do
+    runResourceT $ AWS.runAWS awsEnv $ do
+      rsp <-
+        AWS.send $
+          S3.listObjectsV2 "commoncrawl"
+            & S3.lovPrefix .~ Just "crawl-data/CC-NEWS/2020/03/"
+      liftIO $ runInIO $ logInfo $ display $ tshow $
+        (map (^. S3.oKey) (rsp ^. S3.lovrsContents :: [S3.Object]))
