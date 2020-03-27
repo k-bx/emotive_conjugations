@@ -62,7 +62,7 @@ extractWarc tempDir loc = do
                     )
                 )
             )
-  pure "out.warc.gz"
+  pure $ outPath
 
 iterFunc ::
   Handle ->
