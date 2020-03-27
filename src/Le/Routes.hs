@@ -20,10 +20,8 @@ instance MimeRender GZip BL.ByteString where
   mimeRender _ val = val
 
 instance MimeUnrender GZip BL.ByteString where
-  mimeUnrender _ bs =
-    case BL.take (fromIntegral (length ("application/gzip" :: String))) bs of
-      "application/gzip" -> Right ""
-      _ -> Left "Mime must be application/gzip"
+  mimeUnrenderWithType _ "application/gzip" _bs = Right ""
+  mimeUnrenderWithType _ mt _bs = Left $ "Mime must be application/gzip, but it's: " ++ show mt
 
 data API route
   = API
