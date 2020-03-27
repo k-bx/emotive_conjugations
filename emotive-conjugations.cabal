@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7c897f926268b3be795e6a07f40846a6236e0d07af6eea29c349a853119d94fb
+-- hash: 54d9833ee3a13e323626f6cce11e4bbfdce95fd326ef7808385e195f2962d41c
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -42,6 +42,7 @@ library
       Le.Types
       Le.Util
       Le.WebApp
+      Le.WebClient
   other-modules:
       Paths_emotive_conjugations
   hs-source-dirs:
@@ -74,6 +75,7 @@ library
     , rio
     , servant
     , servant-client
+    , servant-client-core
     , servant-server
     , string-class
     , text
@@ -123,6 +125,7 @@ executable conj
     , rio
     , servant
     , servant-client
+    , servant-client-core
     , servant-server
     , string-class
     , text
@@ -173,6 +176,7 @@ test-suite emotive-conjugations-test
     , rio
     , servant
     , servant-client
+    , servant-client-core
     , servant-server
     , string-class
     , text

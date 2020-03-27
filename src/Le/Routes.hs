@@ -19,6 +19,12 @@ instance Accept GZip where
 instance MimeRender GZip BL.ByteString where
   mimeRender _ val = val
 
+instance MimeUnrender GZip BL.ByteString where
+  mimeUnrender _ bs =
+    case BL.take (fromIntegral (length ("application/gzip" :: String))) bs of
+      "application/gzip" -> Right ""
+      _ -> Left "Mime must be application/gzip"
+
 data API route
   = API
       { __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
