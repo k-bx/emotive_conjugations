@@ -17,6 +17,6 @@ for host in ubuntu@batonbooks ubuntu@meetup; do
     # fi
     rsync -v -az -C ./sysadmin/conj.dhall $host: ;
     ssh $host sudo systemctl daemon-reload ;
-	ssh @host sudo systemctl enable conj-webapp.service ;
+	ssh $host sudo systemctl enable conj-webapp.service ;
     ssh $host sudo systemctl restart conj-webapp ;
 done
