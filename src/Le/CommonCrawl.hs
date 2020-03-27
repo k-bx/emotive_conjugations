@@ -59,7 +59,7 @@ extractWarc tempDir loc = do
                 ( map
                     (\(a, b) -> (a, getSum b))
                     ( take
-                        100
+                        50
                         ( Data.List.sortBy
                             (flip compare `on` snd)
                             (MH.toList domainsV)
