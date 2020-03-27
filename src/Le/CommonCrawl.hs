@@ -14,6 +14,7 @@ import Le.S3Loc
 import qualified Network.AWS as AWS
 import qualified Network.AWS.S3 as S3
 import Network.URI
+import qualified Network.URI.Encode
 import qualified Pipes as P
 import qualified Pipes.ByteString
 import qualified Pipes.GZip
@@ -27,9 +28,10 @@ extractExampleWarc = do
 extractWarc :: FilePath -> S3Loc -> Le FilePath
 extractWarc tempDir loc = do
   logInfo $ "> extracting " <> display (tshow loc)
-  let inPath = tempDir <> "/in.warc.gz"
-      outPathUnc = tempDir <> "/out-uncompressed.warc"
-      outPath = tempDir <> "/out.warc.gz"
+  let locEncoded = Network.URI.Encode.encodeText (Le.S3Loc.toCliS3Url loc)
+  let inPath = tempDir <> "/" <> S.toString locEncoded <> "-in.warc.gz"
+      outPathUnc = tempDir <> "/" <> S.toString locEncoded <> "-out-uncompressed.warc"
+      outPath = tempDir <> "/" <> S.toString locEncoded <> "-out.warc.gz"
   aws $ s3download loc inPath
   withFile inPath ReadMode $ \h -> do
     domains <- newIORef (MH.fromList [])
