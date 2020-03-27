@@ -56,11 +56,14 @@ extractWarc tempDir loc = do
         "> domains: "
           <> display
             ( tshow
-                ( take
-                    100
-                    ( Data.List.sortBy
-                        (flip compare `on` snd)
-                        (MH.toList domainsV)
+                ( map
+                    (\(a, b) -> (a, getSum b))
+                    ( take
+                        100
+                        ( Data.List.sortBy
+                            (flip compare `on` snd)
+                            (MH.toList domainsV)
+                        )
                     )
                 )
             )
