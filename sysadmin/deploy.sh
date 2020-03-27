@@ -6,7 +6,7 @@ for host in ubuntu@batonbooks ubuntu@meetup; do
     ssh $host sudo systemctl stop conj-webapp ;
     ssh $host mkdir -p /home/ubuntu/conj ;
     ssh $host mkdir -p /home/ubuntu/conj/sysadmin ;
-    rsync -v -az $(stack exec -- which conj) $host:conj/ ;
+    rsync -v -az --progress $(stack exec -- which conj) $host:conj/ ;
     rsync -v -az ./sysadmin/conj-webapp.service $host: ;
     ssh $host sudo mv ./conj-webapp.service /etc/systemd/system/ ;
     rsync -v -az -C ./sysadmin/conj.dhall $host: ;

@@ -124,6 +124,9 @@ listNewsWarcs = do
   runResourceT $ AWS.runAWS awsEnv $ do
     rsp <-
       AWS.send $
-        S3.listObjectsV2 "commoncrawl"
+        S3.listObjectsV2 newsBucket
           & S3.lovPrefix .~ Just "crawl-data/CC-NEWS/2020/03/"
     pure $ rsp ^. S3.lovrsContents
+
+newsBucket :: S3.BucketName
+newsBucket = "commoncrawl"

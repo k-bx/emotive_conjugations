@@ -7,8 +7,8 @@ import qualified Le.ApiTypes as AT
 import qualified Le.CommonCrawl
 import Le.Config
 import Le.Import
-import Le.Util
 import qualified Le.WebClient
+import qualified Network.AWS.Data.Text as AWS
 import qualified Network.AWS.S3 as S3
 import qualified Network.URI.Encode
 import Servant.Client
@@ -23,15 +23,12 @@ downloadAndFilter = do
     mgr <- asks appHttpManager
     let cliEnv = (mkClientEnv mgr baseUrl)
     forM_ warcs $ \warc -> do
-      let key = warc ^. S3.oKey . S3._ObjectKey
+      let s3loc = "s3://" <> AWS.toText Le.CommonCrawl.newsBucket <> "/" <> (warc ^. S3.oKey . S3._ObjectKey)
       logInfo $ display $
         "> Downloading from " <> S.toText (baseUrlHost baseUrl) <> ":" <> tshow (baseUrlPort baseUrl)
           <> " file "
-          <> key
-      bs <-
-        liftIO $ fmap eitherErrShow
-          $ flip runClientM cliEnv
-          $ Le.WebClient.cliDownloadAndFilter (AT.DownloadAndFilterForm {dafWarcFile = key})
-      let keyEncoded = Network.URI.Encode.encodeText key
+          <> s3loc
+      bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc})
+      let keyEncoded = Network.URI.Encode.encodeText s3loc
       liftIO $ BL.writeFile (dataDir <> "/" <> S.toString keyEncoded) bs
       pure ()
