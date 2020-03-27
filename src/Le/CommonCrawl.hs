@@ -18,7 +18,6 @@ import qualified Pipes as P
 import qualified Pipes.ByteString
 import qualified Pipes.GZip
 import qualified System.Directory
-import qualified System.IO
 
 extractExampleWarc :: RIO App ()
 extractExampleWarc = do
@@ -29,10 +28,12 @@ extractWarc :: FilePath -> S3Loc -> Le FilePath
 extractWarc tempDir loc = do
   logInfo $ "> extracting " <> display (tshow loc)
   let inPath = tempDir <> "/in.warc.gz"
+      outPathUnc = tempDir <> "/out-uncompressed.warc"
+      outPath = tempDir <> "/out.warc.gz"
   aws $ s3download loc inPath
   withFile inPath ReadMode $ \h -> do
     domains <- newIORef (MH.fromList [])
-    withFile (tempDir <> "/out-uncompressed.warc") WriteMode $ \hOutUnc -> do
+    withFile outPathUnc WriteMode $ \hOutUnc -> do
       withRunInIO $ \runInIO -> do
         _ <-
           liftIO $
@@ -40,14 +41,14 @@ extractWarc tempDir loc = do
               (\r -> runInIO (iterFunc hOutUnc domains r))
               (parseWarc (decompressAll (Pipes.ByteString.fromHandle h)))
         return ()
-        hSeek hOutUnc System.IO.AbsoluteSeek 0
-        withFile (tempDir <> "/out.warc.gz") WriteMode $ \hOutComp -> do
-          liftIO $ P.runEffect $
-            ( Pipes.GZip.compress
-                Pipes.GZip.defaultCompression
-                (Pipes.ByteString.fromHandle hOutUnc)
-            )
-              P.>-> (Pipes.ByteString.toHandle hOutComp)
+    withFile outPathUnc ReadMode $ \hOutUnc -> do
+      withFile outPath WriteMode $ \hOutComp -> do
+        liftIO $ P.runEffect $
+          ( Pipes.GZip.compress
+              Pipes.GZip.defaultCompression
+              (Pipes.ByteString.fromHandle hOutUnc)
+          )
+            P.>-> (Pipes.ByteString.toHandle hOutComp)
       domainsV <- readIORef domains
       logInfo $
         "> domains: "
