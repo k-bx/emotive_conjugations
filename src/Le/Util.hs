@@ -8,3 +8,6 @@ import Le.Import
 
 eitherErr :: Either String c -> c
 eitherErr = either error id
+
+eitherErrShow :: Show a => Either a c -> c
+eitherErrShow = either (error . show) id

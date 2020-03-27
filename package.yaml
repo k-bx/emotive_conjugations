@@ -29,6 +29,7 @@ dependencies:
 - conduit
 - directory
 - dhall
+- http-client
 - http-media
 - http-types
 - lens
@@ -46,9 +47,11 @@ dependencies:
 - servant-client
 - servant-client-core
 - servant-server
+- split
 - string-class
 - transformers
 - text
+- uri-encode
 - warc
 - wai
 - wai-app-static

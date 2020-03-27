@@ -2,6 +2,7 @@ module Le.Run where
 
 import qualified Data.String.Class as S
 import qualified Le.CommonCrawl
+import qualified Le.CommonCrawl.Cmd
 import Le.Import
 import qualified Le.WebApp
 import Options.Applicative
@@ -17,8 +18,9 @@ commands ver =
   mempty
     <> cmd "version" "Show version" (pure (run $ logInfo $ "Version " <> display (S.toText ver)))
     <> cmd "extract-example-warc" "Extract example warc" (pure (run Le.CommonCrawl.extractExampleWarc))
-    <> cmd "ls-news-warcs" "List common crawl news warcs" (pure (run Le.CommonCrawl.listNewsWarcs))
+    <> cmd "ls-news-warcs" "List common crawl news warcs" (pure (run Le.CommonCrawl.listNewsWarcsCmd))
     <> cmd "webapp" "Run web app" (pure Le.WebApp.run)
+    <> cmd "download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.downloadAndFilter))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))

@@ -113,14 +113,17 @@ decompressAll p = do
 extractHostRoot :: Text -> Text
 extractHostRoot = Data.List.last . T.splitOn "."
 
-listNewsWarcs :: RIO App ()
+listNewsWarcsCmd :: Le ()
+listNewsWarcsCmd = do
+  warcs <- listNewsWarcs
+  logInfo $ "> warcs: " <> display (tshow warcs)
+
+listNewsWarcs :: Le [S3.Object]
 listNewsWarcs = do
   awsEnv <- asks appAwsEnv
-  withRunInIO $ \runInIO -> do
-    runResourceT $ AWS.runAWS awsEnv $ do
-      rsp <-
-        AWS.send $
-          S3.listObjectsV2 "commoncrawl"
-            & S3.lovPrefix .~ Just "crawl-data/CC-NEWS/2020/03/"
-      liftIO $ runInIO $ logInfo $ display $ tshow $
-        (map (^. S3.oKey) (rsp ^. S3.lovrsContents :: [S3.Object]))
+  runResourceT $ AWS.runAWS awsEnv $ do
+    rsp <-
+      AWS.send $
+        S3.listObjectsV2 "commoncrawl"
+          & S3.lovPrefix .~ Just "crawl-data/CC-NEWS/2020/03/"
+    pure $ rsp ^. S3.lovrsContents

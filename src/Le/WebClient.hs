@@ -10,15 +10,15 @@ import Servant.Client.Generic
 api :: Proxy (API (AsClientT (RIO App)))
 api = Proxy
 
-cliRoutes :: API (AsClientT Le)
+cliRoutes :: API (AsClientT ClientM)
 cliRoutes =
   genericClientHoist
     (\x -> liftIO (runClientM x env >>= either throwIO return))
   where
     env = error "undefined environment"
 
-cliPing :: Le Text
+cliPing :: ClientM Text
 cliPing = __ping cliRoutes
 
-cliDownloadAndFilter :: AT.DownloadAndFilterForm -> Le BL.ByteString
+cliDownloadAndFilter :: AT.DownloadAndFilterForm -> ClientM BL.ByteString
 cliDownloadAndFilter = __downloadAndFilter cliRoutes

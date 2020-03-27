@@ -44,8 +44,8 @@ run = do
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir
-  withApp $ \env -> do
-    let cfg = appConfig env
+  withApp $ \app -> do
+    let cfg = appConfig app
     cacheContainer <- liftIO $ MStatic.initCaching MStatic.PublicStaticCaching
     let staticOptions =
           MStatic.defaultOptions {MStatic.cacheContainer = cacheContainer}
@@ -66,7 +66,7 @@ run = do
                         (Proxy :: Proxy (ToServantApi API))
                         -- (Proxy :: Proxy '[AuthHandler Wai.Request (P.Entity User)])
                         (Proxy :: Proxy '[])
-                        (nt env)
+                        (nt app)
                         (genericServerT server)
                     )
                 )

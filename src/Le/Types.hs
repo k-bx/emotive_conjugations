@@ -4,6 +4,7 @@ import qualified Data.String.Class as S
 import qualified Dhall
 import qualified Network.AWS as AWS
 import qualified Network.AWS
+import qualified Network.HTTP.Client
 import RIO
 import RIO.Process
 import qualified System.Directory
@@ -27,7 +28,9 @@ data App
         appProcessContext :: !ProcessContext,
         appConfig :: !Config,
         appAwsEnv :: Network.AWS.Env,
-        appTempDir :: FilePath
+        appTempDir :: FilePath,
+        appHttpManager :: Network.HTTP.Client.Manager,
+        appDataDir :: FilePath
         -- Add other app-specific configuration information here
       }
 
@@ -42,6 +45,10 @@ withApp f = do
   cfg <- liftIO readConfig
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
+  httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
+  h <- System.Directory.getHomeDirectory
+  let dataDir = h <> "/tmp/conj/"
+  liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
     -- awsEnv <- AWS.newEnv AWS.Discover
     awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
@@ -52,7 +59,9 @@ withApp f = do
               appProcessContext = pc,
               appConfig = cfg,
               appAwsEnv = awsEnv,
-              appTempDir = tempDirPath
+              appTempDir = tempDirPath,
+              appHttpManager = httpManager,
+              appDataDir = dataDir
             }
       f app
 
