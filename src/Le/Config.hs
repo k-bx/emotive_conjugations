@@ -21,12 +21,12 @@ cheapWorkers =
       { baseUrlScheme = Http,
         baseUrlHost = "localhost",
         baseUrlPort = 6667,
-        baseUrlPath = "/"
+        baseUrlPath = ""
       },
     BaseUrl
       { baseUrlScheme = Http,
         baseUrlHost = "localhost",
         baseUrlPort = 6668,
-        baseUrlPath = "/"
+        baseUrlPath = ""
       }
   ]

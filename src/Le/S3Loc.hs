@@ -77,7 +77,7 @@ parseS3Url uri =
           Left ("parseS3Url: wrong us-east-1 url: " <> S.toString uri)
     Just (URI "s3:" (Just (URIAuth _ b _)) ('/' : k) _ _) ->
       -- TODO: warn: "'s3:' urls are insufficient, include region in the scheme like 's3-eu-central:'"
-      Right (S3Loc Frankfurt (BucketName (S.fromString b)) (ObjectKey (S.fromString k)))
+      Right (S3Loc NorthVirginia (BucketName (S.fromString b)) (ObjectKey (S.fromString k)))
     Just (URI ('s' : '3' : '-' : region) (Just (URIAuth _ b _)) ('/' : k) _ _) ->
       case AWS.fromText (S.toText (Data.List.init region)) of
         Right r ->
