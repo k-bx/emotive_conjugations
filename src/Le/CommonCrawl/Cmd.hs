@@ -20,7 +20,7 @@ downloadAndFilter = do
   let warcChunks = Data.List.Split.chunksOf cheapWorkersNum allWarcs
   dataDir <- asks appDataDir
   forM_ (zip Le.Config.cheapWorkers warcChunks) $ \(baseUrl, warcs) -> do
-    mgr <- asks appHttpManager
+    mgr <- asks appHttpManagerNoTimeout
     let cliEnv = (mkClientEnv mgr baseUrl)
     forM_ warcs $ \warc -> do
       let s3loc = "s3://" <> AWS.toText Le.CommonCrawl.newsBucket <> "/" <> (warc ^. S3.oKey . S3._ObjectKey)

@@ -30,6 +30,7 @@ data App
         appAwsEnv :: Network.AWS.Env,
         appTempDir :: FilePath,
         appHttpManager :: Network.HTTP.Client.Manager,
+        appHttpManagerNoTimeout :: Network.HTTP.Client.Manager,
         appDataDir :: FilePath
         -- Add other app-specific configuration information here
       }
@@ -46,6 +47,7 @@ withApp f = do
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
   httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
+  httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings{Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
   h <- System.Directory.getHomeDirectory
   let dataDir = h <> "/tmp/conj/"
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
@@ -61,6 +63,7 @@ withApp f = do
               appAwsEnv = awsEnv,
               appTempDir = tempDirPath,
               appHttpManager = httpManager,
+              appHttpManagerNoTimeout = httpManagerNoTimeout,
               appDataDir = dataDir
             }
       f app

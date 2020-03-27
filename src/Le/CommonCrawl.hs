@@ -28,11 +28,11 @@ extractExampleWarc = do
 extractWarc :: FilePath -> S3Loc -> Le FilePath
 extractWarc tempDir loc = do
   logInfo $ "> extracting " <> display (tshow loc)
-  let inPath = tempDir <> "/" <> "in.warc.gz"
+  let inPath = tempDir <> "/in.warc.gz"
   aws $ s3download loc inPath
-  withFile "in.warc.gz" ReadMode $ \h -> do
+  withFile inPath ReadMode $ \h -> do
     domains <- newIORef (MH.fromList [])
-    withFile "out-uncompressed.warc" WriteMode $ \hOutUnc -> do
+    withFile (tempDir <> "/out-uncompressed.warc") WriteMode $ \hOutUnc -> do
       withRunInIO $ \runInIO -> do
         _ <-
           liftIO $
@@ -41,7 +41,7 @@ extractWarc tempDir loc = do
               (parseWarc (decompressAll (Pipes.ByteString.fromHandle h)))
         return ()
         hSeek hOutUnc System.IO.AbsoluteSeek 0
-        withFile "out.warc.gz" WriteMode $ \hOutComp -> do
+        withFile (tempDir <> "/out.warc.gz") WriteMode $ \hOutComp -> do
           liftIO $ P.runEffect $
             ( Pipes.GZip.compress
                 Pipes.GZip.defaultCompression
