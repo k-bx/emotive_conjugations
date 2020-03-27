@@ -19,7 +19,7 @@ downloadAndFilter = do
   let cheapWorkersNum = length Le.Config.cheapWorkers
   let warcChunks = Data.List.Split.chunksOf cheapWorkersNum allWarcs
   dataDir <- asks appDataDir
-  forM_ (zip Le.Config.cheapWorkers warcChunks) $ \(baseUrl, warcs) -> do
+  pooledForConcurrently_ (zip Le.Config.cheapWorkers warcChunks) $ \(baseUrl, warcs) -> do
     mgr <- asks appHttpManagerNoTimeout
     let cliEnv = (mkClientEnv mgr baseUrl)
     forM_ warcs $ \warc -> do
