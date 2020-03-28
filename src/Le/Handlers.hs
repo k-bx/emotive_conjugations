@@ -7,15 +7,17 @@ import qualified Le.CommonCrawl
 import Le.Import
 import qualified Le.S3Loc
 import Le.Util
+import qualified Servant.Types.SourceT
 import qualified System.Directory
+import qualified Prelude
 
-ping :: HasCallStack => RIO App Text
+ping :: HasCallStack => Le Text
 ping = sg $ return "pong"
 
-pingJson :: HasCallStack => RIO App [Text]
+pingJson :: HasCallStack => Le [Text]
 pingJson = sg $ do pure $ ["pong"]
 
-errorOut :: HasCallStack => RIO App [Text]
+errorOut :: HasCallStack => Le [Text]
 errorOut = sg $ do pure $ error "Something bad happened"
 
 downloadAndFilter ::
@@ -36,3 +38,13 @@ testDownloadAndFilter = sg $ do
   h <- liftIO $ System.Directory.getHomeDirectory
   let outPath = h <> "/tmp/s3%3A%2F%2Fcommoncrawl%2Fcrawl-data%2FCC-NEWS%2F2020%2F03%2FCC-NEWS-20200301015020-01025.warc.gz-out.warc.gz"
   liftIO $ BL.readFile outPath
+
+testDownloadAndFilter2 ::
+  HasCallStack =>
+  RIO App (Servant.Types.SourceT.SourceT IO ByteString)
+testDownloadAndFilter2 = do
+  logInfo $ "> testDownloadAndFilter"
+  liftIO $ Prelude.putStrLn $ "> testDownloadAndFilter2"
+  h <- liftIO $ System.Directory.getHomeDirectory
+  let outPath = h <> "/tmp/s3%3A%2F%2Fcommoncrawl%2Fcrawl-data%2FCC-NEWS%2F2020%2F03%2FCC-NEWS-20200301015020-01025.warc.gz-out.warc.gz"
+  pure $ Servant.Types.SourceT.readFile outPath

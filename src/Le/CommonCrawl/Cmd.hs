@@ -1,6 +1,7 @@
 module Le.CommonCrawl.Cmd where
 
 import qualified Data.ByteString.Lazy as BL
+--import qualified Data.List
 import qualified Data.List.Split
 import qualified Data.String.Class as S
 import qualified Le.ApiTypes as AT
@@ -36,3 +37,21 @@ downloadAndFilter = do
       let keyEncoded = Network.URI.Encode.encodeText s3loc
       liftIO $ BL.writeFile (dataDir <> "/" <> S.toString keyEncoded) bs
       pure ()
+
+testDownloadAndFilter :: Le ()
+testDownloadAndFilter = do
+  dataDir <- asks appDataDir
+  let baseUrl = BaseUrl
+        { baseUrlScheme = Http,
+          baseUrlHost = "localhost",
+          baseUrlPort = 6666,
+          baseUrlPath = ""
+        }
+  -- let baseUrl = Data.List.head Le.Config.cheapWorkers
+  mgr <- asks appHttpManagerNoTimeout
+  let cliEnv = (mkClientEnv mgr baseUrl)
+  bs <- Le.WebClient.cliTestDownloadAndFilter cliEnv
+  logInfo $ display $ "> testDownloadAndFilter got bs: " <> tshow (BL.length bs)
+  let keyEncoded = Network.URI.Encode.encodeText "testresult.warc.gz"
+  liftIO $ BL.writeFile (dataDir <> "/" <> S.toString keyEncoded) bs
+  pure ()

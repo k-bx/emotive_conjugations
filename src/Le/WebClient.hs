@@ -20,3 +20,9 @@ cliPing env = __ping (cliRoutes env)
 
 cliDownloadAndFilter :: ClientEnv -> AT.DownloadAndFilterForm -> Le BL.ByteString
 cliDownloadAndFilter env = __downloadAndFilter (cliRoutes env)
+
+cliTestDownloadAndFilter :: ClientEnv -> Le BL.ByteString
+cliTestDownloadAndFilter env = __testDownloadAndFilter (cliRoutes env)
+
+cliTestDownloadAndFilter2 :: ClientEnv -> Le BL.ByteString
+cliTestDownloadAndFilter2 env = __testDownloadAndFilter (cliRoutes env)
