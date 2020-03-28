@@ -17,7 +17,11 @@ downloadAndFilter :: Le ()
 downloadAndFilter = do
   allWarcs <- Le.CommonCrawl.listNewsWarcs
   let cheapWorkersNum = length Le.Config.cheapWorkers
-  let warcChunks = Data.List.Split.chunksOf cheapWorkersNum allWarcs
+  logInfo $ display $
+    "> About to process " <> tshow (length allWarcs) <> " warcs"
+  let chunkSize = (length allWarcs `div` cheapWorkersNum) + 1
+  let warcChunks = Data.List.Split.chunksOf chunkSize allWarcs
+  logInfo $ display $ "> Chunk size: " <> tshow chunkSize
   dataDir <- asks appDataDir
   pooledForConcurrently_ (zip Le.Config.cheapWorkers warcChunks) $ \(baseUrl, warcs) -> do
     mgr <- asks appHttpManagerNoTimeout

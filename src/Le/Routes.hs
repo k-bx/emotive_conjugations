@@ -31,6 +31,10 @@ data API route
           route
             :- "api" :> "download-and-filter.json"
               :> ReqBody '[JSON] AT.DownloadAndFilterForm
+              :> Post '[GZip] BL.ByteString,
+        __testDownloadAndFilter ::
+          route
+            :- "api" :> "test-download-and-filter.json"
               :> Post '[GZip] BL.ByteString
       }
   deriving (Generic)
@@ -51,7 +55,8 @@ server =
   API
     { __ping = ping,
       __jsonApi = toServant jsonApi,
-      __downloadAndFilter = downloadAndFilter
+      __downloadAndFilter = downloadAndFilter,
+      __testDownloadAndFilter = testDownloadAndFilter
     }
   where
     jsonApi :: JsonAPI (AsServerT (RIO App))

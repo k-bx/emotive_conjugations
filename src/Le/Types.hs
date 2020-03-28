@@ -47,7 +47,7 @@ withApp f = do
   lo <- logOptionsHandle stderr False
   pc <- mkDefaultProcessContext
   httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
-  httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings{Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
+  httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings {Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
   h <- System.Directory.getHomeDirectory
   let dataDir = h <> "/tmp/conj/"
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
@@ -66,6 +66,7 @@ withApp f = do
               appHttpManagerNoTimeout = httpManagerNoTimeout,
               appDataDir = dataDir
             }
+      runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
       f app
 
 readConfig :: IO Config

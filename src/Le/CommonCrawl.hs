@@ -69,6 +69,7 @@ extractWarc tempDir loc = do
             )
   liftIO $ System.Directory.removeFile inPath
   liftIO $ System.Directory.removeFile outPathUnc
+  logInfo $ "> done extractng. result at: " <> display (tshow outPath)
   pure $ outPath
 
 iterFunc ::
