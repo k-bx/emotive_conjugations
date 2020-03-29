@@ -89,7 +89,6 @@ iterFunc hOut domains record@Record {..} = do
   let mIsHttp =
         recHeader ^. recHeaders . at "Content-Type" <&> S.toText
           <&> ("application/http" `T.isInfixOf`)
-  let newsHostsWWW = map ("www." <>) Le.Config.newsHosts
   case mIsHttp of
     Nothing -> skip
     Just False -> skip
@@ -99,7 +98,6 @@ iterFunc hOut domains record@Record {..} = do
         Just host -> do
           modifyIORef domains (MH.modify (+ 1) host)
           if any (`T.isInfixOf` host) Le.Config.newsHosts
-            || any (`T.isInfixOf` host) newsHostsWWW
             then do
               liftIO $ P.runEffect $ encodeRecord record P.>-> Pipes.ByteString.toHandle hOut
             else skip
