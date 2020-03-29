@@ -27,40 +27,9 @@ run = do
 
 ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
-  ensureIndex "workspace" "workspace_company_id_fkeyi" ["company_id"]
-  ensureIndex "user" "user_company_id_fkeyi" ["company_id"]
-  ensureIndex "employee" "employee_workspace_id_fkeyi" ["workspace_id"]
-  ensureIndex "employee" "employee_workspace_id_fkeyi" ["workspace_id"]
-  ensureIndex
-    "notification"
-    "notification_created_at_user_id_keyi"
-    ["created_at", "user_id"]
-  ensureIndex
-    "employee_xvector"
-    "employee_xvector_employee_id_fkeyi"
-    ["employee_id"]
-  ensureIndex "audio_chain" "audio_chain_workspace_id_fkeyi" ["workspace_id"]
-  ensureIndex
-    "audio_chain"
-    "audio_chain_conversation_id_fkeyi"
-    ["conversation_id"]
-  ensureIndex
-    "audio_chain_piece"
-    "audio_chain_piece_audio_chain_id_fkeyi"
-    ["audio_chain_id"]
-  ensureIndex "report_ready" "report_ready_mic_fkeyi" ["mic"]
-  ensureIndex "report_mc" "report_mc_report_ready_id_fkeyi" ["report_ready_id"]
-  ensureIndex "report_mc" "report_mc_employee_id_fkeyi" ["employee_id"]
-  ensureIndex
-    "report_conversation"
-    "report_conversation_report_mc_id_fkeyi"
-    ["report_mc_id"]
-  ensureIndex "rttmm" "rttmm_conversation_id_fkeyi" ["conversation_id"]
-  ensureIndex "rttmm" "rttmm_time_keyi" ["time"]
-  ensureIndex "nlp" "nlp_time_keyi" ["time"]
-  ensureIndex "nlp" "nlp_conversation_id_keyi" ["conversation_id"]
-  ensureIndex "nlp_keyword" "nlp_keyword_nlp_id_keyi" ["nlp_id"]
-  ensureIndex "voice_sample" "voice_sample_employee_id_keyi" ["employee_id"]
+  pure ()
+
+-- ensureIndex "workspace" "workspace_company_id_fkeyi" ["company_id"]
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()
 ensureIndex tableName indexName fieldNames = do
@@ -87,15 +56,16 @@ migrateData = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
   when (version <= 1) migration01
-  -- Update this when you add more migrations
-  when (version < 2) (setMigrationVersion 2)
+  when (version < latestVersion) (setMigrationVersion latestVersion)
 
+-- Update this when you add more migrations
 latestVersion :: Int
-latestVersion = 1
+latestVersion = 2
 
+-- 1 -> 2
 migration01 :: ReaderT P.SqlBackend IO ()
 migration01 = do
-  error "not implemented"
+  pure ()
 
 getMigrationInfo :: ReaderT P.SqlBackend IO MigrationInfo
 getMigrationInfo = do
