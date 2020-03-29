@@ -98,8 +98,8 @@ iterFunc hOut domains record@Record {..} = do
         Nothing -> skip
         Just host -> do
           modifyIORef domains (MH.modify (+ 1) host)
-          if host `elem` Le.Config.newsHosts
-            || host `elem` newsHostsWWW
+          if any (`T.isInfixOf` host) Le.Config.newsHosts
+            || any (`T.isInfixOf` host) newsHostsWWW
             then do
               liftIO $ P.runEffect $ encodeRecord record P.>-> Pipes.ByteString.toHandle hOut
             else skip
