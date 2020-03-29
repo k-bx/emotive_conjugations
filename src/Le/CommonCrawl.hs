@@ -7,6 +7,7 @@ import qualified Data.List
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Data.Warc
+import Le.App
 import qualified Le.Config
 import Le.Files
 import Le.Import

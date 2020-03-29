@@ -1,13 +1,15 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module Le.Types where
 
+import Control.Monad.Logger (MonadLogger (..), toLogStr)
 import qualified Data.String.Class as S
 import qualified Dhall
-import qualified Network.AWS as AWS
 import qualified Network.AWS
 import qualified Network.HTTP.Client
 import RIO
 import RIO.Process
-import qualified System.Directory
+import System.Log.FastLogger (fromLogStr)
 
 type AppM = RIO App
 
@@ -16,16 +18,17 @@ type Le = RIO App
 -- | Command line arguments
 data Config
   = Config
-      { cfgHttpPort :: Maybe Natural
-      , cfgMode :: Mode
-      , cfgDataDir :: FilePath
+      { cfgHttpPort :: Maybe Natural,
+        cfgMode :: Mode,
+        cfgDataDir :: FilePath,
+        cfgPsqlConnString :: Text
       }
   deriving (Generic)
 
 instance Dhall.FromDhall Config
 
 data Mode = Master | Worker
-  deriving Generic
+  deriving (Generic)
 
 instance Dhall.FromDhall Mode
 
@@ -48,41 +51,7 @@ instance HasLogFunc App where
 instance HasProcessContext App where
   processContextL = lens appProcessContext (\x y -> x {appProcessContext = y})
 
-withApp :: (App -> IO a) -> IO a
-withApp f = do
-  cfg <- liftIO readConfig
-  lo <-
-    logOptionsHandle stderr False
-      <&> setLogUseTime True
-  pc <- mkDefaultProcessContext
-  httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
-  httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings {Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
-  let dataDir = cfgDataDir cfg
-  liftIO $ System.Directory.createDirectoryIfMissing True dataDir
-  withLogFunc lo $ \lf -> do
-    -- awsEnv <- AWS.newEnv AWS.Discover
-    awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
-    -- let tempDirPath = h <> "/tmp/conj-webapp"
-    withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
-      let app = App
-            { appLogFunc = lf,
-              appProcessContext = pc,
-              appConfig = cfg,
-              appAwsEnv = awsEnv,
-              appTempDir = tempDirPath,
-              appHttpManager = httpManager,
-              appHttpManagerNoTimeout = httpManagerNoTimeout,
-              appDataDir = dataDir
-            }
-      runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
-      f app
-
-readConfig :: IO Config
-readConfig = do
-  h <- System.Directory.getHomeDirectory
-  Dhall.input Dhall.auto (S.toText (h <> "/conj.dhall"))
-
-aws :: AWS.AWS a -> Le a
-aws action = do
-  App {appAwsEnv} <- ask
-  Network.AWS.runResourceT $ AWS.runAWS appAwsEnv action
+-- | 'P.withPostgresqlPool' needs this.
+instance MonadLogger IO where
+  monadLoggerLog _loc _logSource _logLevel msg =
+    liftIO (S.hPutStrLn stderr (fromLogStr (toLogStr msg)))

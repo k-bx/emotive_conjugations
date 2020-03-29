@@ -18,8 +18,8 @@ import qualified System.Directory
 downloadAndFilter :: Le ()
 downloadAndFilter = do
   allWarcs0 <- Le.CommonCrawl.listNewsWarcs
-  dataDir <- asks appDataDir
-  let filteredDataDir = dataDir <> "/filtered"
+  cfg <- asks appConfig
+  let filteredDataDir = Le.Config.filteredDataDir cfg
   let s3loc warc = "s3://" <> AWS.toText Le.CommonCrawl.newsBucket <> "/" <> (warc ^. S3.oKey . S3._ObjectKey)
   let outPath warc =
         filteredDataDir <> "/" <> S.toString (Network.URI.Encode.encodeText (s3loc warc))

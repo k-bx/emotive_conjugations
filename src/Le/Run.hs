@@ -1,9 +1,11 @@
 module Le.Run where
 
 import qualified Data.String.Class as S
+import Le.App
 import qualified Le.CommonCrawl
 import qualified Le.CommonCrawl.Cmd
 import Le.Import
+import qualified Le.Migrate
 import qualified Le.WebApp
 import Options.Applicative
 
@@ -22,9 +24,7 @@ commands ver =
     <> cmd "webapp" "Run web app" (pure Le.WebApp.run)
     <> cmd "download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.downloadAndFilter))
     <> cmd "test-download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.testDownloadAndFilter))
+    <> cmd "migrate" "Run migrations" (pure Le.Migrate.run)
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))
-
-run :: RIO App a -> IO a
-run act = withApp $ \env -> runRIO env act

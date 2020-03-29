@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3e85ece6f0f00ad5bdbf66a611c8b2b8b3eab90c77631dbaec93d0bd3caa58e7
+-- hash: d4c460cbfeac69abac03caf98d0183c340d2bbc64aaf0fd1f3ea78d70c104873
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Le.Aeson
       Le.ApiTypes
+      Le.App
       Le.AppUtils
       Le.CommonCrawl
       Le.CommonCrawl.Cmd
@@ -36,10 +37,12 @@ library
       Le.Files
       Le.Handlers
       Le.Import
+      Le.Migrate
       Le.Model
       Le.Routes
       Le.Run
       Le.S3Loc
+      Le.Time
       Le.Types
       Le.Util
       Le.WebApp
@@ -60,15 +63,20 @@ library
     , conduit
     , dhall
     , directory
+    , esqueleto
+    , fast-logger
     , http-client
     , http-media
     , http-types
+    , interpolatedstring-perl6
     , lens
+    , monad-logger
     , monoidal-containers
     , network-uri
     , optparse-applicative
     , persistent
-    , persistent-sqlite
+    , persistent-postgresql
+    , persistent-template
     , pipes
     , pipes-bytestring
     , pipes-zlib
@@ -82,6 +90,7 @@ library
     , split
     , string-class
     , text
+    , time
     , transformers
     , uri-encode
     , wai
@@ -112,16 +121,21 @@ executable conj
     , dhall
     , directory
     , emotive-conjugations
+    , esqueleto
+    , fast-logger
     , http-client
     , http-media
     , http-types
+    , interpolatedstring-perl6
     , lens
+    , monad-logger
     , monoidal-containers
     , network-uri
     , optparse-applicative
     , optparse-simple
     , persistent
-    , persistent-sqlite
+    , persistent-postgresql
+    , persistent-template
     , pipes
     , pipes-bytestring
     , pipes-zlib
@@ -135,6 +149,7 @@ executable conj
     , split
     , string-class
     , text
+    , time
     , transformers
     , uri-encode
     , wai
@@ -167,15 +182,20 @@ test-suite emotive-conjugations-test
     , dhall
     , directory
     , emotive-conjugations
+    , esqueleto
+    , fast-logger
     , hspec
     , http-client
     , http-media
     , http-types
+    , interpolatedstring-perl6
     , lens
+    , monad-logger
     , monoidal-containers
     , network-uri
     , persistent
-    , persistent-sqlite
+    , persistent-postgresql
+    , persistent-template
     , pipes
     , pipes-bytestring
     , pipes-zlib
@@ -189,6 +209,7 @@ test-suite emotive-conjugations-test
     , split
     , string-class
     , text
+    , time
     , transformers
     , uri-encode
     , wai

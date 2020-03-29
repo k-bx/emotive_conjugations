@@ -4,6 +4,7 @@ import Control.Monad.Trans.Except (ExceptT (..))
 import qualified Data.String.Class as S
 import GHC.Conc (numCapabilities)
 import GHC.Stack
+import qualified Le.App
 import Le.Import
 import Le.Routes
 import qualified Network.Wai as Wai
@@ -44,7 +45,7 @@ run = do
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir
-  withApp $ \app -> do
+  Le.App.withApp $ \app -> do
     let cfg = appConfig app
     cacheContainer <- liftIO $ MStatic.initCaching MStatic.PublicStaticCaching
     let staticOptions =
