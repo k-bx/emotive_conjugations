@@ -36,3 +36,11 @@ cheapWorkers =
 -- is located
 filteredDataDir :: Config -> FilePath
 filteredDataDir cfg = cfgDataDir cfg <> "/filtered"
+
+pythonScriptsDir :: FilePath
+pythonScriptsDir =
+  "/home/kb/workspace/emotive_conjugations/scripts"
+
+pythonPath :: FilePath
+pythonPath =
+  "/home/kb/workspace/emotive_conjugations/venv/bin/python"

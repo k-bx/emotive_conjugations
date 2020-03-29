@@ -6,6 +6,7 @@ import qualified Le.CommonCrawl
 import qualified Le.CommonCrawl.Cmd
 import Le.Import
 import qualified Le.Migrate
+import qualified Le.Python
 import qualified Le.WebApp
 import Options.Applicative
 
@@ -25,6 +26,7 @@ commands ver =
     <> cmd "download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.downloadAndFilter))
     <> cmd "test-download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.testDownloadAndFilter))
     <> cmd "migrate" "Run migrations" (pure Le.Migrate.run)
+    <> cmd "test-python-subcommand" "Ping python" (pure (run Le.Python.runTest))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))
