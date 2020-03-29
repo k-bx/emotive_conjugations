@@ -1,6 +1,6 @@
 module Le.Config where
 
-import Le.Import
+import RIO
 import Servant.Client
 
 newsHosts :: [Text]

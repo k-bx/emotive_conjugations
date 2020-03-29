@@ -17,10 +17,17 @@ type Le = RIO App
 data Config
   = Config
       { cfgHttpPort :: Maybe Natural
+      , cfgMode :: Mode
+      , cfgDataDir :: FilePath
       }
   deriving (Generic)
 
 instance Dhall.FromDhall Config
+
+data Mode = Master | Worker
+  deriving Generic
+
+instance Dhall.FromDhall Mode
 
 data App
   = App
@@ -44,12 +51,13 @@ instance HasProcessContext App where
 withApp :: (App -> IO a) -> IO a
 withApp f = do
   cfg <- liftIO readConfig
-  lo <- logOptionsHandle stderr False
+  lo <-
+    logOptionsHandle stderr False
+      <&> setLogUseTime True
   pc <- mkDefaultProcessContext
   httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
   httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings {Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
-  h <- System.Directory.getHomeDirectory
-  let dataDir = h <> "/tmp/conj/"
+  let dataDir = cfgDataDir cfg
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
     -- awsEnv <- AWS.newEnv AWS.Discover
