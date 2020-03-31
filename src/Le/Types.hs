@@ -41,8 +41,8 @@ data App
         appTempDir :: FilePath,
         appHttpManager :: Network.HTTP.Client.Manager,
         appHttpManagerNoTimeout :: Network.HTTP.Client.Manager,
-        appDataDir :: FilePath
-        -- Add other app-specific configuration information here
+        appDataDir :: FilePath,
+        appNumCapabilities :: Int
       }
 
 instance HasLogFunc App where

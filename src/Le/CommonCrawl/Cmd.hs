@@ -2,7 +2,7 @@ module Le.CommonCrawl.Cmd where
 
 import Control.Lens (at)
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.List.Split
+import qualified Data.List
 import qualified Data.String.Class as S
 import Data.Warc
 import qualified Le.ApiTypes as AT
@@ -33,20 +33,16 @@ downloadAndFilter = do
   let cheapWorkersNum = length Le.Config.cheapWorkers
   logInfo $ display $
     "> About to process " <> tshow (length allWarcs) <> " warcs"
-  let chunkSize = (length allWarcs `div` cheapWorkersNum) + 1
-  let warcChunks = Data.List.Split.chunksOf chunkSize allWarcs
-  logInfo $ display $ "> Chunk size: " <> tshow chunkSize
-  pooledForConcurrently_ (zip Le.Config.cheapWorkers warcChunks) $ \(baseUrl, warcs) -> do
+  pooledForConcurrentlyN_ cheapWorkersNum (zip (Data.List.cycle Le.Config.cheapWorkers) allWarcs) $ \(baseUrl, warc) -> do
     mgr <- asks appHttpManagerNoTimeout
-    let cliEnv = (mkClientEnv mgr baseUrl)
-    forM_ warcs $ \warc -> do
-      logInfo $ display $
-        "> Downloading from " <> S.toText (baseUrlHost baseUrl) <> ":" <> tshow (baseUrlPort baseUrl)
-          <> " file "
-          <> s3loc warc
-      bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc warc})
-      liftIO $ BL.writeFile (outPath warc) bs
-      pure ()
+    let cliEnv = mkClientEnv mgr baseUrl
+    logInfo $ display $
+      "> Downloading from " <> S.toText (baseUrlHost baseUrl) <> ":" <> tshow (baseUrlPort baseUrl)
+        <> " file "
+        <> s3loc warc
+    bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc warc})
+    liftIO $ BL.writeFile (outPath warc) bs
+    pure ()
 
 testDownloadAndFilter :: Le ()
 testDownloadAndFilter = do
@@ -69,8 +65,9 @@ testDownloadAndFilter = do
 parseFilteredArticles :: Le ()
 parseFilteredArticles = do
   cfg <- asks appConfig
+  app <- ask
   filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
-  forM_ filteredWarcPaths $ \warcPath -> do
+  pooledForConcurrentlyN_ (appNumCapabilities app) filteredWarcPaths $ \warcPath -> do
     recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
     logInfo $ display $ "> warc path: " <> S.toText warcPath
     forM_ recs $ \(recHeader, recBs) -> do

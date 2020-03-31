@@ -2,6 +2,7 @@ module Le.App where
 
 import qualified Data.String.Class as S
 import qualified Dhall
+import GHC.Conc (numCapabilities)
 import Le.Import
 import qualified Network.AWS as AWS
 import qualified Network.HTTP.Client
@@ -30,7 +31,8 @@ withApp f = do
               appTempDir = tempDirPath,
               appHttpManager = httpManager,
               appHttpManagerNoTimeout = httpManagerNoTimeout,
-              appDataDir = dataDir
+              appDataDir = dataDir,
+              appNumCapabilities = numCapabilities
             }
       runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
       f app
