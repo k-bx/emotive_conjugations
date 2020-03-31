@@ -1,13 +1,15 @@
 module Le.CommonCrawl.Cmd where
 
+import Control.Lens (at)
 import qualified Data.ByteString.Lazy as BL
---import qualified Data.List
 import qualified Data.List.Split
 import qualified Data.String.Class as S
+import Data.Warc
 import qualified Le.ApiTypes as AT
-import qualified Le.CommonCrawl
+import Le.CommonCrawl
 import qualified Le.Config
 import Le.Import
+import qualified Le.Python
 import qualified Le.WebClient
 import qualified Network.AWS.Data.Text as AWS
 import qualified Network.AWS.S3 as S3
@@ -63,3 +65,23 @@ testDownloadAndFilter = do
   let keyEncoded = Network.URI.Encode.encodeText "testresult.warc.gz"
   liftIO $ BL.writeFile (dataDir <> "/" <> S.toString keyEncoded) bs
   pure ()
+
+parseFilteredArticles :: Le ()
+parseFilteredArticles = do
+  cfg <- asks appConfig
+  filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
+  forM_ filteredWarcPaths $ \warcPath -> do
+    recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
+    logInfo $ display $ "> warc path: " <> S.toText warcPath
+    forM_ recs $ \(recHeader, recBs) -> do
+      let uriText =
+            recHeader
+              ^. recHeaders
+              . at "WARC-Target-URI"
+              & fromMaybe ""
+              & S.toText
+      res <- Le.Python.runPythonParsing (Le.Python.CmdParseArticle (Le.Python.CmdParseArticleOpts (S.toText recBs)))
+      logInfo $ display $ "> URI: " <> uriText
+      logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+      logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+-- logInfo $ display $ "> text: " <> Le.Python.cprText res

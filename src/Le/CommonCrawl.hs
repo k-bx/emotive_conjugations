@@ -2,6 +2,7 @@ module Le.CommonCrawl where
 
 import Control.Lens ((.~), at)
 import Control.Monad.IO.Class
+import qualified Data.ByteString as B
 import qualified Data.HashMap.Monoidal as MH
 import qualified Data.List
 import qualified Data.String.Class as S
@@ -73,28 +74,34 @@ extractWarc tempDir loc = do
   logInfo $ "> done extractng. result at: " <> display (tshow outPath)
   pure $ outPath
 
+recHeaderHost :: RecordHeader -> Maybe Text
+recHeaderHost recHeader =
+  recHeader ^. recHeaders . at "WARC-Target-URI" <&> S.toString
+    <&> parseURI
+    & join
+      <&> uriAuthority
+    & join
+      <&> uriRegName
+      <&> S.toText
+
+recHeaderIsHttp :: RecordHeader -> Bool
+recHeaderIsHttp recHeader =
+  recHeader
+    ^. recHeaders . at "Content-Type"
+    <&> S.toText
+    <&> ("application/http" `T.isInfixOf`)
+    & fromMaybe False
+
 iterFunc ::
   Handle ->
   IORef (MH.MonoidalHashMap Text (Sum Int)) ->
   Record IO b ->
   RIO App b
 iterFunc hOut domains record@Record {..} = do
-  let mhost =
-        recHeader ^. recHeaders . at "WARC-Target-URI" <&> S.toString
-          <&> parseURI
-          & join
-            <&> uriAuthority
-          & join
-            <&> uriRegName
-            <&> S.toText
-  let mIsHttp =
-        recHeader ^. recHeaders . at "Content-Type" <&> S.toText
-          <&> ("application/http" `T.isInfixOf`)
-  case mIsHttp of
-    Nothing -> skip
-    Just False -> skip
-    Just True -> do
-      case mhost of
+  case recHeaderIsHttp recHeader of
+    False -> skip
+    True -> do
+      case recHeaderHost recHeader of
         Nothing -> skip
         Just host -> do
           modifyIORef domains (MH.modify (+ 1) host)
@@ -138,3 +145,29 @@ listNewsWarcs = do
 
 newsBucket :: S3.BucketName
 newsBucket = "commoncrawl"
+
+allWarcRecords :: FilePath -> Le [(RecordHeader, ByteString)]
+allWarcRecords fpath = do
+  ref <- newIORef []
+  withFile fpath ReadMode $ \fh -> do
+    withRunInIO $ \runInIO -> do
+      _ <-
+        liftIO $
+          iterRecords
+            (runInIO . iterGetAll ref)
+            (parseWarc (decompressAll (Pipes.ByteString.fromHandle fh)))
+      pure ()
+  readIORef ref
+
+iterGetAll ::
+  -- | needs to be reversed later
+  IORef [(RecordHeader, ByteString)] ->
+  Record IO b ->
+  RIO App b
+iterGetAll ref Record {..} = do
+  bss <- newIORef []
+  r <- liftIO $ P.runEffect $ P.for recContent $ \x -> do
+    liftIO $ modifyIORef bss (\bs -> x `seq` (x : bs))
+  bssVal <- readIORef bss
+  modifyIORef ref (\xs -> (recHeader, B.concat (reverse bssVal)) : xs)
+  return r

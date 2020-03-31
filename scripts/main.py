@@ -28,7 +28,7 @@ def main():
             res = {
                 "title": article.title,
                 "authors": article.authors,
-                "pub_date": article.publish_date,
+                "pub_date": article.publish_date.timestamp() if article.publish_date else None,
                 "description": article.meta_description,
                 "text": article.text
             }
