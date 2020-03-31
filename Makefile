@@ -2,6 +2,11 @@ VIRTUAL_ENV?=$(shell pwd)/venv
 pip=$(VIRTUAL_ENV)/bin/pip3
 python=$(VIRTUAL_ENV)/bin/python3
 
+.PHONY: prod
+prod:
+	stack build
+	stack install
+
 .PHONY: install_venv
 install_python:
 	test -f $(python) || virtualenv -p /usr/bin/python3 venv
@@ -28,11 +33,6 @@ tags:
 .PHONY: clean
 clean:
 	stack clean
-
-.PHONY: prod
-prod:
-	stack build
-	stack install
 
 .PHONY: deploy
 deploy:
