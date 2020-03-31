@@ -27,6 +27,7 @@ commands ver =
     <> cmd "test-download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.testDownloadAndFilter))
     <> cmd "migrate" "Run migrations" (pure Le.Migrate.run)
     <> cmd "test-python-subcommand" "Ping python" (pure (run Le.Python.runTest))
+    <> cmd "test-python-article" "Newspaper python library test" (pure (run Le.Python.parseArticleNewspaperTest))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))

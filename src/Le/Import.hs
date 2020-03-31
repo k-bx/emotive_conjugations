@@ -23,7 +23,8 @@ import Data.Time.Clock as X
     getCurrentTime,
   )
 import Data.Time.Clock.POSIX as X
-  ( posixSecondsToUTCTime,
+  ( POSIXTime,
+    posixSecondsToUTCTime,
     utcTimeToPOSIXSeconds,
   )
 import Data.Time.LocalTime as X

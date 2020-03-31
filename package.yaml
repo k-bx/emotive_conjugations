@@ -27,6 +27,7 @@ dependencies:
 - amazonka-s3
 - bytestring
 - conduit
+- cryptonite
 - directory
 - dhall
 - esqueleto

@@ -9,6 +9,10 @@ install_python:
 	# mkdir -p vendor
 	# test -d vendor/news-please || (cd vendor && git clone https://github.com/fhamborg/news-please.git)
 	cd vendor/news-please && $(pip) install -r ./requirements.txt && $(python) setup.py install
+	# newspaper deps
+	sudo apt-get install libxml2-dev libxslt-dev
+	sudo apt-get install libjpeg-dev zlib1g-dev libpng-dev
+	curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | $(python)
 
 .PHONY: tags
 tags:

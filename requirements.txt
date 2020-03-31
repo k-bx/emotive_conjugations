@@ -1,3 +1,4 @@
 ipython
 pylint
 jedi
+newspaper3k
