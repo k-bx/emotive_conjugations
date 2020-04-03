@@ -1,6 +1,7 @@
 module Le.Article where
 
 import qualified Data.String.Class as S
+import qualified Data.Text as T
 import Le.Import
 import Le.Util
 import qualified Network.URI
@@ -15,5 +16,24 @@ extractHost uriText =
     |> fmap uriRegName
     |> fmap S.toText
 
+extractHostUnsafe :: Text -> Text
 extractHostUnsafe =
   fromJustNote "impossible! couldn't parse url host" . extractHost
+
+newspaperNameFromHost :: Text -> Text
+newspaperNameFromHost t =
+  let pairs :: [(Text, Text)]
+      pairs =
+        [ ("nytimes.com", "The New York Times"),
+          ("bbc.com", "BBC")
+        ]
+   in pairs
+        |> map
+          ( \(domain, name) ->
+              case t `T.isInfixOf` domain of
+                False -> Nothing
+                True -> Just name
+          )
+        |> catMaybes
+        |> listToMaybe
+        |> fromMaybe t

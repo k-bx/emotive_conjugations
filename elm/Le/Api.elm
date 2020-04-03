@@ -119,6 +119,29 @@ jsonEncNoOp  val =
    ]
 
 
+
+type alias ArticleShort  =
+   { date: IntZonedTime
+   , paper_name: String
+   , title_short: String
+   }
+
+jsonDecArticleShort : Json.Decode.Decoder ( ArticleShort )
+jsonDecArticleShort =
+   Json.Decode.succeed (\pdate ppaper_name ptitle_short -> {date = pdate, paper_name = ppaper_name, title_short = ptitle_short})
+   |> required "date" (jsonDecIntZonedTime)
+   |> required "paper_name" (Json.Decode.string)
+   |> required "title_short" (Json.Decode.string)
+
+jsonEncArticleShort : ArticleShort -> Value
+jsonEncArticleShort  val =
+   Json.Encode.object
+   [ ("date", jsonEncIntZonedTime val.date)
+   , ("paper_name", Json.Encode.string val.paper_name)
+   , ("title_short", Json.Encode.string val.title_short)
+   ]
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -239,6 +262,37 @@ getApiErroroutjson toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg (Json.Decode.list (jsonDecText))
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiArticlesshortjson : (Result Error  ((List ArticleShort))  -> msg) -> Cmd msg
+getApiArticlesshortjson toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "articles-short.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg (Json.Decode.list (jsonDecArticleShort))
             , timeout =
                 Nothing
             , tracker =

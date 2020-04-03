@@ -5,6 +5,7 @@ module Le.Routes where
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.String.Class as S
 import qualified Le.ApiTypes as AT
+import Le.Article.Handlers
 import Le.Handlers
 import Le.Import
 import Network.HTTP.Media ((//), (/:))
@@ -67,7 +68,10 @@ data JsonAPI route
             :- "api" :> "ping.json" :> Get '[JSON] [Text],
         _errorOut ::
           route
-            :- "api" :> "error-out.json" :> Get '[JSON] [Text]
+            :- "api" :> "error-out.json" :> Get '[JSON] [Text],
+        _articlesShortHandler ::
+          route
+            :- "api" :> "articles-short.json" :> Get '[JSON] [AT.ArticleShort]
       }
   deriving (Generic)
 
@@ -87,5 +91,6 @@ server =
       JsonAPI
         { _logErrorHandler = logErrorHandler,
           _pingJson = pingJson,
-          _errorOut = errorOut
+          _errorOut = errorOut,
+          _articlesShortHandler = articlesShortHandler
         }

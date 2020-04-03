@@ -14,6 +14,8 @@ data NoOp
 
 deriveBoth (jsonOpts 3) ''NoOp
 
+type IntZonedTime = Int
+
 data DownloadAndFilterForm
   = DownloadAndFilterForm
       { dafWarcFile :: Text
@@ -28,3 +30,13 @@ instance J.ToJSON DownloadAndFilterForm where
 
 instance J.FromJSON DownloadAndFilterForm where
   parseJSON = J.genericParseJSON (jsonOpts 3)
+
+data ArticleShort
+  = ArticleShort
+      { artDate :: IntZonedTime,
+        artPaperName :: Text,
+        artTitleShort :: Text
+      }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''ArticleShort

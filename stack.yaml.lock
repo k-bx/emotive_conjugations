@@ -32,6 +32,13 @@ packages:
       sha256: f7f0b06c58db814d1f12ed6f4f4cb67ff8c72e51da61c04db12c2aedb896542e
   original:
     hackage: interpolatedstring-perl6-1.0.2@sha256:7ce49c8a69a2a1b89c001ed79db2aab656ffd0faf2a7a701a553b6deb5c8ba7f,1073
+- completed:
+    hackage: tz-0.1.3.3@sha256:b9de0c1b10825460ff14a237209a8bf7747f47979601d35621276556bf63d2ca,5086
+    pantry-tree:
+      size: 1180
+      sha256: ae6af45f3dba5a478ea9cc77c718f955fcc5c96f2dc0f4ede34c4a15a3e85ac1
+  original:
+    hackage: tz-0.1.3.3@sha256:b9de0c1b10825460ff14a237209a8bf7747f47979601d35621276556bf63d2ca,5086
 snapshots:
 - completed:
     size: 491372

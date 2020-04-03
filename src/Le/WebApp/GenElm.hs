@@ -29,7 +29,8 @@ instance
 
 moduleDefs :: [DefineElm]
 moduleDefs =
-  [ DefineElm (Proxy :: Proxy AT.NoOp)
+  [ DefineElm (Proxy :: Proxy AT.NoOp),
+    DefineElm (Proxy :: Proxy AT.ArticleShort)
   ]
 
 replacements :: [(Text, Text)]

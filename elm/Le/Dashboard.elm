@@ -102,23 +102,14 @@ navbarContent =
 mainContent : Html Msg
 mainContent =
     main_ [ class "flex-shrink-0", attribute "role" "main" ]
-        [ div [ class "container" ]
-            [ h1 [ class "mt-5" ]
-                [ text "Sticky footer with fixed navbar" ]
-            , p [ class "lead" ]
-                [ text "Pin a footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS. A fixed navbar has been added with "
-                , code []
-                    [ text "padding-top: 60px;" ]
-                , text "on the "
-                , code []
-                    [ text "main > .container" ]
-                , text "."
-                ]
-            , p []
-                [ text "Back to "
-                , a [ href "/docs/4.4/examples/sticky-footer/" ]
-                    [ text "the default sticky footer" ]
-                , text " minus the navbar."
+        [ div [ class "container-flex mt-5" ]
+            [ div [ class "row" ]
+                [ div [ class "col-4" ]
+                    [ text "list of articles here"
+                    ]
+                , div [ class "col-8" ]
+                    [ text "details"
+                    ]
                 ]
             ]
         ]

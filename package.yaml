@@ -67,6 +67,8 @@ dependencies:
 - text
 - time
 - typed-process
+- tz
+- tzdata
 - uri-encode
 - warc
 - wai

@@ -18,6 +18,7 @@ import Control.Newtype as X (Newtype (..))
 import qualified Data.ByteString.Lazy as BL
 import Data.Monoid as X (Sum (..))
 import qualified Data.String.Class as S
+import Data.Time.Additional as X
 import Data.Time.Clock as X
   ( NominalDiffTime,
     UTCTime,

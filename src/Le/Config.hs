@@ -1,5 +1,7 @@
 module Le.Config where
 
+import qualified Data.Time.Zones
+import qualified Data.Time.Zones.All
 import Le.Types
 import RIO
 import Servant.Client
@@ -44,3 +46,15 @@ pythonScriptsDir =
 pythonPath :: FilePath
 pythonPath =
   "/home/kb/workspace/emotive_conjugations/venv/bin/python"
+
+articlesLimit :: Int
+articlesLimit = 100
+
+-- | For now we hardcode the usage of this timezone everywhere, in
+-- future we can put it in company's settings or even accept in API if
+-- needed.
+tzLabel :: Data.Time.Zones.All.TZLabel
+tzLabel = Data.Time.Zones.All.America__Chicago
+
+tz :: Data.Time.Zones.TZ
+tz = Data.Time.Zones.All.tzByLabel tzLabel
