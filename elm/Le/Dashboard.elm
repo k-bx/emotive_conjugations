@@ -128,13 +128,13 @@ mainContent model =
         renderArticleNav article =
             div [ class "articles-nav__cell" ]
                 [ div [ class "articles-nav__cell__maintitle" ]
-                    [ strong [] [ text article.title_short ]
+                    [ strong [] [ text article.paper_name ]
                     ]
                 , div []
                     [ text <| renderDateTimeline (Time.millisToPosix article.date)
                     ]
                 , div []
-                    [ text article.paper_name
+                    [ text article.title_short
                     ]
                 ]
     in
