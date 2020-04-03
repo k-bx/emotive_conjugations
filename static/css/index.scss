@@ -20,8 +20,20 @@ main > .container {
   }
 
   .articles-nav {
+    border-right: 1px solid #e5e5e5;
+
     .articles-nav__cell {
-      .articles-nav__cell__maintitle {
+      padding-left: .5rem;
+      padding-right: .5rem;
+      border-bottom: 1px solid #e5e5e5;
+
+      .articles-nav__cell__date {
+        float: right;
+        color: #7a808c;
+      }
+
+      .articles-nav__cell__secondary {
+        color: #213059;
       }
     }
   }

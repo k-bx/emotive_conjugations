@@ -127,14 +127,18 @@ mainContent model =
         renderArticleNav : Api.ArticleShort -> Html Msg
         renderArticleNav article =
             div [ class "articles-nav__cell" ]
-                [ div [ class "articles-nav__cell__maintitle" ]
-                    [ strong [] [ text article.paper_name ]
+                [ div [ class "articles-nav__cell__date" ]
+                    [ div []
+                        [ text <| renderDateTimeline (Time.millisToPosix article.date)
+                        ]
                     ]
-                , div []
-                    [ text <| renderDateTimeline (Time.millisToPosix article.date)
-                    ]
-                , div []
-                    [ text article.title_short
+                , div [ class "" ]
+                    [ div [ class "articles-nav__cell__maintitle" ]
+                        [ strong [] [ text article.paper_name ]
+                        ]
+                    , div [ class "articles-nav__cell__secondary" ]
+                        [ text article.title_short
+                        ]
                     ]
                 ]
     in
