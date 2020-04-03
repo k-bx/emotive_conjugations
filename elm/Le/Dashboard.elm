@@ -58,7 +58,10 @@ navbar : Html Msg
 navbar =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ]
-            [ a [ class "navbar-brand", href "#" ]
+            [ a
+                [ class "navbar-brand"
+                , href <| Le.Routes.dashboard
+                ]
                 [ text "Emotive Conjugations" ]
             , button [ attribute "aria-controls" "navbarCollapse", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarCollapse", attribute "data-toggle" "collapse", type_ "button" ]
                 [ span [ class "navbar-toggler-icon" ]
@@ -67,7 +70,10 @@ navbar =
             , div [ class "collapse navbar-collapse", id "navbarCollapse" ]
                 [ ul [ class "navbar-nav mr-auto" ]
                     [ li [ class "nav-item active" ]
-                        [ a [ class "nav-link", href "#" ]
+                        [ a
+                            [ class "nav-link"
+                            , href <| Le.Routes.dashboard
+                            ]
                             [ text "Dashboard"
                             ]
                         ]
