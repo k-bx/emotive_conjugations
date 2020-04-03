@@ -26,3 +26,73 @@ isMobile v =
 
         False ->
             True
+
+
+{-| Example: "JUN 22 2019" on timeline
+-}
+renderDateTimeline : Time.Posix -> String
+renderDateTimeline x =
+    let
+        mon =
+            Time.toMonth Time.utc x
+
+        day =
+            Time.toDay Time.utc x
+
+        year =
+            Time.toYear Time.utc x
+    in
+    renderMonthShort mon
+        ++ " "
+        ++ intToStringTwoSigns day
+        ++ " "
+        ++ String.fromInt year
+
+
+renderMonthShort : Time.Month -> String
+renderMonthShort m =
+    case m of
+        Jan ->
+            "Jan"
+
+        Feb ->
+            "Feb"
+
+        Mar ->
+            "Mar"
+
+        Apr ->
+            "Apr"
+
+        May ->
+            "May"
+
+        Jun ->
+            "Jun"
+
+        Jul ->
+            "Jul"
+
+        Aug ->
+            "Aug"
+
+        Sep ->
+            "Sep"
+
+        Oct ->
+            "Oct"
+
+        Nov ->
+            "Nov"
+
+        Dec ->
+            "Dec"
+
+
+intToStringTwoSigns : Int -> String
+intToStringTwoSigns x =
+    if x < 10 then
+        "0" ++ String.fromInt x
+
+    else
+        String.fromInt x

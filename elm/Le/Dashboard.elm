@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Le.Api as Api
 import Le.Block.Toast
+import Le.Components exposing (..)
 import Le.Config
 import Le.Lib exposing (..)
 import Le.Routes
@@ -14,17 +15,20 @@ import Le.Utils exposing (..)
 import Maybe.Extra
 import Process
 import Task
+import Time
 
 
 type Msg
     = NoOp
     | ToastMsg Le.Block.Toast.Msg
     | UpdateModel Model
+    | GotArticles (Result Api.Error (List Api.ArticleShort))
 
 
 type alias Model =
     { formErrors : Dict String String
     , toasts : Le.Block.Toast.Model
+    , articles : Maybe (List Api.ArticleShort)
     }
 
 
@@ -32,8 +36,9 @@ init : ( Model, Cmd Msg )
 init =
     ( { formErrors = Dict.empty
       , toasts = Le.Block.Toast.init
+      , articles = Nothing
       }
-    , Cmd.none
+    , Api.getApiArticlesshortjson GotArticles
     )
 
 
@@ -52,6 +57,14 @@ update msg model =
                     Le.Block.Toast.update imsg model.toasts
             in
             ( { model | toasts = im }, Cmd.map ToastMsg icmds )
+
+        GotArticles (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotArticles (Ok articles) ->
+            ( { model | articles = Just articles }
+            , Cmd.none
+            )
 
 
 navbarContent : Html Msg
@@ -99,14 +112,36 @@ navbarContent =
         ]
 
 
-mainContent : Html Msg
-mainContent =
+mainContent : Model -> Html Msg
+mainContent model =
+    let
+        articlesNav =
+            case model.articles of
+                Nothing ->
+                    [ div [ class "text-center" ] [ loadingSpinner ] ]
+
+                Just articles ->
+                    List.map renderArticleNav articles
+
+        renderArticleNav : Api.ArticleShort -> Html Msg
+        renderArticleNav article =
+            div []
+                [ div []
+                    [ text article.paper_name
+                    ]
+                , div []
+                    [ text <| renderDateTimeline (Time.millisToPosix article.date)
+                    ]
+                , div []
+                    [ text article.title_short
+                    ]
+                ]
+    in
     main_ [ class "flex-shrink-0", attribute "role" "main" ]
         [ div [ class "container-flex mt-5" ]
             [ div [ class "row" ]
-                [ div [ class "col-4" ]
-                    [ text "list of articles here"
-                    ]
+                [ div [ class "col-4" ] <|
+                    articlesNav
                 , div [ class "col-8" ]
                     [ text "details"
                     ]
@@ -131,7 +166,7 @@ view vps model =
         div [ class "h-100 gr__getbootstrap_com" ]
             [ div [ class "d-flex flex-column h-100" ]
                 [ navbarContent
-                , mainContent
+                , mainContent model
                 , footerContent
                 ]
             ]
