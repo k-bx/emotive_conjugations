@@ -41,7 +41,7 @@ run :: IO ()
 run = do
   hSetBuffering stdout LineBuffering
   hSetBuffering stderr LineBuffering
-  Prelude.putStrLn "Starting webapp at https://salesrt.localhost:8081/ ..."
+  Prelude.putStrLn "Starting webapp at https://emotive-conjugations.localhost:8080/ ..."
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir

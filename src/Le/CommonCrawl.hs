@@ -9,13 +9,13 @@ import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Data.Warc
 import Le.App
+import qualified Le.Article
 import qualified Le.Config
 import Le.Files
 import Le.Import
 import Le.S3Loc
 import qualified Network.AWS as AWS
 import qualified Network.AWS.S3 as S3
-import Network.URI
 import qualified Network.URI.Encode
 import qualified Pipes as P
 import qualified Pipes.ByteString
@@ -76,13 +76,8 @@ extractWarc tempDir loc = do
 
 recHeaderHost :: RecordHeader -> Maybe Text
 recHeaderHost recHeader =
-  recHeader ^. recHeaders . at "WARC-Target-URI" <&> S.toString
-    <&> parseURI
-    & join
-      <&> uriAuthority
-    & join
-      <&> uriRegName
-      <&> S.toText
+  recHeader ^. recHeaders . at "WARC-Target-URI" <&> S.toText
+    <&> Le.Article.extractHost & join
 
 recHeaderIsHttp :: RecordHeader -> Bool
 recHeaderIsHttp recHeader =

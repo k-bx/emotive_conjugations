@@ -1,15 +1,28 @@
 module Le.Handlers where
 
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.Text.IO as T
 import qualified Le.ApiTypes as AT
 import Le.AppUtils
 import qualified Le.CommonCrawl
 import Le.Import
+import Le.Model
 import qualified Le.S3Loc
 import Le.Util
 import qualified Servant.Types.SourceT
 import qualified System.Directory
 import qualified Prelude
+
+logErrorHandler :: HasCallStack => Maybe Text -> AppM ()
+logErrorHandler mMsg =
+  sg $ do
+    logError $ display $ "Error reported via API: " <> tshow mMsg
+
+index :: HasCallStack => Entity User -> AppM Text
+index _user = sg $ liftIO $ T.readFile "index.html"
+
+indexNoAuth :: HasCallStack => AppM Text
+indexNoAuth = sg $ liftIO $ T.readFile "index.html"
 
 ping :: HasCallStack => Le Text
 ping = sg $ return "pong"

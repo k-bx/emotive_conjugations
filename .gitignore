@@ -4,3 +4,5 @@ venv
 vendor/news-please/build
 vendor/news-please/dist
 TAGS
+elm-stuff
+dist

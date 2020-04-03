@@ -12,7 +12,9 @@ module Le.Import
   )
 where
 
+import Control.Monad.Logger as X (NoLoggingT (..))
 import Control.Monad.Trans.Resource as X
+import Control.Newtype as X (Newtype (..))
 import qualified Data.ByteString.Lazy as BL
 import Data.Monoid as X (Sum (..))
 import qualified Data.String.Class as S
@@ -39,6 +41,7 @@ import Le.Aeson as X (FromJSON (..), ToJSON (..), jsonOpts)
 import Le.Types
 import Network.URI as X (URI (..), URIAuth (..))
 import RIO
+import Safe as X (fromJustNote)
 
 ev :: Entity record -> record
 ev = entityVal

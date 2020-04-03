@@ -1,6 +1,7 @@
 module Le.App where
 
 import qualified Data.String.Class as S
+import qualified Database.Persist.Postgresql as P
 import qualified Dhall
 import GHC.Conc (numCapabilities)
 import Le.Import
@@ -22,20 +23,24 @@ withApp f = do
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
     awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
-    withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
-      let app = App
-            { appLogFunc = lf,
-              appProcessContext = pc,
-              appConfig = cfg,
-              appAwsEnv = awsEnv,
-              appTempDir = tempDirPath,
-              appHttpManager = httpManager,
-              appHttpManagerNoTimeout = httpManagerNoTimeout,
-              appDataDir = dataDir,
-              appNumCapabilities = numCapabilities
-            }
-      runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
-      f app
+    runNoLoggingT
+      $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5
+      $ \pool -> liftIO $ do
+        withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
+          let app = App
+                { appLogFunc = lf,
+                  appProcessContext = pc,
+                  appConfig = cfg,
+                  appAwsEnv = awsEnv,
+                  appTempDir = tempDirPath,
+                  appHttpManager = httpManager,
+                  appHttpManagerNoTimeout = httpManagerNoTimeout,
+                  appDataDir = dataDir,
+                  appNumCapabilities = numCapabilities,
+                  appDb = pool
+                }
+          runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
+          f app
 
 readConfig :: IO Config
 readConfig = do
@@ -49,3 +54,8 @@ aws action = do
 
 run :: RIO App a -> IO a
 run act = withApp $ \env -> runRIO env act
+
+runDb :: ReaderT P.SqlBackend IO b -> Le b
+runDb f = do
+  env <- ask
+  liftIO $ flip P.runSqlPool (appDb env) $ f

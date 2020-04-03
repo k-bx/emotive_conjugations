@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a58a66b0c0a43c789174834d1a43f242d408d4e137af4ff1039e7417cda23d4c
+-- hash: 6844a693172e60c5392aabbd0162252340e238aa3b0a241add0c5d5e685bbc76
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       Le.ApiTypes
       Le.App
       Le.AppUtils
+      Le.Article
       Le.CommonCrawl
       Le.CommonCrawl.Cmd
       Le.Config
@@ -43,10 +44,13 @@ library
       Le.Routes
       Le.Run
       Le.S3Loc
+      Le.Shake
       Le.Time
       Le.Types
       Le.Util
       Le.WebApp
+      Le.WebApp.Dev
+      Le.WebApp.GenElm
       Le.WebClient
   other-modules:
       Paths_emotive_conjugations
@@ -65,8 +69,10 @@ library
     , cryptonite
     , dhall
     , directory
+    , elm-bridge
     , esqueleto
     , fast-logger
+    , fsnotify
     , http-client
     , http-media
     , http-types
@@ -75,6 +81,7 @@ library
     , monad-logger
     , monoidal-containers
     , network-uri
+    , newtype
     , optparse-applicative
     , persistent
     , persistent-postgresql
@@ -83,17 +90,23 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resource-pool
     , resourcet
     , rio
+    , safe
     , servant
     , servant-client
     , servant-client-core
+    , servant-elm
+    , servant-foreign
     , servant-server
+    , shake
     , split
     , string-class
     , text
     , time
     , transformers
+    , typed-process
     , uri-encode
     , wai
     , wai-app-static
@@ -123,9 +136,11 @@ executable conj
     , cryptonite
     , dhall
     , directory
+    , elm-bridge
     , emotive-conjugations
     , esqueleto
     , fast-logger
+    , fsnotify
     , http-client
     , http-media
     , http-types
@@ -134,6 +149,7 @@ executable conj
     , monad-logger
     , monoidal-containers
     , network-uri
+    , newtype
     , optparse-applicative
     , optparse-simple
     , persistent
@@ -143,17 +159,23 @@ executable conj
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resource-pool
     , resourcet
     , rio
+    , safe
     , servant
     , servant-client
     , servant-client-core
+    , servant-elm
+    , servant-foreign
     , servant-server
+    , shake
     , split
     , string-class
     , text
     , time
     , transformers
+    , typed-process
     , uri-encode
     , wai
     , wai-app-static
@@ -185,9 +207,11 @@ test-suite emotive-conjugations-test
     , cryptonite
     , dhall
     , directory
+    , elm-bridge
     , emotive-conjugations
     , esqueleto
     , fast-logger
+    , fsnotify
     , hspec
     , http-client
     , http-media
@@ -197,6 +221,7 @@ test-suite emotive-conjugations-test
     , monad-logger
     , monoidal-containers
     , network-uri
+    , newtype
     , persistent
     , persistent-postgresql
     , persistent-template
@@ -204,17 +229,23 @@ test-suite emotive-conjugations-test
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , resource-pool
     , resourcet
     , rio
+    , safe
     , servant
     , servant-client
     , servant-client-core
+    , servant-elm
+    , servant-foreign
     , servant-server
+    , shake
     , split
     , string-class
     , text
     , time
     , transformers
+    , typed-process
     , uri-encode
     , wai
     , wai-app-static

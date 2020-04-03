@@ -1,7 +1,18 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Le.ApiTypes where
 
 import qualified Data.Aeson as J
+import Elm.Derive
 import Le.Import
+
+data NoOp
+  = NoOp
+      { nooField :: Text
+      }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''NoOp
 
 data DownloadAndFilterForm
   = DownloadAndFilterForm

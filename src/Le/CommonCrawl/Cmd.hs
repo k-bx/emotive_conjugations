@@ -6,10 +6,14 @@ import qualified Data.List
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Data.Warc
+import qualified Database.Persist.Postgresql as P
 import qualified Le.ApiTypes as AT
+import Le.App
+import qualified Le.Article
 import Le.CommonCrawl
 import qualified Le.Config
 import Le.Import
+import Le.Model
 import qualified Le.Python
 import qualified Le.WebClient
 import qualified Network.AWS.Data.Text as AWS
@@ -83,7 +87,30 @@ parseFilteredArticles = do
                   & fromMaybe ""
                   & S.toText
           res <- Le.Python.runPythonParsing (Le.Python.CmdParseArticle (Le.Python.CmdParseArticleOpts html))
+          void $ runDb $ do
+            -- articleId <- ensureArticle uriText
+            P.insert $ ANewspaper
+              { aNewspaperUrl = uriText,
+                aNewspaperHost = Le.Article.extractHostUnsafe uriText,
+                aNewspaperTitle = Le.Python.cprTitle res,
+                aNewspaperAuthors = JsonList (Le.Python.cprAuthors res),
+                aNewspaperDate =
+                  posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
+                aNewspaperContent = Le.Python.cprText res,
+                aNewspaperLang = Le.Python.cprLanguage res
+              }
           logInfo $ display $ "> URI: " <> uriText
-          logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-          logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
--- logInfo $ display $ "> text: " <> Le.Python.cprText res
+          -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+          -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+          -- logInfo $ display $ "> text: " <> Le.Python.cprText res
+          pure ()
+
+-- ensureArticle :: Text -> ReaderT P.SqlBackend IO ArticleId
+-- ensureArticle uriText = do
+--   mArticle <- P.getBy (ArticleUrlUniq uriText)
+--   case mArticle of
+--     Nothing -> P.insert $ Article
+--       { articleUrl = uriText,
+--         articleHost = Le.Article.extractHostUnsafe uriText
+--       }
+--     Just article -> pure $ entityKey article

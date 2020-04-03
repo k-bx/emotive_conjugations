@@ -2,7 +2,6 @@
 
 module Le.Migrate where
 
-import Control.Monad.Logger (runNoLoggingT)
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Database.Esqueleto

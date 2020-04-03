@@ -7,8 +7,12 @@ import qualified Le.CommonCrawl.Cmd
 import Le.Import
 import qualified Le.Migrate
 import qualified Le.Python
+import qualified Le.Shake
 import qualified Le.WebApp
+import qualified Le.WebApp.Dev
+import qualified Le.WebApp.GenElm
 import Options.Applicative
+import System.Environment (withArgs)
 
 main :: String -> IO ()
 main ver = join (customExecParser (prefs (showHelpOnError <> showHelpOnEmpty)) (info (helper <*> hsubparser (commands ver)) imod))
@@ -29,6 +33,12 @@ commands ver =
     <> cmd "test-python-subcommand" "Ping python" (pure (run Le.Python.runTest))
     <> cmd "test-python-article" "Newspaper python library test" (pure (run Le.Python.parseArticleNewspaperTest))
     <> cmd "extract-articles" "Parse filtered articles via newspaper" (pure (run Le.CommonCrawl.Cmd.parseFilteredArticles))
+    <> cmd "gen-elm" "Generate Api.elm" (pure Le.WebApp.GenElm.run)
+    <> cmd "dev-webapp" "Run webapp listening to fs changes and rebuilding as needed" (pure Le.WebApp.Dev.main)
+    <> cmd
+      "shake"
+      "Shake things up"
+      (flip withArgs Le.Shake.shake <$> many (strArgument (metavar "-- Shake arguments")))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))

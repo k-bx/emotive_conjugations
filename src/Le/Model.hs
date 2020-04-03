@@ -14,11 +14,18 @@ import Le.Import
 share
   [mkPersist sqlSettings, mkDeleteCascade sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
-Article
-    url Text
-    host Text
+User
+    email Text
+    deriving Show
+-- | Article extracted via Python newspaper library
+ANewspaper
+    url Text -- duplicate for convenience
+    host Text -- duplicate for convenience
+    title Text
+    authors (JsonList Text)
+    date UTCTime Maybe
     content Text
-    date UTCTime
+    lang Text
     deriving Show
 --
 -- Migration data. Singleton object

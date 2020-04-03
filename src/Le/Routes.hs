@@ -3,13 +3,26 @@
 module Le.Routes where
 
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.String.Class as S
 import qualified Le.ApiTypes as AT
 import Le.Handlers
 import Le.Import
-import Network.HTTP.Media ((//))
+import Network.HTTP.Media ((//), (/:))
 import Servant
 import Servant.API.Generic
 import Servant.Server.Generic
+
+data HTML
+
+instance Accept HTML where
+  contentType _ = "text" // "html" /: ("charset", "utf-8")
+
+instance S.ConvLazyByteString a => MimeRender HTML a where
+  mimeRender _ val = S.toLazyByteString val
+
+instance MimeUnrender HTML Text where
+  mimeUnrenderWithType _ "text/html" bs = Right (S.toText bs)
+  mimeUnrenderWithType _ mt _bs = Left $ "Mime must be text/html, but it's: " ++ show mt
 
 data GZip
 
@@ -25,7 +38,8 @@ instance MimeUnrender GZip BL.ByteString where
 
 data API route
   = API
-      { __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
+      { __index :: route :- Get '[HTML] Text,
+        __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
         __jsonApi :: route :- ToServantApi JsonAPI,
         __downloadAndFilter ::
           route
@@ -41,7 +55,13 @@ data API route
 
 data JsonAPI route
   = JsonAPI
-      { _pingJson ::
+      { _logErrorHandler ::
+          route
+            :- "api"
+            :> "log-error.json"
+            :> QueryParam "msg" Text
+            :> Get '[JSON] (),
+        _pingJson ::
           route
             :- "api" :> "ping.json" :> Get '[JSON] [Text],
         _errorOut ::
@@ -53,7 +73,8 @@ data JsonAPI route
 server :: API (AsServerT (RIO App))
 server =
   API
-    { __ping = ping,
+    { __index = indexNoAuth,
+      __ping = ping,
       __jsonApi = toServant jsonApi,
       __downloadAndFilter = downloadAndFilter,
       __testDownloadAndFilter = testDownloadAndFilter
@@ -62,6 +83,7 @@ server =
     jsonApi :: JsonAPI (AsServerT (RIO App))
     jsonApi =
       JsonAPI
-        { _pingJson = pingJson,
+        { _logErrorHandler = logErrorHandler,
+          _pingJson = pingJson,
           _errorOut = errorOut
         }
