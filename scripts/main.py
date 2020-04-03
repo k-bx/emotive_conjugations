@@ -23,14 +23,15 @@ def main():
             print('> authors', article.authors, file=sys.stderr)
             print('> publish date', article.publish_date.strftime('%Y-%m-%d %H:%M:%S') if article.publish_date else None,
                   file=sys.stderr)
-            print('> description', article.meta_description[:100], file=sys.stderr)
-            print('> text', article.text[:100], file=sys.stderr)
+            # print('> description', article.meta_description[:100], file=sys.stderr)
+            # print('> text', article.text[:100], file=sys.stderr)
             res = {
                 "title": article.title,
                 "authors": article.authors,
                 "pub_date": article.publish_date.timestamp() if article.publish_date else None,
                 "description": article.meta_description,
-                "text": article.text
+                "text": article.text,
+                "language": article.meta_lang
             }
             print(json.dumps(res))
 

@@ -45,7 +45,8 @@ data CmdParseArticleRes
         cprAuthors :: [Text],
         cprPubDate :: Maybe POSIXTime,
         cprDescription :: Text,
-        cprText :: Text
+        cprText :: Text,
+        cprLanguage :: Text
       }
   deriving (Generic, Show)
 

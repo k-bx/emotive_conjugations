@@ -4,6 +4,7 @@ import Control.Lens (at)
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.List
 import qualified Data.String.Class as S
+import qualified Data.Text as T
 import Data.Warc
 import qualified Le.ApiTypes as AT
 import Le.CommonCrawl
@@ -71,14 +72,18 @@ parseFilteredArticles = do
     recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
     logInfo $ display $ "> warc path: " <> S.toText warcPath
     forM_ recs $ \(recHeader, recBs) -> do
-      let uriText =
-            recHeader
-              ^. recHeaders
-              . at "WARC-Target-URI"
-              & fromMaybe ""
-              & S.toText
-      res <- Le.Python.runPythonParsing (Le.Python.CmdParseArticle (Le.Python.CmdParseArticleOpts (S.toText recBs)))
-      logInfo $ display $ "> URI: " <> uriText
-      logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-      logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+      let html = T.strip (S.toText recBs)
+      if html == ""
+        then pure ()
+        else do
+          let uriText =
+                recHeader
+                  ^. recHeaders
+                  . at "WARC-Target-URI"
+                  & fromMaybe ""
+                  & S.toText
+          res <- Le.Python.runPythonParsing (Le.Python.CmdParseArticle (Le.Python.CmdParseArticleOpts html))
+          logInfo $ display $ "> URI: " <> uriText
+          logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+          logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
 -- logInfo $ display $ "> text: " <> Le.Python.cprText res
