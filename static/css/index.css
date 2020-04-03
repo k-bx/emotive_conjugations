@@ -9887,4 +9887,8 @@ main > .container {
   background-color: #f5f5f5;
 }
 
+.page-dashboard .main-content-margin {
+  margin-top: 5rem;
+}
+
 /*# sourceMappingURL=index.css.map */

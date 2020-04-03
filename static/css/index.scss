@@ -11,3 +11,18 @@ main > .container {
 .footer {
     background-color: #f5f5f5;
 }
+
+// page-specific stuff
+
+.page-dashboard {
+  .main-content-margin {
+    margin-top: 5rem;
+  }
+
+  .articles-nav {
+    .articles-nav__cell {
+      .articles-nav__cell__maintitle {
+      }
+    }
+  }
+}

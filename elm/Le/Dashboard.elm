@@ -116,32 +116,33 @@ mainContent : Model -> Html Msg
 mainContent model =
     let
         articlesNav =
-            case model.articles of
-                Nothing ->
-                    [ div [ class "text-center" ] [ loadingSpinner ] ]
+            div [ class "articles-nav" ] <|
+                case model.articles of
+                    Nothing ->
+                        [ div [ class "text-center" ] [ loadingSpinner ] ]
 
-                Just articles ->
-                    List.map renderArticleNav articles
+                    Just articles ->
+                        List.map renderArticleNav articles
 
         renderArticleNav : Api.ArticleShort -> Html Msg
         renderArticleNav article =
-            div []
-                [ div []
-                    [ text article.paper_name
+            div [ class "articles-nav__cell" ]
+                [ div [ class "articles-nav__cell__maintitle" ]
+                    [ strong [] [ text article.title_short ]
                     ]
                 , div []
                     [ text <| renderDateTimeline (Time.millisToPosix article.date)
                     ]
                 , div []
-                    [ text article.title_short
+                    [ text article.paper_name
                     ]
                 ]
     in
-    main_ [ class "flex-shrink-0", attribute "role" "main" ]
-        [ div [ class "container-flex mt-5" ]
+    main_ [ class "flex-shrink-0 main-content-margin", attribute "role" "main" ]
+        [ div [ class "container-flex" ]
             [ div [ class "row" ]
                 [ div [ class "col-4" ] <|
-                    articlesNav
+                    [ articlesNav ]
                 , div [ class "col-8" ]
                     [ text "details"
                     ]
@@ -163,7 +164,7 @@ footerContent =
 view : ViewParams -> Model -> Html Msg
 view vps model =
     Le.Block.Toast.view ToastMsg vps.now model.toasts <|
-        div [ class "h-100 gr__getbootstrap_com" ]
+        div [ class "h-100 gr__getbootstrap_com page-dashboard" ]
             [ div [ class "d-flex flex-column h-100" ]
                 [ navbarContent
                 , mainContent model
