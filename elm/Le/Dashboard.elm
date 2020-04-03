@@ -54,8 +54,8 @@ update msg model =
             ( { model | toasts = im }, Cmd.map ToastMsg icmds )
 
 
-navbar : Html Msg
-navbar =
+navbarContent : Html Msg
+navbarContent =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ]
             [ a
@@ -99,10 +99,48 @@ navbar =
         ]
 
 
+mainContent : Html Msg
+mainContent =
+    main_ [ class "flex-shrink-0", attribute "role" "main" ]
+        [ div [ class "container" ]
+            [ h1 [ class "mt-5" ]
+                [ text "Sticky footer with fixed navbar" ]
+            , p [ class "lead" ]
+                [ text "Pin a footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS. A fixed navbar has been added with "
+                , code []
+                    [ text "padding-top: 60px;" ]
+                , text "on the "
+                , code []
+                    [ text "main > .container" ]
+                , text "."
+                ]
+            , p []
+                [ text "Back to "
+                , a [ href "/docs/4.4/examples/sticky-footer/" ]
+                    [ text "the default sticky footer" ]
+                , text " minus the navbar."
+                ]
+            ]
+        ]
+
+
+footerContent : Html Msg
+footerContent =
+    footer [ class "footer mt-auto py-3" ]
+        [ div [ class "container" ]
+            [ span [ class "text-muted" ]
+                [ text "Place sticky footer content here." ]
+            ]
+        ]
+
+
 view : ViewParams -> Model -> Html Msg
 view vps model =
     Le.Block.Toast.view ToastMsg vps.now model.toasts <|
-        div []
-            [ navbar
-            , text "hello, dashboard"
+        div [ class "h-100 gr__getbootstrap_com" ]
+            [ div [ class "d-flex flex-column h-100" ]
+                [ navbarContent
+                , mainContent
+                , footerContent
+                ]
             ]

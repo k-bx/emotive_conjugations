@@ -167,7 +167,7 @@ view toMsg mt model inner =
             inner
 
         Just t ->
-            div []
+            div [ class "h-100" ]
                 [ div [ class "toasts" ]
                     [ div [ class "toasts__wrap" ]
                         (EL.toList (EL.map (viewToast toMsg t) model.toasts))
