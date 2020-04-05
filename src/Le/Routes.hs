@@ -8,6 +8,7 @@ import qualified Le.ApiTypes as AT
 import Le.Article.Handlers
 import Le.Handlers
 import Le.Import
+import Le.Model
 import Network.HTTP.Media ((//), (/:))
 import Servant
 import Servant.API.Generic
@@ -71,7 +72,13 @@ data JsonAPI route
             :- "api" :> "error-out.json" :> Get '[JSON] [Text],
         _articlesShortHandler ::
           route
-            :- "api" :> "articles-short.json" :> Get '[JSON] [AT.ArticleShort]
+            :- "api" :> "articles-short.json" :> Get '[JSON] [AT.ArticleShort],
+        _articleDetails ::
+          route
+            :- "api" :> "article"
+              :> Capture "article-id" ArticleId
+              :> "article.json"
+              :> Get '[JSON] AT.Article
       }
   deriving (Generic)
 
@@ -92,5 +99,6 @@ server =
         { _logErrorHandler = logErrorHandler,
           _pingJson = pingJson,
           _errorOut = errorOut,
-          _articlesShortHandler = articlesShortHandler
+          _articlesShortHandler = articlesShortHandler,
+          _articleDetails = articleDetails
         }

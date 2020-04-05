@@ -121,14 +121,16 @@ jsonEncNoOp  val =
 
 
 type alias ArticleShort  =
-   { date: IntZonedTime
+   { id: ArticleId
+   , date: IntZonedTime
    , paper_name: String
    , title_short: String
    }
 
 jsonDecArticleShort : Json.Decode.Decoder ( ArticleShort )
 jsonDecArticleShort =
-   Json.Decode.succeed (\pdate ppaper_name ptitle_short -> {date = pdate, paper_name = ppaper_name, title_short = ptitle_short})
+   Json.Decode.succeed (\pid pdate ppaper_name ptitle_short -> {id = pid, date = pdate, paper_name = ppaper_name, title_short = ptitle_short})
+   |> required "id" (jsonDecArticleId)
    |> required "date" (jsonDecIntZonedTime)
    |> required "paper_name" (Json.Decode.string)
    |> required "title_short" (Json.Decode.string)
@@ -136,9 +138,48 @@ jsonDecArticleShort =
 jsonEncArticleShort : ArticleShort -> Value
 jsonEncArticleShort  val =
    Json.Encode.object
-   [ ("date", jsonEncIntZonedTime val.date)
+   [ ("id", jsonEncArticleId val.id)
+   , ("date", jsonEncIntZonedTime val.date)
    , ("paper_name", Json.Encode.string val.paper_name)
    , ("title_short", Json.Encode.string val.title_short)
+   ]
+
+
+
+type alias Article  =
+   { id: ArticleId
+   , url: String
+   , date: (Maybe IntZonedTime)
+   , paper_name: String
+   , title: String
+   , authors: (List String)
+   , content: String
+   , lang: String
+   }
+
+jsonDecArticle : Json.Decode.Decoder ( Article )
+jsonDecArticle =
+   Json.Decode.succeed (\pid purl pdate ppaper_name ptitle pauthors pcontent plang -> {id = pid, url = purl, date = pdate, paper_name = ppaper_name, title = ptitle, authors = pauthors, content = pcontent, lang = plang})
+   |> required "id" (jsonDecArticleId)
+   |> required "url" (Json.Decode.string)
+   |> fnullable "date" (jsonDecIntZonedTime)
+   |> required "paper_name" (Json.Decode.string)
+   |> required "title" (Json.Decode.string)
+   |> required "authors" (Json.Decode.list (Json.Decode.string))
+   |> required "content" (Json.Decode.string)
+   |> required "lang" (Json.Decode.string)
+
+jsonEncArticle : Article -> Value
+jsonEncArticle  val =
+   Json.Encode.object
+   [ ("id", jsonEncArticleId val.id)
+   , ("url", Json.Encode.string val.url)
+   , ("date", (maybeEncode (jsonEncIntZonedTime)) val.date)
+   , ("paper_name", Json.Encode.string val.paper_name)
+   , ("title", Json.Encode.string val.title)
+   , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
+   , ("content", Json.Encode.string val.content)
+   , ("lang", Json.Encode.string val.lang)
    ]
 
 
@@ -151,9 +192,9 @@ jsonEncIntZonedTime = Json.Encode.int
 type alias Milliseconds = Int
 jsonDecMilliseconds = Json.Decode.int
 jsonEncMilliseconds = Json.Encode.int
-type alias CompanyId = Int
-jsonDecCompanyId = Json.Decode.int
-jsonEncCompanyId = Json.Encode.int
+type alias ArticleId = Int
+jsonDecArticleId = Json.Decode.int
+jsonEncArticleId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -293,6 +334,39 @@ getApiArticlesshortjson toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg (Json.Decode.list (jsonDecArticleShort))
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiArticleByArticleidArticlejson : ArticleId -> (Result Error  (Article)  -> msg) -> Cmd msg
+getApiArticleByArticleidArticlejson capture_article_id toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "article"
+                    , (capture_article_id |> String.fromInt)
+                    , "article.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg jsonDecArticle
             , timeout =
                 Nothing
             , tracker =

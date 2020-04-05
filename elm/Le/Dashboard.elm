@@ -23,12 +23,16 @@ type Msg
     | ToastMsg Le.Block.Toast.Msg
     | UpdateModel Model
     | GotArticles (Result Api.Error (List Api.ArticleShort))
+    | CellClicked Api.ArticleId
+    | GotArticle (Result Api.Error Api.Article)
 
 
 type alias Model =
     { formErrors : Dict String String
     , toasts : Le.Block.Toast.Model
     , articles : Maybe (List Api.ArticleShort)
+    , active : Maybe Api.ArticleId
+    , articleFull : Maybe Api.Article
     }
 
 
@@ -37,6 +41,8 @@ init =
     ( { formErrors = Dict.empty
       , toasts = Le.Block.Toast.init
       , articles = Nothing
+      , active = Nothing
+      , articleFull = Nothing
       }
     , Api.getApiArticlesshortjson GotArticles
     )
@@ -66,6 +72,19 @@ update msg model =
             , Cmd.none
             )
 
+        CellClicked articleId ->
+            ( { model | active = Just articleId }
+            , Api.getApiArticleByArticleidArticlejson articleId GotArticle
+            )
+
+        GotArticle (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotArticle (Ok article) ->
+            ( { model | articleFull = Just article }
+            , Cmd.none
+            )
+
 
 navbarContent : Html Msg
 navbarContent =
@@ -90,22 +109,6 @@ navbarContent =
                             [ text "Dashboard"
                             ]
                         ]
-
-                    -- , li [ class "nav-item" ]
-                    --     [ a [ class "nav-link", href "#" ]
-                    --         [ text "Link" ]
-                    --     ]
-                    -- , li [ class "nav-item" ]
-                    --     [ a [ attribute "aria-disabled" "true", class "nav-link disabled", href "#", attribute "tabindex" "-1" ]
-                    --         [ text "Disabled" ]
-                    --     ]
-                    -- ]
-                    -- , Html.form [ class "form-inline mt-2 mt-md-0" ]
-                    --     [ input [ attribute "aria-label" "Search", class "form-control mr-sm-2", placeholder "Search", type_ "text" ]
-                    --         []
-                    --     , button [ class "btn btn-outline-success my-2 my-sm-0", type_ "submit" ]
-                    --         [ text "Search" ]
-                    --     ]
                     ]
                 ]
             ]
@@ -126,7 +129,11 @@ mainContent model =
 
         renderArticleNav : Api.ArticleShort -> Html Msg
         renderArticleNav article =
-            div [ class "articles-nav__cell" ]
+            div
+                [ class "articles-nav__cell"
+                , classList [ ( "articles-nav__cell--active", Just article.id == model.active ) ]
+                , onClick <| CellClicked article.id
+                ]
                 [ div [ class "articles-nav__cell__date" ]
                     [ div []
                         [ text <| renderDateTimeline (Time.millisToPosix article.date)
@@ -141,14 +148,29 @@ mainContent model =
                         ]
                     ]
                 ]
+
+        articleFullDetailsBlock =
+            case model.articleFull of
+                Nothing ->
+                    div [] []
+
+                Just article ->
+                    articleDetails article
+
+        articleDetails article =
+            div []
+                [ h2 [] [ text article.title ]
+                , div [] <|
+                    renderContent article.content
+                ]
     in
     main_ [ class "flex-shrink-0 main-content-margin", attribute "role" "main" ]
-        [ div [ class "container-flex" ]
+        [ div [ class "container-fluid" ]
             [ div [ class "row" ]
                 [ div [ class "col-4" ] <|
                     [ articlesNav ]
                 , div [ class "col-8" ]
-                    [ text "details"
+                    [ articleFullDetailsBlock
                     ]
                 ]
             ]

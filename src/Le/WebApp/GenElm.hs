@@ -30,13 +30,13 @@ instance
 moduleDefs :: [DefineElm]
 moduleDefs =
   [ DefineElm (Proxy :: Proxy AT.NoOp),
-    DefineElm (Proxy :: Proxy AT.ArticleShort)
+    DefineElm (Proxy :: Proxy AT.ArticleShort),
+    DefineElm (Proxy :: Proxy AT.Article)
   ]
 
 replacements :: [(Text, Text)]
 replacements =
-  [ ("(Key Company)", "CompanyId"),
-    ("(Key TranscriptionCut)", "TranscriptionCutId"),
+  [ ("(Key Article)", "ArticleId"),
     ( "jsonDec(Tuple2 Text Text)",
       "jsonDecTuple2 Json.Decode.string Json.Decode.string"
     ),
@@ -53,7 +53,7 @@ intAliases =
     [ "IntUTCTime",
       "IntZonedTime",
       "Milliseconds",
-      "CompanyId"
+      "ArticleId"
     ]
 
 stringAliases :: [String]

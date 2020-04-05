@@ -96,3 +96,14 @@ intToStringTwoSigns x =
 
     else
         String.fromInt x
+
+
+
+-- | Converts "\n\n" to paragraphs
+
+
+renderContent : String -> List (Html msg)
+renderContent t =
+    t
+        |> String.split "\n\n"
+        |> List.map (\x -> p [] [ text x ])

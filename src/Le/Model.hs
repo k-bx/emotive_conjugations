@@ -17,7 +17,11 @@ share
 User
     email Text
     deriving Show
--- | Article extracted via Python newspaper library
+Article
+    url Text -- duplicate for convenience
+    host Text -- duplicate for convenience
+-- | Article extracted via Python newspaper library.
+-- Article.id == ANewspaper.id
 ANewspaper
     url Text -- duplicate for convenience
     host Text -- duplicate for convenience
