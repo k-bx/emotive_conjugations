@@ -25,8 +25,19 @@ main > .container {
     .articles-nav__cell {
       padding-left: .5rem;
       padding-right: .5rem;
+      padding-bottom: .5rem;
       border-bottom: 1px solid #e5e5e5;
-
+      &:hover {
+        background-color: #e5f2ff;
+        cursor: pointer;
+        // color: #fff;
+        // .articles-nav__cell__date {
+        //   color: #fff;
+        // }
+        // .articles-nav__cell__secondary {
+        //   color: #fff;
+        // }
+      }
       .articles-nav__cell__date {
         float: right;
         color: #7a808c;
@@ -34,6 +45,16 @@ main > .container {
 
       .articles-nav__cell__secondary {
         color: #213059;
+      }
+    }
+    .articles-nav__cell--active {
+      background-color: #0069d9;
+      color: #fff;
+      .articles-nav__cell__date {
+        color: #fff;
+      }
+      .articles-nav__cell__secondary {
+        color: #fff;
       }
     }
   }

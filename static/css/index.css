@@ -9896,7 +9896,12 @@ main > .container {
 .page-dashboard .articles-nav .articles-nav__cell {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid #e5e5e5;
+}
+.page-dashboard .articles-nav .articles-nav__cell:hover {
+  background-color: #e5f2ff;
+  cursor: pointer;
 }
 .page-dashboard .articles-nav .articles-nav__cell .articles-nav__cell__date {
   float: right;
@@ -9904,6 +9909,16 @@ main > .container {
 }
 .page-dashboard .articles-nav .articles-nav__cell .articles-nav__cell__secondary {
   color: #213059;
+}
+.page-dashboard .articles-nav .articles-nav__cell--active {
+  background-color: #0069d9;
+  color: #fff;
+}
+.page-dashboard .articles-nav .articles-nav__cell--active .articles-nav__cell__date {
+  color: #fff;
+}
+.page-dashboard .articles-nav .articles-nav__cell--active .articles-nav__cell__secondary {
+  color: #fff;
 }
 
 /*# sourceMappingURL=index.css.map */
