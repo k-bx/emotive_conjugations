@@ -10,6 +10,9 @@ main > .container {
 
 .footer {
     background-color: #f5f5f5;
+    a {
+      color: #444444;
+    }
 }
 
 .toasts {
@@ -68,8 +71,27 @@ main > .container {
 // page-specific stuff
 
 .page-dashboard {
-  .main-content-margin {
-    margin-top: 5rem;
+  .main-content {
+    flex-grow: 1;
+    overflow: auto;
+  }
+  .applemail {
+    display: flex;
+    height: 100%;
+    .applemail__articles {
+      width: 20rem;
+      flex-shrink: 0;
+      overflow-y: scroll;
+      scrollbar-width: none;
+    }
+    // .applemail__articles:hover {
+    //   scrollbar-width: thin;
+    // }
+    .applemail__content {
+      padding: 2rem;
+      height: 100%;
+      overflow-y: scroll;
+    }
   }
 
   .articles-nav {

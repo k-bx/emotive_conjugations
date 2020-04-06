@@ -89,7 +89,7 @@ update msg model =
 navbarContent : Html Msg
 navbarContent =
     header []
-        [ nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ]
+        [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark" ]
             [ a
                 [ class "navbar-brand"
                 , href <| Le.Routes.dashboard
@@ -164,14 +164,12 @@ mainContent model =
                     renderContent article.content
                 ]
     in
-    main_ [ class "flex-shrink-0 main-content-margin", attribute "role" "main" ]
-        [ div [ class "container-fluid" ]
-            [ div [ class "row" ]
-                [ div [ class "col-4" ] <|
-                    [ articlesNav ]
-                , div [ class "col-8" ]
-                    [ articleFullDetailsBlock
-                    ]
+    main_ [ class "main-content", attribute "role" "main" ]
+        [ div [ class "applemail" ]
+            [ div [ class "applemail__articles" ] <|
+                [ articlesNav ]
+            , div [ class "applemail__content" ]
+                [ articleFullDetailsBlock
                 ]
             ]
         ]
@@ -180,9 +178,14 @@ mainContent model =
 footerContent : Html Msg
 footerContent =
     footer [ class "footer mt-auto py-3" ]
-        [ div [ class "container" ]
+        [ div [ class "text-center" ]
             [ span [ class "text-muted" ]
-                [ text "Place sticky footer content here." ]
+                [ text "Made by "
+                , a [ href "https://k-bx.github.io", target "_blank" ] [ text "Konstantine Rybnikov" ]
+                , text " with help from "
+                , a [ href "https://theportal.wiki/", target "_blank" ] [ text "The Portal" ]
+                , text " community"
+                ]
             ]
         ]
 
