@@ -7,3 +7,4 @@ TAGS
 elm-stuff
 dist
 .shake.*
+__pycache__

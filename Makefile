@@ -112,6 +112,8 @@ install_python:
 	sudo apt-get install libxml2-dev libxslt-dev
 	sudo apt-get install libjpeg-dev zlib1g-dev libpng-dev
 	curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | $(python)
+	# this one is big, only do on desktop
+	python -m spacy download en_core_web_lg
 
 .PHONY: tags
 tags:
@@ -131,6 +133,13 @@ clean:
 .PHONY: deploy
 deploy:
 	./sysadmin/deploy.sh
+
+.PHONY: deploy-webapp-python
+deploy-webapp-python:
+	sudo cp ./sysadmin/conj-webapp-python.service /etc/systemd/system/
+	sudo systemctl daemon-reload
+	sudo systemctl enable conj-webapp-python.service
+	sudo systemctl restart conj-webapp-python
 
 .PHONY: launch-ssh-tunnels
 launch-ssh-tunnels:

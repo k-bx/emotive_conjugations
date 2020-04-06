@@ -2,3 +2,7 @@ ipython
 pylint
 jedi
 newspaper3k
+spacy
+spacy-lookups-data
+flask
+gunicorn

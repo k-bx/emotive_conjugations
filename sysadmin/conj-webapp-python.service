@@ -1,0 +1,13 @@
+[Unit]
+Description=conj-webapp-python
+
+[Service]
+ExecStart=/home/kb/workspace/emotive_conjugations/venv/bin/gunicorn -w 8 -b 127.0.0.1:8082 --chdir /home/kb/workspace/emotive_conjugations/scripts/ webserver:app
+Restart=always
+User=kb
+Group=kb
+RestartSec=5s
+WorkingDirectory=/home/kb/workspace/emotive_conjugations/scripts
+
+[Install]
+WantedBy=multi-user.target
