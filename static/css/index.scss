@@ -73,7 +73,7 @@ main > .container {
 .page-dashboard {
   .main-content {
     flex-grow: 1;
-    overflow: auto;
+    overflow-y: auto;
   }
   .applemail {
     display: flex;
