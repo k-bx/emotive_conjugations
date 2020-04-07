@@ -86,18 +86,19 @@ parseFilteredArticles = do
                   . at "WARC-Target-URI"
                   & fromMaybe ""
                   & S.toText
-          res <- Le.Python.runPythonParsing (Le.Python.CmdParseArticle (Le.Python.CmdParseArticleOpts html))
+          res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html)
           void $ runDb $ do
             -- articleId <- ensureArticle uriText
-            P.insert $ ANewspaper
-              { aNewspaperUrl = uriText,
-                aNewspaperHost = Le.Article.extractHostUnsafe uriText,
-                aNewspaperTitle = Le.Python.cprTitle res,
-                aNewspaperAuthors = JsonList (Le.Python.cprAuthors res),
-                aNewspaperDate =
+            P.insert $ ArticleNp
+              { articleNpUrl = uriText,
+                articleNpHost = Le.Article.extractHostUnsafe uriText,
+                articleNpTitle = Le.Python.cprTitle res,
+                articleNpAuthors = JsonList (Le.Python.cprAuthors res),
+                articleNpDate =
                   posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
-                aNewspaperContent = Le.Python.cprText res,
-                aNewspaperLang = Le.Python.cprLanguage res
+                articleNpContent = Le.Python.cprText res,
+                articleNpLang = Le.Python.cprLanguage res,
+                articleNpSpacyNer = Nothing
               }
           logInfo $ display $ "> URI: " <> uriText
           -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
@@ -114,3 +115,21 @@ parseFilteredArticles = do
 --         articleHost = Le.Article.extractHostUnsafe uriText
 --       }
 --     Just article -> pure $ entityKey article
+
+spacyNerArticles :: Le ()
+spacyNerArticles = do
+  articleNps <- runDb $ P.selectList [ArticleNpSpacyNer P.==. Nothing] [P.Desc ArticleNpId]
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articleNps $ \articleNp -> do
+    res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articleNpContent (ev articleNp)))
+    runDb $ do
+      P.update (entityKey articleNp) [ArticleNpSpacyNer P.=. (Just res)]
+      forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
+        P.insert $ NamedEntity
+          { namedEntityArticleId = P.toSqlKey (P.fromSqlKey (entityKey articleNp)),
+            namedEntityEntity = cseText,
+            namedEntityStart = cseStart,
+            namedEntityStartChar = cseStartChar,
+            namedEntityEnd = cseEnd,
+            namedEntityEndChar = cseEndChar,
+            namedEntityLabel_ = cseLabel_
+          }

@@ -19,6 +19,7 @@ withApp f = do
   pc <- RIO.Process.mkDefaultProcessContext
   httpManager <- Network.HTTP.Client.newManager Network.HTTP.Client.defaultManagerSettings
   httpManagerNoTimeout <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings {Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
+  httpManagerPython <- Network.HTTP.Client.newManager (Network.HTTP.Client.defaultManagerSettings {Network.HTTP.Client.managerResponseTimeout = Network.HTTP.Client.responseTimeoutNone})
   let dataDir = cfgDataDir cfg
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
@@ -35,6 +36,7 @@ withApp f = do
                   appTempDir = tempDirPath,
                   appHttpManager = httpManager,
                   appHttpManagerNoTimeout = httpManagerNoTimeout,
+                  appHttpManagerPython = httpManagerPython,
                   appDataDir = dataDir,
                   appNumCapabilities = numCapabilities,
                   appDb = pool

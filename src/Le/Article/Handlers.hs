@@ -11,26 +11,26 @@ import Le.Model
 
 articlesShortHandler :: Le [AT.ArticleShort]
 articlesShortHandler = do
-  aNewspapers <- runDb $ P.selectList [ANewspaperDate P.!=. Nothing] [P.Desc ANewspaperDate, P.LimitTo Le.Config.articlesLimit]
-  forM aNewspapers $ \aNewspaper -> do
-    let date = fromJustNote "impossible!" (aNewspaperDate (ev aNewspaper))
+  articleNps <- runDb $ P.selectList [ArticleNpDate P.!=. Nothing] [P.Desc ArticleNpDate, P.LimitTo Le.Config.articlesLimit]
+  forM articleNps $ \articleNp -> do
+    let date = fromJustNote "impossible!" (articleNpDate (ev articleNp))
     pure $ AT.ArticleShort
-      { artId = P.toSqlKey (P.fromSqlKey (entityKey aNewspaper)),
+      { artId = P.toSqlKey (P.fromSqlKey (entityKey articleNp)),
         artDate = zonedTimeToMilliseconds (utcToZonedTime' tz date),
-        artPaperName = newspaperNameFromHost (aNewspaperHost (ev aNewspaper)),
-        artTitleShort = aNewspaperTitle (ev aNewspaper)
+        artPaperName = newspaperNameFromHost (articleNpHost (ev articleNp)),
+        artTitleShort = articleNpTitle (ev articleNp)
       }
 
 articleDetails :: ArticleId -> Le AT.Article
 articleDetails articleId = do
-  aNewspaper <- mustFindM $ runDb $ P.selectFirst [ANewspaperId P.==. P.toSqlKey (P.fromSqlKey articleId)] []
+  articleNp <- mustFindM $ runDb $ P.selectFirst [ArticleNpId P.==. P.toSqlKey (P.fromSqlKey articleId)] []
   pure $ AT.Article
     { arcId = articleId,
-      arcUrl = aNewspaperUrl (ev aNewspaper),
-      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> aNewspaperDate (ev aNewspaper),
-      arcPaperName = newspaperNameFromHost (aNewspaperHost (ev aNewspaper)),
-      arcTitle = aNewspaperTitle (ev aNewspaper),
-      arcAuthors = unpack (aNewspaperAuthors (ev aNewspaper)),
-      arcContent = aNewspaperContent (ev aNewspaper),
-      arcLang = aNewspaperLang (ev aNewspaper)
+      arcUrl = articleNpUrl (ev articleNp),
+      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate (ev articleNp),
+      arcPaperName = newspaperNameFromHost (articleNpHost (ev articleNp)),
+      arcTitle = articleNpTitle (ev articleNp),
+      arcAuthors = unpack (articleNpAuthors (ev articleNp)),
+      arcContent = articleNpContent (ev articleNp),
+      arcLang = articleNpLang (ev articleNp)
     }

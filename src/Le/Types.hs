@@ -25,7 +25,8 @@ data Config
       { cfgHttpPort :: Maybe Natural,
         cfgMode :: Mode,
         cfgDataDir :: FilePath,
-        cfgPsqlConnString :: Text
+        cfgPsqlConnString :: Text,
+        cfgPythonWebapp :: Text
       }
   deriving (Generic)
 
@@ -45,6 +46,8 @@ data App
         appTempDir :: FilePath,
         appHttpManager :: Network.HTTP.Client.Manager,
         appHttpManagerNoTimeout :: Network.HTTP.Client.Manager,
+        -- | local python flask worker (scripts/webserver.py)
+        appHttpManagerPython :: Network.HTTP.Client.Manager,
         appDataDir :: FilePath,
         appNumCapabilities :: Int,
         appDb :: Pool P.SqlBackend

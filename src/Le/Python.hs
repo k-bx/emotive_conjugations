@@ -1,18 +1,23 @@
 module Le.Python where
 
+import Control.Lens ((.~))
 import qualified Crypto.Hash
 import qualified Data.Aeson as J
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Database.Persist.Postgresql as P
 import qualified Le.Config
 import Le.Import
+import Le.Util
+import qualified Network.Wreq as W
 import qualified RIO.Process
 
 data Cmd
   = CmdPing
   | CmdParseArticle CmdParseArticleOpts
+  | CmdSpacyNer CmdSpacyNerOpts
   deriving (Generic, Show)
 
 instance J.ToJSON Cmd where
@@ -59,6 +64,65 @@ instance J.ToJSON CmdParseArticleRes where
 instance J.FromJSON CmdParseArticleRes where
   parseJSON = J.genericParseJSON (jsonOpts 3)
 
+data CmdSpacyNerOpts
+  = CmdSpacyNerOpts
+      { csnText :: Text
+      }
+  deriving (Generic, Show)
+
+instance J.ToJSON CmdSpacyNerOpts where
+
+  toEncoding = J.genericToEncoding (jsonOpts 3)
+
+  toJSON = J.genericToJSON (jsonOpts 3)
+
+instance J.FromJSON CmdSpacyNerOpts where
+  parseJSON = J.genericParseJSON (jsonOpts 3)
+
+data CmdSpacyNerRes
+  = CmdSpacyNerRes
+      { csrEnts :: [CmdSpacyNerResEnt]
+      }
+  deriving (Generic, Show)
+
+instance J.ToJSON CmdSpacyNerRes where
+
+  toEncoding = J.genericToEncoding (jsonOpts 3)
+
+  toJSON = J.genericToJSON (jsonOpts 3)
+
+instance J.FromJSON CmdSpacyNerRes where
+  parseJSON = J.genericParseJSON (jsonOpts 3)
+
+instance P.PersistField CmdSpacyNerRes where
+
+  toPersistValue = P.toPersistValueJSON
+
+  fromPersistValue = P.fromPersistValueJSON
+
+instance P.PersistFieldSql CmdSpacyNerRes where
+  sqlType _ = P.SqlString
+
+data CmdSpacyNerResEnt
+  = CmdSpacyNerResEnt
+      { cseText :: Text,
+        cseStart :: Int,
+        cseStartChar :: Int,
+        cseEnd :: Int,
+        cseEndChar :: Int,
+        cseLabel_ :: Text
+      }
+  deriving (Generic, Show)
+
+instance J.ToJSON CmdSpacyNerResEnt where
+
+  toEncoding = J.genericToEncoding (jsonOpts 3)
+
+  toJSON = J.genericToJSON (jsonOpts 3)
+
+instance J.FromJSON CmdSpacyNerResEnt where
+  parseJSON = J.genericParseJSON (jsonOpts 3)
+
 runPython :: Cmd -> Le (BL.ByteString, BL.ByteString)
 runPython c = do
   tempDir <- asks appTempDir
@@ -93,6 +157,17 @@ runPythonParsing c = do
           <> S.toText err
       error "runPythonParsing failure"
 
+runPythonWeb :: FromJSON a => Cmd -> Le a
+runPythonWeb c = do
+  mgr <- asks appHttpManagerPython
+  cfg <- asks appConfig
+  let opts =
+        W.defaults
+          & W.manager .~ Right mgr
+          & W.header "content-type" .~ ["application/json"]
+  r <- liftIO $ W.postWith opts (S.toString (cfgPythonWebapp cfg <> "/api/call")) (J.encode c)
+  pure (eitherErr (J.eitherDecode (r ^. W.responseBody)))
+
 -- | Test connection and libaries
 runTest :: Le ()
 runTest = do
@@ -107,6 +182,12 @@ parseArticleNewspaperTest :: Le ()
 parseArticleNewspaperTest = do
   -- https://www.nytimes.com/2020/03/29/arts/music/krzysztof-penderecki-dead.html
   html <- liftIO $ T.readFile "/home/kb/workspace/emotive_conjugations/data/test/penderecki-dead.html"
-  res <- runPythonParsing (CmdParseArticle (CmdParseArticleOpts html))
+  res <- cmdParseArticle (CmdParseArticleOpts html)
   logInfo $ display $ "> Title: " <> tshow (cprTitle res)
   logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (cprPubDate res))
+
+cmdParseArticle :: CmdParseArticleOpts -> Le CmdParseArticleRes
+cmdParseArticle opts = runPythonParsing (CmdParseArticle opts)
+
+cmdSpacyNer :: CmdSpacyNerOpts -> Le CmdSpacyNerRes
+cmdSpacyNer opts = runPythonWeb (CmdSpacyNer opts)

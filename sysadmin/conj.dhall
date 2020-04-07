@@ -5,4 +5,5 @@ in  { cfgHttpPort = Some 6666
     , cfgDataDir = "/home/ubuntu/conj_data"
     , cfgPsqlConnString =
         "host=localhost port=5432 user=postgres dbname=conj_worker password=password"
+    , cfgPythonWebapp = "http://localhost:8082"
     }

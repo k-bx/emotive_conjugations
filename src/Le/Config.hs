@@ -34,6 +34,10 @@ cheapWorkers =
       }
   ]
 
+-- | How many conj-webapp-python.service workers essentially
+numPythonWorkers :: Int
+numPythonWorkers = 4
+
 -- | Data where CommonCrawl WARCs filtered for interesting news sites
 -- is located
 filteredDataDir :: Config -> FilePath

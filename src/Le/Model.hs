@@ -6,6 +6,7 @@
 module Le.Model where
 
 import Data.Text as Text
+import qualified Le.Python
 import Database.Persist.Postgresql
 import Database.Persist.TH
 import Le.Import
@@ -22,7 +23,7 @@ Article
     host Text -- duplicate for convenience
 -- | Article extracted via Python newspaper library.
 -- Article.id == ANewspaper.id
-ANewspaper
+ArticleNp
     url Text -- duplicate for convenience
     host Text -- duplicate for convenience
     title Text
@@ -30,6 +31,16 @@ ANewspaper
     date UTCTime Maybe
     content Text
     lang Text
+    spacyNer Le.Python.CmdSpacyNerRes Maybe
+    deriving Show
+NamedEntity
+    articleId ArticleId
+    entity Text
+    start Int
+    startChar Int
+    end Int
+    endChar Int
+    label_ Text
     deriving Show
 --
 -- Migration data. Singleton object

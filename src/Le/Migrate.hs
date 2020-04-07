@@ -21,8 +21,12 @@ run = do
       $ \mpool -> do
         liftIO $ flip P.runSqlPool mpool $ P.runMigration migrateAll
         liftIO $ flip P.runSqlPool mpool $ ensureIndexes
-    P.withPostgresqlPool (S.fromText (cfgPsqlConnString (appConfig app))) 1 $ \mpool -> do
-      liftIO $ flip P.runSqlPool mpool $ migrateData
+    runNoLoggingT
+      $ P.withPostgresqlPool
+        (S.fromText (cfgPsqlConnString (appConfig app)))
+        1
+      $ \mpool -> do
+        liftIO $ flip P.runSqlPool mpool $ migrateData
 
 ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
@@ -55,16 +59,32 @@ migrateData = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
   when (version <= 1) migration01
+  when (version <= 2) migration02
+  when (version <= 3) migration02
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations
 latestVersion :: Int
-latestVersion = 2
+latestVersion = 4
 
 -- 1 -> 2
 migration01 :: ReaderT P.SqlBackend IO ()
 migration01 = do
   pure ()
+
+-- 1 -> 2
+migration02 :: ReaderT P.SqlBackend IO ()
+migration02 = do
+  articlesNp <- P.selectList [] [P.Desc ArticleNpId]
+  forM_ articlesNp $ \articleNp -> do
+    let articleId = P.toSqlKey (P.fromSqlKey (entityKey articleNp))
+    P.repsert
+      articleId
+      ( Article
+          { articleUrl = articleNpUrl (ev articleNp),
+            articleHost = articleNpHost (ev articleNp)
+          }
+      )
 
 getMigrationInfo :: ReaderT P.SqlBackend IO MigrationInfo
 getMigrationInfo = do
