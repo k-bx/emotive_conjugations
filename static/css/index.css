@@ -9942,6 +9942,9 @@ main > .container {
   color: #d61d1d;
 }
 
+.page-dashboard .article .article__spacy-ner {
+  background-color: yellow;
+}
 .page-dashboard .main-content {
   flex-grow: 1;
   overflow-y: auto;

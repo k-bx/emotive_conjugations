@@ -71,6 +71,12 @@ main > .container {
 // page-specific stuff
 
 .page-dashboard {
+  .article {
+    .article__spacy-ner {
+      background-color: yellow;
+    }
+  }
+
   .main-content {
     flex-grow: 1;
     overflow-y: auto;

@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Le.Api as Api
+import Le.Article
 import Le.Block.Toast
 import Le.Components exposing (..)
 import Le.Config
@@ -171,13 +172,13 @@ mainContent model =
         articleDetails article =
             div []
                 [ h2 [] [ text article.title ]
-                , div [] <|
+                , div [ class "article" ] <|
                     case model.articleNp of
                         Nothing ->
                             [ div [] [] ]
 
                         Just articleNp ->
-                            renderContent articleNp.content
+                            Le.Article.renderContent articleNp.content articleNp.spacy_ner_ents
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]
