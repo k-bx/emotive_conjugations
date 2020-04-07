@@ -33,7 +33,6 @@ articleDetails articleId = do
       arcPaperName = newspaperNameFromHost (articleNpHost articleNp),
       arcTitle = articleNpTitle articleNp,
       arcAuthors = unpack (articleNpAuthors articleNp),
-      arcContent = articleNpContent articleNp,
       arcLang = articleNpLang articleNp
     }
 

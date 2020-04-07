@@ -52,7 +52,6 @@ data Article
         arcPaperName :: Text,
         arcTitle :: Text,
         arcAuthors :: [Text],
-        arcContent :: Text,
         arcLang :: Text
       }
   deriving (Show, Eq, Generic)

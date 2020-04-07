@@ -25,6 +25,7 @@ type Msg
     | GotArticles (Result Api.Error (List Api.ArticleShort))
     | CellClicked Api.ArticleId
     | GotArticle (Result Api.Error Api.Article)
+    | GotArticleNp (Result Api.Error Api.ArticleNp)
 
 
 type alias Model =
@@ -33,6 +34,7 @@ type alias Model =
     , articles : Maybe (List Api.ArticleShort)
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
+    , articleNp : Maybe Api.ArticleNp
     }
 
 
@@ -43,6 +45,7 @@ init =
       , articles = Nothing
       , active = Nothing
       , articleFull = Nothing
+      , articleNp = Nothing
       }
     , Api.getApiArticlesshortjson GotArticles
     )
@@ -82,6 +85,14 @@ update msg model =
 
         GotArticle (Ok article) ->
             ( { model | articleFull = Just article }
+            , Api.getApiArticleByArticlenpidArticlenpjson article.id GotArticleNp
+            )
+
+        GotArticleNp (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotArticleNp (Ok articleNp) ->
+            ( { model | articleNp = Just articleNp }
             , Cmd.none
             )
 
@@ -161,7 +172,12 @@ mainContent model =
             div []
                 [ h2 [] [ text article.title ]
                 , div [] <|
-                    renderContent article.content
+                    case model.articleNp of
+                        Nothing ->
+                            [ div [] [] ]
+
+                        Just articleNp ->
+                            renderContent articleNp.content
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]
