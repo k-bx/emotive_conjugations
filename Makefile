@@ -138,7 +138,7 @@ deploy:
 deploy-webapp-python:
 	sudo cp ./sysadmin/conj-webapp-python.service /etc/systemd/system/
 	sudo systemctl daemon-reload
-	sudo systemctl enable conj-webapp-python.service
+	# sudo systemctl enable conj-webapp-python.service
 	sudo systemctl restart conj-webapp-python
 
 .PHONY: launch-ssh-tunnels
