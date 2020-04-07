@@ -183,6 +183,70 @@ jsonEncArticle  val =
    ]
 
 
+
+type alias ArticleNp  =
+   { id: ArticleNpId
+   , authors: (List String)
+   , date: (Maybe IntZonedTime)
+   , content: String
+   , lang: String
+   , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
+   }
+
+jsonDecArticleNp : Json.Decode.Decoder ( ArticleNp )
+jsonDecArticleNp =
+   Json.Decode.succeed (\pid pauthors pdate pcontent plang pspacy_ner_ents -> {id = pid, authors = pauthors, date = pdate, content = pcontent, lang = plang, spacy_ner_ents = pspacy_ner_ents})
+   |> required "id" (jsonDecArticleNpId)
+   |> required "authors" (Json.Decode.list (Json.Decode.string))
+   |> fnullable "date" (jsonDecIntZonedTime)
+   |> required "content" (Json.Decode.string)
+   |> required "lang" (Json.Decode.string)
+   |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
+
+jsonEncArticleNp : ArticleNp -> Value
+jsonEncArticleNp  val =
+   Json.Encode.object
+   [ ("id", jsonEncArticleNpId val.id)
+   , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
+   , ("date", (maybeEncode (jsonEncIntZonedTime)) val.date)
+   , ("content", Json.Encode.string val.content)
+   , ("lang", Json.Encode.string val.lang)
+   , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
+   ]
+
+
+
+type alias CmdSpacyNerResEnt  =
+   { text: String
+   , start: Int
+   , start_char: Int
+   , end: Int
+   , end_char: Int
+   , label_: String
+   }
+
+jsonDecCmdSpacyNerResEnt : Json.Decode.Decoder ( CmdSpacyNerResEnt )
+jsonDecCmdSpacyNerResEnt =
+   Json.Decode.succeed (\ptext pstart pstart_char pend pend_char plabel_ -> {text = ptext, start = pstart, start_char = pstart_char, end = pend, end_char = pend_char, label_ = plabel_})
+   |> required "text" (Json.Decode.string)
+   |> required "start" (Json.Decode.int)
+   |> required "start_char" (Json.Decode.int)
+   |> required "end" (Json.Decode.int)
+   |> required "end_char" (Json.Decode.int)
+   |> required "label_" (Json.Decode.string)
+
+jsonEncCmdSpacyNerResEnt : CmdSpacyNerResEnt -> Value
+jsonEncCmdSpacyNerResEnt  val =
+   Json.Encode.object
+   [ ("text", Json.Encode.string val.text)
+   , ("start", Json.Encode.int val.start)
+   , ("start_char", Json.Encode.int val.start_char)
+   , ("end", Json.Encode.int val.end)
+   , ("end_char", Json.Encode.int val.end_char)
+   , ("label_", Json.Encode.string val.label_)
+   ]
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -195,6 +259,9 @@ jsonEncMilliseconds = Json.Encode.int
 type alias ArticleId = Int
 jsonDecArticleId = Json.Decode.int
 jsonEncArticleId = Json.Encode.int
+type alias ArticleNpId = Int
+jsonDecArticleNpId = Json.Decode.int
+jsonEncArticleNpId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -367,6 +434,40 @@ getApiArticleByArticleidArticlejson capture_article_id toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg jsonDecArticle
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiArticleByArticlenpidArticlenpjson : ArticleNpId -> (Result Error  (ArticleNp)  -> msg) -> Cmd msg
+getApiArticleByArticlenpidArticlenpjson capture_article_np_id toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "article"
+                    , (capture_article_np_id
+                       |> String.fromInt)
+                    , "article-np.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg jsonDecArticleNp
             , timeout =
                 Nothing
             , tracker =

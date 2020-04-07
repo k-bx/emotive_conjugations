@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Le.Python where
 
 import Control.Lens ((.~))
@@ -8,6 +10,7 @@ import qualified Data.String.Class as S
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Database.Persist.Postgresql as P
+import Elm.Derive (deriveBoth)
 import qualified Le.Config
 import Le.Import
 import Le.Util
@@ -83,7 +86,7 @@ data CmdSpacyNerRes
   = CmdSpacyNerRes
       { csrEnts :: [CmdSpacyNerResEnt]
       }
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 instance J.ToJSON CmdSpacyNerRes where
 
@@ -112,16 +115,9 @@ data CmdSpacyNerResEnt
         cseEndChar :: Int,
         cseLabel_ :: Text
       }
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
-instance J.ToJSON CmdSpacyNerResEnt where
-
-  toEncoding = J.genericToEncoding (jsonOpts 3)
-
-  toJSON = J.genericToJSON (jsonOpts 3)
-
-instance J.FromJSON CmdSpacyNerResEnt where
-  parseJSON = J.genericParseJSON (jsonOpts 3)
+deriveBoth (jsonOpts 3) ''CmdSpacyNerResEnt
 
 runPython :: Cmd -> Le (BL.ByteString, BL.ByteString)
 runPython c = do

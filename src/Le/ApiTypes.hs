@@ -6,6 +6,7 @@ import qualified Data.Aeson as J
 import Elm.Derive
 import Le.Import
 import qualified Le.Model as M
+import qualified Le.Python
 
 data NoOp
   = NoOp
@@ -57,3 +58,16 @@ data Article
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''Article
+
+data ArticleNp
+  = ArticleNp
+      { arnId :: M.ArticleNpId,
+        arnAuthors :: [Text],
+        arnDate :: Maybe IntZonedTime,
+        arnContent :: Text,
+        arnLang :: Text,
+        arnSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt]
+      }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''ArticleNp

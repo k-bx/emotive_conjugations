@@ -78,7 +78,13 @@ data JsonAPI route
             :- "api" :> "article"
               :> Capture "article-id" ArticleId
               :> "article.json"
-              :> Get '[JSON] AT.Article
+              :> Get '[JSON] AT.Article,
+        _articleNpDetails ::
+          route
+            :- "api" :> "article"
+              :> Capture "article-np-id" ArticleNpId
+              :> "article-np.json"
+              :> Get '[JSON] AT.ArticleNp
       }
   deriving (Generic)
 
@@ -100,5 +106,6 @@ server =
           _pingJson = pingJson,
           _errorOut = errorOut,
           _articlesShortHandler = articlesShortHandler,
-          _articleDetails = articleDetails
+          _articleDetails = articleDetails,
+          _articleNpDetails = articleNpDetails
         }

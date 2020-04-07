@@ -8,6 +8,7 @@ import Le.Article
 import Le.Config
 import Le.Import
 import Le.Model
+import qualified Le.Python
 
 articlesShortHandler :: Le [AT.ArticleShort]
 articlesShortHandler = do
@@ -23,14 +24,27 @@ articlesShortHandler = do
 
 articleDetails :: ArticleId -> Le AT.Article
 articleDetails articleId = do
-  articleNp <- mustFindM $ runDb $ P.selectFirst [ArticleNpId P.==. P.toSqlKey (P.fromSqlKey articleId)] []
+  let articleNpId = P.toSqlKey (P.fromSqlKey articleId)
+  articleNp <- mustFindM $ runDb $ P.get articleNpId
   pure $ AT.Article
     { arcId = articleId,
-      arcUrl = articleNpUrl (ev articleNp),
-      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate (ev articleNp),
-      arcPaperName = newspaperNameFromHost (articleNpHost (ev articleNp)),
-      arcTitle = articleNpTitle (ev articleNp),
-      arcAuthors = unpack (articleNpAuthors (ev articleNp)),
-      arcContent = articleNpContent (ev articleNp),
-      arcLang = articleNpLang (ev articleNp)
+      arcUrl = articleNpUrl articleNp,
+      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate articleNp,
+      arcPaperName = newspaperNameFromHost (articleNpHost articleNp),
+      arcTitle = articleNpTitle articleNp,
+      arcAuthors = unpack (articleNpAuthors articleNp),
+      arcContent = articleNpContent articleNp,
+      arcLang = articleNpLang articleNp
+    }
+
+articleNpDetails :: ArticleNpId -> Le AT.ArticleNp
+articleNpDetails articleNpId = do
+  articleNp <- mustFindM $ runDb $ P.get articleNpId
+  pure $ AT.ArticleNp
+    { arnId = articleNpId,
+      arnAuthors = unpack (articleNpAuthors articleNp),
+      arnDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate articleNp,
+      arnContent = articleNpContent articleNp,
+      arnLang = articleNpLang articleNp,
+      arnSpacyNerEnts = fmap Le.Python.csrEnts (articleNpSpacyNer articleNp)
     }

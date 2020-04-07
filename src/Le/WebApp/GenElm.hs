@@ -10,6 +10,7 @@ import Elm.Module
 import Elm.TyRep (ETCon (..))
 import qualified Le.ApiTypes as AT
 import Le.Import
+import qualified Le.Python
 import Le.Routes
 import Servant
 import Servant.API.Generic
@@ -31,12 +32,15 @@ moduleDefs :: [DefineElm]
 moduleDefs =
   [ DefineElm (Proxy :: Proxy AT.NoOp),
     DefineElm (Proxy :: Proxy AT.ArticleShort),
-    DefineElm (Proxy :: Proxy AT.Article)
+    DefineElm (Proxy :: Proxy AT.Article),
+    DefineElm (Proxy :: Proxy AT.ArticleNp),
+    DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt)
   ]
 
 replacements :: [(Text, Text)]
 replacements =
   [ ("(Key Article)", "ArticleId"),
+    ("(Key ArticleNp)", "ArticleNpId"),
     ( "jsonDec(Tuple2 Text Text)",
       "jsonDecTuple2 Json.Decode.string Json.Decode.string"
     ),
@@ -53,7 +57,8 @@ intAliases =
     [ "IntUTCTime",
       "IntZonedTime",
       "Milliseconds",
-      "ArticleId"
+      "ArticleId",
+      "ArticleNpId"
     ]
 
 stringAliases :: [String]
