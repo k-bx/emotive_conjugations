@@ -76,6 +76,16 @@ main > .container {
     }
   }
 
+  .search-panel {
+    min-height: 3rem;
+    background: linear-gradient(to bottom, #e2e2e4, #d2d2d4);
+    border-bottom: 2px solid #bababc;
+    flex-shrink: 0;
+    // box-shadow: 0 2px 1.5px -1.5px #bababc;
+    display: flex;
+    align-items: center;
+  }
+
   .main-content {
     flex-grow: 1;
     overflow-y: auto;

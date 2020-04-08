@@ -70,3 +70,12 @@ data ArticleNp
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''ArticleNp
+
+data Paginated item
+  = Paginated
+      { pgnItems :: [item],
+        pgnOverallPages :: Int
+      }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''Paginated

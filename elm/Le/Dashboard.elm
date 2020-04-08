@@ -15,6 +15,9 @@ import Le.Types exposing (..)
 import Le.Utils exposing (..)
 import Maybe.Extra
 import Process
+import SelectTwo
+import SelectTwo.Html
+import SelectTwo.Types exposing (AjaxParams, SelectTwo, SelectTwoMsg)
 import Task
 import Time
 
@@ -27,6 +30,10 @@ type Msg
     | CellClicked Api.ArticleId
     | GotArticle (Result Api.Error Api.Article)
     | GotArticleNp (Result Api.Error Api.ArticleNp)
+    | SelectTwo (SelectTwoMsg Msg)
+    | NerSelect String
+    | SelectNerAjax AjaxParams Bool
+    | GotNers AjaxParams (Result Api.Error (Api.Paginated String))
 
 
 type alias Model =
@@ -36,6 +43,9 @@ type alias Model =
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
     , articleNp : Maybe Api.ArticleNp
+    , selectTwo : Maybe (SelectTwo Msg)
+    , ners : List String
+    , ner : String
     }
 
 
@@ -47,6 +57,9 @@ init =
       , active = Nothing
       , articleFull = Nothing
       , articleNp = Nothing
+      , selectTwo = Nothing
+      , ners = []
+      , ner = ""
       }
     , Api.getApiArticlesshortjson GotArticles
     )
@@ -97,6 +110,55 @@ update msg model =
             , Cmd.none
             )
 
+        SelectTwo stmsg ->
+            let
+                ajaxCases =
+                    Just
+                        (\id_ params reset ->
+                            case id_ of
+                                "select-ner" ->
+                                    ( model
+                                    , SelectTwo.send <| SelectNerAjax params reset
+                                    )
+
+                                _ ->
+                                    ( model
+                                    , Cmd.none
+                                    )
+                        )
+            in
+            SelectTwo.update SelectTwo stmsg ajaxCases model
+
+        SelectNerAjax params reset ->
+            ( SelectTwo.setLoading params reset model
+            , Api.getApiNamedentitieslistjson (Just params.term) (Just params.page) (GotNers params)
+            )
+
+        NerSelect ner ->
+            ( { model | ner = ner }
+            , Cmd.none
+            )
+
+        GotNers params (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotNers params (Ok ners) ->
+            let
+                m2 =
+                    { model | ners = ners.items }
+
+                list : List (SelectTwo.Types.GroupSelectTwoOption Msg)
+                list =
+                    SelectTwo.basicSelectOptions NerSelect (List.map (\x -> ( x, x )) ners.items)
+
+                newParams : AjaxParams
+                newParams =
+                    { params | more = params.page < ners.overall_pages }
+            in
+            ( SelectTwo.setList list newParams m2
+            , Cmd.none
+            )
+
 
 navbarContent : Html Msg
 navbarContent =
@@ -123,6 +185,37 @@ navbarContent =
                         ]
                     ]
                 ]
+            ]
+        ]
+
+
+searchPanel : Model -> Html Msg
+searchPanel model =
+    div [ class "search-panel" ]
+        [ div [ class "ml-2" ]
+            [ let
+                opts =
+                    SelectTwo.basicSelectOptions NerSelect
+                        (model.ners
+                            |> List.map (\ner -> ( ner, ner ))
+                        )
+              in
+              SelectTwo.Html.select2 SelectTwo
+                { defaults =
+                    SelectTwo.defaultsFromList [ NerSelect model.ner ] opts
+                , ajax = True
+                , delay = 300
+                , id_ = "select-ner"
+                , clearMsg = Nothing
+                , showSearch = True
+                , width = "300px"
+                , placeholder = "Select Named Entity"
+                , list = opts
+                , multiSelect = False
+                , disabled = False
+                , noResultsMessage = Just "No results"
+                , closeOnClear = False
+                }
             ]
         ]
 
@@ -210,10 +303,15 @@ footerContent =
 view : ViewParams -> Model -> Html Msg
 view vps model =
     Le.Block.Toast.view ToastMsg vps.now model.toasts <|
-        div [ class "h-100 gr__getbootstrap_com page-dashboard" ]
+        div
+            [ class "h-100 gr__getbootstrap_com page-dashboard"
+            , SelectTwo.Html.select2Close SelectTwo
+            ]
             [ div [ class "d-flex flex-column h-100" ]
                 [ navbarContent
+                , searchPanel model
                 , mainContent model
                 , footerContent
                 ]
+            , SelectTwo.Html.select2Dropdown SelectTwo Nothing model
             ]

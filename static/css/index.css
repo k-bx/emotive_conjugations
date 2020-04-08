@@ -9942,6 +9942,14 @@ main > .container {
   color: #d61d1d;
 }
 
+.page-dashboard .search-panel {
+  min-height: 3rem;
+  background: linear-gradient(to bottom, #e2e2e4, #d2d2d4);
+  border-bottom: 2px solid #bababc;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
 .page-dashboard .main-content {
   flex-grow: 1;
   overflow-y: auto;

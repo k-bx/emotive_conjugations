@@ -5,6 +5,7 @@ import qualified Le.ApiTypes as AT
 import Le.App
 import Le.AppUtils
 import Le.Article
+import qualified Le.Article.Queries as Q
 import Le.Config
 import Le.Import
 import Le.Model
@@ -46,4 +47,14 @@ articleNpDetails articleNpId = do
       arnContent = articleNpContent articleNp,
       arnLang = articleNpLang articleNp,
       arnSpacyNerEnts = fmap Le.Python.csrEnts (articleNpSpacyNer articleNp)
+    }
+
+listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)
+listNamedEntities mQuery mPage = do
+  let page = fromMaybe 1 mPage
+      query = fromMaybe "" mQuery
+  entities <- runDb $ Q.queryNamedEntities query page
+  pure $ AT.Paginated
+    { pgnItems = entities,
+      pgnOverallPages = page + 1
     }

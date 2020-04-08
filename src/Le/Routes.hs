@@ -84,7 +84,13 @@ data JsonAPI route
             :- "api" :> "article"
               :> Capture "article-np-id" ArticleNpId
               :> "article-np.json"
-              :> Get '[JSON] AT.ArticleNp
+              :> Get '[JSON] AT.ArticleNp,
+        _listNamedEntities ::
+          route
+            :- "api" :> "named-entities-list.json"
+              :> QueryParam "q" Text
+              :> QueryParam "page" Int
+              :> Get '[JSON] (AT.Paginated Text)
       }
   deriving (Generic)
 
@@ -107,5 +113,6 @@ server =
           _errorOut = errorOut,
           _articlesShortHandler = articlesShortHandler,
           _articleDetails = articleDetails,
-          _articleNpDetails = articleNpDetails
+          _articleNpDetails = articleNpDetails,
+          _listNamedEntities = listNamedEntities
         }

@@ -244,6 +244,26 @@ jsonEncCmdSpacyNerResEnt  val =
    ]
 
 
+
+type alias Paginated item =
+   { items: (List item)
+   , overall_pages: Int
+   }
+
+jsonDecPaginated : Json.Decode.Decoder item -> Json.Decode.Decoder ( Paginated item )
+jsonDecPaginated localDecoder_item =
+   Json.Decode.succeed (\pitems poverall_pages -> {items = pitems, overall_pages = poverall_pages})
+   |> required "items" (Json.Decode.list (localDecoder_item))
+   |> required "overall_pages" (Json.Decode.int)
+
+jsonEncPaginated : (item -> Value) -> Paginated item -> Value
+jsonEncPaginated localEncoder_item val =
+   Json.Encode.object
+   [ ("items", (Json.Encode.list localEncoder_item) val.items)
+   , ("overall_pages", Json.Encode.int val.overall_pages)
+   ]
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -465,6 +485,42 @@ getApiArticleByArticlenpidArticlenpjson capture_article_np_id toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg jsonDecArticleNp
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiNamedentitieslistjson : (Maybe String) -> (Maybe Int) -> (Result Error  ((Paginated String))  -> msg) -> Cmd msg
+getApiNamedentitieslistjson query_q query_page toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [ [ query_q
+                    |> Maybe.map (Url.Builder.string "q") ]
+                , [ query_page
+                    |> Maybe.map (String.fromInt
+                                  >> Url.Builder.string "page") ]
+                ])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "named-entities-list.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg (jsonDecPaginated jsonDecText)
             , timeout =
                 Nothing
             , tracker =
