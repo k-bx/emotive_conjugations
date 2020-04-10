@@ -9948,10 +9948,6 @@ main > .container {
 .page-dashboard .article .content-token-wrap {
   display: inline-block;
 }
-.page-dashboard .article .content-token {
-  display: flex;
-  flex-direction: column;
-}
 .page-dashboard .article .content-token .content-token__pos {
   font-size: 0.4rem;
 }
@@ -9972,6 +9968,7 @@ main > .container {
 }
 .page-dashboard .article .content-token:hover {
   background-color: #92d4de;
+  border-radius: 0.25rem;
   cursor: pointer;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }

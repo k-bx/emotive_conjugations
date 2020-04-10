@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Le.Api as Api
+import List.Extra
 import Maybe.Extra
 
 
@@ -27,22 +28,27 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
         -- beginnings of various things to be wrapped in spans later
         dotsList : List Int
         dotsList =
-            List.sort
-                (List.concatMap
-                    (\x ->
-                        [ x.idx
-                        , x.idx + String.length x.text
-                        ]
+            List.Extra.unique
+                (List.sort
+                    (List.concatMap
+                        (\x ->
+                            [ x.idx
+                            , x.idx + String.length x.text
+                            ]
+                        )
+                        spacyPoss
+                        ++ List.concatMap
+                            (\x ->
+                                [ x.start_char
+                                , x.start_char + String.length x.text
+                                ]
+                            )
+                            spacyNers
                     )
-                    spacyPoss
                 )
-                ++ List.concatMap
-                    (\x ->
-                        [ x.start_char
-                        , x.start_char + String.length x.text
-                        ]
-                    )
-                    spacyNers
+
+        l0 =
+            Debug.log "dotsList" dotsList
 
         -- map from dot to potential token info
         tokMap : Dict Int Api.CmdSpacyPosResEnt
@@ -142,10 +148,6 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     , classList [ ( "content-token--" ++ tok.pos_, True ) ]
                     ]
                     [ el
-
-                    -- , span [ class "content-token__pos" ]
-                    --     [ text <| tok.pos_
-                    --     ]
                     ]
                 ]
 

@@ -78,8 +78,8 @@ main > .container {
       display: inline-block;
     }
     .content-token {
-      display: flex;
-      flex-direction: column;
+      // display: flex;
+      // flex-direction: column;
       // position: relative;
 
       .content-token__pos {
@@ -111,6 +111,8 @@ main > .container {
     }
     .content-token:hover {
       background-color: #92d4de;
+      // padding: .25em .4em;
+      border-radius: .25rem;
       cursor: pointer;
       transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     }
