@@ -65,7 +65,8 @@ data ArticleNp
         arnDate :: Maybe IntZonedTime,
         arnContent :: Text,
         arnLang :: Text,
-        arnSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt]
+        arnSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+        arnSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
       }
   deriving (Show, Eq, Generic)
 

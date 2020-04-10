@@ -48,7 +48,8 @@ articleNpDetails articleNpId = do
       arnDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate articleNp,
       arnContent = articleNpContent articleNp,
       arnLang = articleNpLang articleNp,
-      arnSpacyNerEnts = fmap Le.Python.csrEnts (articleNpSpacyNer articleNp)
+      arnSpacyNerEnts = fmap Le.Python.csrEnts (articleNpSpacyNer articleNp),
+      arnSpacyPosEnts = fmap Le.Python.cprTokens (articleNpSpacyPos articleNp)
     }
 
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)

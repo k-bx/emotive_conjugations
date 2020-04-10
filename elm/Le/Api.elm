@@ -188,17 +188,19 @@ type alias ArticleNp  =
    , content: String
    , lang: String
    , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
+   , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
    }
 
 jsonDecArticleNp : Json.Decode.Decoder ( ArticleNp )
 jsonDecArticleNp =
-   Json.Decode.succeed (\pid pauthors pdate pcontent plang pspacy_ner_ents -> {id = pid, authors = pauthors, date = pdate, content = pcontent, lang = plang, spacy_ner_ents = pspacy_ner_ents})
+   Json.Decode.succeed (\pid pauthors pdate pcontent plang pspacy_ner_ents pspacy_pos_ents -> {id = pid, authors = pauthors, date = pdate, content = pcontent, lang = plang, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
    |> required "id" (jsonDecArticleNpId)
    |> required "authors" (Json.Decode.list (Json.Decode.string))
    |> fnullable "date" (jsonDecIntZonedTime)
    |> required "content" (Json.Decode.string)
    |> required "lang" (Json.Decode.string)
    |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
+   |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
 
 jsonEncArticleNp : ArticleNp -> Value
 jsonEncArticleNp  val =
@@ -209,6 +211,7 @@ jsonEncArticleNp  val =
    , ("content", Json.Encode.string val.content)
    , ("lang", Json.Encode.string val.lang)
    , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
+   , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.spacy_pos_ents)
    ]
 
 
@@ -241,6 +244,131 @@ jsonEncCmdSpacyNerResEnt  val =
    , ("end", Json.Encode.int val.end)
    , ("end_char", Json.Encode.int val.end_char)
    , ("label_", Json.Encode.string val.label_)
+   ]
+
+
+
+type alias CmdSpacyPosResEnt  =
+   { text: String
+   , lemma_: String
+   , pos_: String
+   , tag_: String
+   , dep_: String
+   , shape_: String
+   , is_alpha: Bool
+   , is_ascii: Bool
+   , is_digit: Bool
+   , is_punct: Bool
+   , is_left_punct: Bool
+   , is_right_punct: Bool
+   , is_space: Bool
+   , is_bracket: Bool
+   , is_quote: Bool
+   , is_currency: Bool
+   , like_url: Bool
+   , like_num: Bool
+   , like_mail: Bool
+   , is_oov: Bool
+   , is_stop: Bool
+   , head_i: Int
+   , left_edge_i: Int
+   , right_edge_i: Int
+   , i: Int
+   , ent_type_: String
+   , ent_iob_: String
+   , ent_kb_id: Int
+   , ent_kb_id_: String
+   , norm_: String
+   , lang_: String
+   , prob: Float
+   , idx: Int
+   , sentiment: Float
+   , lex_id: Int
+   , rank: Int
+   , cluster: Int
+   }
+
+jsonDecCmdSpacyPosResEnt : Json.Decode.Decoder ( CmdSpacyPosResEnt )
+jsonDecCmdSpacyPosResEnt =
+   Json.Decode.succeed (\ptext plemma_ ppos_ ptag_ pdep_ pshape_ pis_alpha pis_ascii pis_digit pis_punct pis_left_punct pis_right_punct pis_space pis_bracket pis_quote pis_currency plike_url plike_num plike_mail pis_oov pis_stop phead_i pleft_edge_i pright_edge_i pi pent_type_ pent_iob_ pent_kb_id pent_kb_id_ pnorm_ plang_ pprob pidx psentiment plex_id prank pcluster -> {text = ptext, lemma_ = plemma_, pos_ = ppos_, tag_ = ptag_, dep_ = pdep_, shape_ = pshape_, is_alpha = pis_alpha, is_ascii = pis_ascii, is_digit = pis_digit, is_punct = pis_punct, is_left_punct = pis_left_punct, is_right_punct = pis_right_punct, is_space = pis_space, is_bracket = pis_bracket, is_quote = pis_quote, is_currency = pis_currency, like_url = plike_url, like_num = plike_num, like_mail = plike_mail, is_oov = pis_oov, is_stop = pis_stop, head_i = phead_i, left_edge_i = pleft_edge_i, right_edge_i = pright_edge_i, i = pi, ent_type_ = pent_type_, ent_iob_ = pent_iob_, ent_kb_id = pent_kb_id, ent_kb_id_ = pent_kb_id_, norm_ = pnorm_, lang_ = plang_, prob = pprob, idx = pidx, sentiment = psentiment, lex_id = plex_id, rank = prank, cluster = pcluster})
+   |> required "text" (Json.Decode.string)
+   |> required "lemma_" (Json.Decode.string)
+   |> required "pos_" (Json.Decode.string)
+   |> required "tag_" (Json.Decode.string)
+   |> required "dep_" (Json.Decode.string)
+   |> required "shape_" (Json.Decode.string)
+   |> required "is_alpha" (Json.Decode.bool)
+   |> required "is_ascii" (Json.Decode.bool)
+   |> required "is_digit" (Json.Decode.bool)
+   |> required "is_punct" (Json.Decode.bool)
+   |> required "is_left_punct" (Json.Decode.bool)
+   |> required "is_right_punct" (Json.Decode.bool)
+   |> required "is_space" (Json.Decode.bool)
+   |> required "is_bracket" (Json.Decode.bool)
+   |> required "is_quote" (Json.Decode.bool)
+   |> required "is_currency" (Json.Decode.bool)
+   |> required "like_url" (Json.Decode.bool)
+   |> required "like_num" (Json.Decode.bool)
+   |> required "like_mail" (Json.Decode.bool)
+   |> required "is_oov" (Json.Decode.bool)
+   |> required "is_stop" (Json.Decode.bool)
+   |> required "head_i" (Json.Decode.int)
+   |> required "left_edge_i" (Json.Decode.int)
+   |> required "right_edge_i" (Json.Decode.int)
+   |> required "i" (Json.Decode.int)
+   |> required "ent_type_" (Json.Decode.string)
+   |> required "ent_iob_" (Json.Decode.string)
+   |> required "ent_kb_id" (Json.Decode.int)
+   |> required "ent_kb_id_" (Json.Decode.string)
+   |> required "norm_" (Json.Decode.string)
+   |> required "lang_" (Json.Decode.string)
+   |> required "prob" (Json.Decode.float)
+   |> required "idx" (Json.Decode.int)
+   |> required "sentiment" (Json.Decode.float)
+   |> required "lex_id" (Json.Decode.int)
+   |> required "rank" (Json.Decode.int)
+   |> required "cluster" (Json.Decode.int)
+
+jsonEncCmdSpacyPosResEnt : CmdSpacyPosResEnt -> Value
+jsonEncCmdSpacyPosResEnt  val =
+   Json.Encode.object
+   [ ("text", Json.Encode.string val.text)
+   , ("lemma_", Json.Encode.string val.lemma_)
+   , ("pos_", Json.Encode.string val.pos_)
+   , ("tag_", Json.Encode.string val.tag_)
+   , ("dep_", Json.Encode.string val.dep_)
+   , ("shape_", Json.Encode.string val.shape_)
+   , ("is_alpha", Json.Encode.bool val.is_alpha)
+   , ("is_ascii", Json.Encode.bool val.is_ascii)
+   , ("is_digit", Json.Encode.bool val.is_digit)
+   , ("is_punct", Json.Encode.bool val.is_punct)
+   , ("is_left_punct", Json.Encode.bool val.is_left_punct)
+   , ("is_right_punct", Json.Encode.bool val.is_right_punct)
+   , ("is_space", Json.Encode.bool val.is_space)
+   , ("is_bracket", Json.Encode.bool val.is_bracket)
+   , ("is_quote", Json.Encode.bool val.is_quote)
+   , ("is_currency", Json.Encode.bool val.is_currency)
+   , ("like_url", Json.Encode.bool val.like_url)
+   , ("like_num", Json.Encode.bool val.like_num)
+   , ("like_mail", Json.Encode.bool val.like_mail)
+   , ("is_oov", Json.Encode.bool val.is_oov)
+   , ("is_stop", Json.Encode.bool val.is_stop)
+   , ("head_i", Json.Encode.int val.head_i)
+   , ("left_edge_i", Json.Encode.int val.left_edge_i)
+   , ("right_edge_i", Json.Encode.int val.right_edge_i)
+   , ("i", Json.Encode.int val.i)
+   , ("ent_type_", Json.Encode.string val.ent_type_)
+   , ("ent_iob_", Json.Encode.string val.ent_iob_)
+   , ("ent_kb_id", Json.Encode.int val.ent_kb_id)
+   , ("ent_kb_id_", Json.Encode.string val.ent_kb_id_)
+   , ("norm_", Json.Encode.string val.norm_)
+   , ("lang_", Json.Encode.string val.lang_)
+   , ("prob", Json.Encode.float val.prob)
+   , ("idx", Json.Encode.int val.idx)
+   , ("sentiment", Json.Encode.float val.sentiment)
+   , ("lex_id", Json.Encode.int val.lex_id)
+   , ("rank", Json.Encode.int val.rank)
+   , ("cluster", Json.Encode.int val.cluster)
    ]
 
 
