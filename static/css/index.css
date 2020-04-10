@@ -9962,7 +9962,7 @@ main > .container {
   width: 20rem;
   flex-shrink: 0;
   overflow-y: scroll;
-  scrollbar-width: none;
+  scrollbar-width: thin;
 }
 .page-dashboard .applemail .applemail__content {
   padding: 2rem;

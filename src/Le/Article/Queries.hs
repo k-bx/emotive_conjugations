@@ -36,6 +36,7 @@ select ??
 from "article_np"
 inner join named_entity ne on ne.article_id = "article_np".id
 where {personQText}
+group by ("article_np"."id")
 order by "article_np"."date" desc, "article_np"."id" desc 
 limit {lim}
     |]

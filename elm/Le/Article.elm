@@ -10,9 +10,10 @@ import Le.Api as Api
 -}
 renderContent :
     String
+    -> String
     -> Maybe (List Api.CmdSpacyNerResEnt)
     -> List (Html msg)
-renderContent inputText spacyNers =
+renderContent nerToHighlight inputText spacyNers =
     let
         highlightNers textLeft consumed ners =
             case ners of
@@ -44,8 +45,8 @@ renderContent inputText spacyNers =
                 |> List.intersperse (br [] [])
 
         renderNer n =
-            case n.label_ of
-                "PERSON" ->
+            case ( n.label_, n.text == nerToHighlight ) of
+                ( "PERSON", True ) ->
                     [ span [ class "badge badge-info article__spacy-ner" ]
                         [ text <|
                             n.text

@@ -8,7 +8,7 @@ import Svg
 import Svg.Attributes as Svg
 import Task
 import Time
-import Time.Distance
+-- import Time.Distance
 
 
 type Msg
@@ -142,20 +142,20 @@ viewToast toMsg t toastEi =
             ]
         , div [ class "toast-body" ]
             [ div [] [ text toastEi.element.label ]
-            , div []
-                [ small []
-                    [ let
-                        createdAt =
-                            if Time.posixToMillis toastEi.element.created >= Time.posixToMillis t then
-                                Time.millisToPosix (Time.posixToMillis toastEi.element.created - 5000)
+            -- , div []
+            --     [ small []
+            --         [ let
+            --             createdAt =
+            --                 if Time.posixToMillis toastEi.element.created >= Time.posixToMillis t then
+            --                     Time.millisToPosix (Time.posixToMillis toastEi.element.created - 5000)
 
-                            else
-                                toastEi.element.created
-                      in
-                      text <|
-                        Time.Distance.inWords createdAt t
-                    ]
-                ]
+            --                 else
+            --                     toastEi.element.created
+            --           in
+            --           text <|
+            --             Time.Distance.inWords createdAt t
+            --         ]
+            --     ]
             ]
         ]
 

@@ -275,7 +275,7 @@ mainContent model =
                             [ div [] [] ]
 
                         Just articleNp ->
-                            Le.Article.renderContent articleNp.content articleNp.spacy_ner_ents
+                            Le.Article.renderContent model.ner articleNp.content articleNp.spacy_ner_ents
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]

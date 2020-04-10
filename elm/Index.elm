@@ -146,7 +146,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onResize ResizeHappened
-        , Time.every 5000 GotTime
+        -- , Time.every 5000 GotTime
         ]
 
 
