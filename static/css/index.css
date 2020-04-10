@@ -9942,6 +9942,11 @@ main > .container {
   color: #d61d1d;
 }
 
+.page-dashboard .article .content-token:hover {
+  background-color: #92d4de;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
 .page-dashboard .search-panel {
   min-height: 3rem;
   background: linear-gradient(to bottom, #e2e2e4, #d2d2d4);

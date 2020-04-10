@@ -72,6 +72,25 @@ main > .container {
 
 .page-dashboard {
   .article {
+    .content-token {
+      // position: relative;
+
+      // .content-token__pos {
+      //   position: absolute;
+      //   top: 10px;
+      //   font-size: .4rem;
+      //   color: #fff;
+      //   background-color: #6c757d;
+      //   padding: .25em .4em;
+      //   border-radius: .25rem;
+      //   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+      // }
+    }
+    .content-token:hover {
+      background-color: #92d4de;
+      cursor: pointer;
+      transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
     .article__spacy-ner {
     }
   }
