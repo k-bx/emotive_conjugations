@@ -36,7 +36,7 @@ instance J.FromJSON DownloadAndFilterForm where
 data ArticleShort
   = ArticleShort
       { artId :: M.ArticleId,
-        artDate :: IntZonedTime,
+        artDate :: Maybe IntZonedTime,
         artPaperName :: Text,
         artTitleShort :: Text
       }

@@ -72,7 +72,10 @@ data JsonAPI route
             :- "api" :> "error-out.json" :> Get '[JSON] [Text],
         _articlesShortHandler ::
           route
-            :- "api" :> "articles-short.json" :> Get '[JSON] [AT.ArticleShort],
+            :- "api"
+              :> "articles-short.json"
+              :> QueryParam "person" Text
+              :> Get '[JSON] [AT.ArticleShort],
         _articleDetails ::
           route
             :- "api" :> "article"
@@ -87,7 +90,7 @@ data JsonAPI route
               :> Get '[JSON] AT.ArticleNp,
         _listNamedEntities ::
           route
-            :- "api" :> "named-entities-list.json"
+            :- "api" :> "person-named-entities-list.json"
               :> QueryParam "q" Text
               :> QueryParam "page" Int
               :> Get '[JSON] (AT.Paginated Text)

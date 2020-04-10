@@ -44,12 +44,17 @@ renderContent inputText spacyNers =
                 |> List.intersperse (br [] [])
 
         renderNer n =
-            [ span [ class "badge badge-info article__spacy-ner" ]
-                [ text <|
-                    n.text
-                        ++ ":"
-                        ++ n.label_
-                ]
-            ]
+            case n.label_ of
+                "PERSON" ->
+                    [ span [ class "badge badge-info article__spacy-ner" ]
+                        [ text <|
+                            n.text
+                                ++ ":"
+                                ++ n.label_
+                        ]
+                    ]
+
+                _ ->
+                    renderRegularText n.text
     in
     highlightNers inputText 0 (Maybe.withDefault [] spacyNers)

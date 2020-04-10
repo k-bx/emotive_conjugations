@@ -61,7 +61,7 @@ init =
       , ners = []
       , ner = ""
       }
-    , Api.getApiArticlesshortjson GotArticles
+    , Api.getApiArticlesshortjson Nothing GotArticles
     )
 
 
@@ -131,12 +131,12 @@ update msg model =
 
         SelectNerAjax params reset ->
             ( SelectTwo.setLoading params reset model
-            , Api.getApiNamedentitieslistjson (Just params.term) (Just params.page) (GotNers params)
+            , Api.getApiPersonnamedentitieslistjson (Just params.term) (Just params.page) (GotNers params)
             )
 
         NerSelect ner ->
             ( { model | ner = ner }
-            , Cmd.none
+            , Api.getApiArticlesshortjson (Just ner) GotArticles
             )
 
         GotNers params (Err e) ->
@@ -241,7 +241,11 @@ mainContent model =
                 ]
                 [ div [ class "articles-nav__cell__date" ]
                     [ div []
-                        [ text <| renderDateTimeline (Time.millisToPosix article.date)
+                        [ text
+                            (article.date
+                                |> Maybe.map (renderDateTimeline << Time.millisToPosix)
+                                |> Maybe.withDefault "--"
+                            )
                         ]
                     ]
                 , div [ class "" ]

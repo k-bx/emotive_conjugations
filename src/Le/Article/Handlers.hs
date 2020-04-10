@@ -11,14 +11,16 @@ import Le.Import
 import Le.Model
 import qualified Le.Python
 
-articlesShortHandler :: Le [AT.ArticleShort]
-articlesShortHandler = do
-  articleNps <- runDb $ P.selectList [ArticleNpDate P.!=. Nothing] [P.Desc ArticleNpDate, P.LimitTo Le.Config.articlesLimit]
+articlesShortHandler ::
+  Maybe Text ->
+  Le [AT.ArticleShort]
+articlesShortHandler mPerson = do
+  articleNps <- runDb $ Q.queryPersonArticleNps mPerson
   forM articleNps $ \articleNp -> do
-    let date = fromJustNote "impossible!" (articleNpDate (ev articleNp))
+    let mdate = articleNpDate (ev articleNp)
     pure $ AT.ArticleShort
       { artId = P.toSqlKey (P.fromSqlKey (entityKey articleNp)),
-        artDate = zonedTimeToMilliseconds (utcToZonedTime' tz date),
+        artDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> mdate,
         artPaperName = newspaperNameFromHost (articleNpHost (ev articleNp)),
         artTitleShort = articleNpTitle (ev articleNp)
       }
@@ -53,7 +55,7 @@ listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)
 listNamedEntities mQuery mPage = do
   let page = fromMaybe 1 mPage
       query = fromMaybe "" mQuery
-  entities <- runDb $ Q.queryNamedEntities query page
+  entities <- runDb $ Q.queryPersonNamedEntities query page
   pure $ AT.Paginated
     { pgnItems = entities,
       pgnOverallPages = page + 1

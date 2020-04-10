@@ -122,7 +122,7 @@ jsonEncNoOp  val =
 
 type alias ArticleShort  =
    { id: ArticleId
-   , date: IntZonedTime
+   , date: (Maybe IntZonedTime)
    , paper_name: String
    , title_short: String
    }
@@ -131,7 +131,7 @@ jsonDecArticleShort : Json.Decode.Decoder ( ArticleShort )
 jsonDecArticleShort =
    Json.Decode.succeed (\pid pdate ppaper_name ptitle_short -> {id = pid, date = pdate, paper_name = ppaper_name, title_short = ptitle_short})
    |> required "id" (jsonDecArticleId)
-   |> required "date" (jsonDecIntZonedTime)
+   |> fnullable "date" (jsonDecIntZonedTime)
    |> required "paper_name" (Json.Decode.string)
    |> required "title_short" (Json.Decode.string)
 
@@ -139,7 +139,7 @@ jsonEncArticleShort : ArticleShort -> Value
 jsonEncArticleShort  val =
    Json.Encode.object
    [ ("id", jsonEncArticleId val.id)
-   , ("date", jsonEncIntZonedTime val.date)
+   , ("date", (maybeEncode (jsonEncIntZonedTime)) val.date)
    , ("paper_name", Json.Encode.string val.paper_name)
    , ("title_short", Json.Encode.string val.title_short)
    ]
@@ -395,13 +395,15 @@ getApiErroroutjson toMsg =
 
 
 
-getApiArticlesshortjson : (Result Error  ((List ArticleShort))  -> msg) -> Cmd msg
-getApiArticlesshortjson toMsg =
+getApiArticlesshortjson : (Maybe String) -> (Result Error  ((List ArticleShort))  -> msg) -> Cmd msg
+getApiArticlesshortjson query_person toMsg =
     let
         params =
             List.filterMap identity
             (List.concat
-                [])
+                [ [ query_person
+                    |> Maybe.map (Url.Builder.string "person") ]
+                ])
     in
         Http.request
             { method =
@@ -493,8 +495,8 @@ getApiArticleByArticlenpidArticlenpjson capture_article_np_id toMsg =
 
 
 
-getApiNamedentitieslistjson : (Maybe String) -> (Maybe Int) -> (Result Error  ((Paginated String))  -> msg) -> Cmd msg
-getApiNamedentitieslistjson query_q query_page toMsg =
+getApiPersonnamedentitieslistjson : (Maybe String) -> (Maybe Int) -> (Result Error  ((Paginated String))  -> msg) -> Cmd msg
+getApiPersonnamedentitieslistjson query_q query_page toMsg =
     let
         params =
             List.filterMap identity
@@ -514,7 +516,7 @@ getApiNamedentitieslistjson query_q query_page toMsg =
             , url =
                 Url.Builder.crossOrigin ""
                     [ "api"
-                    , "named-entities-list.json"
+                    , "person-named-entities-list.json"
                     ]
                     params
             , body =
