@@ -136,11 +136,17 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     [ el2 ] ++ go afterCut dots (consumed + cutLen) mOpeningTok mOpeningNer
 
         wrapInTok tok el =
-            span [ class "content-token" ]
-                [ el
-                -- , span [ class "content-token__pos" ]
-                --     [ text <| tok.pos_
-                --     ]
+            span [ class "content-token-wrap" ]
+                [ span
+                    [ class "content-token"
+                    , classList [ ( "content-token--" ++ tok.pos_, True ) ]
+                    ]
+                    [ el
+
+                    -- , span [ class "content-token__pos" ]
+                    --     [ text <| tok.pos_
+                    --     ]
+                    ]
                 ]
 
         wrapInNer ner el =

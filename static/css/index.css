@@ -9942,6 +9942,34 @@ main > .container {
   color: #d61d1d;
 }
 
+.page-dashboard .article {
+  font-size: 1.2rem;
+}
+.page-dashboard .article .content-token-wrap {
+  display: inline-block;
+}
+.page-dashboard .article .content-token {
+  display: flex;
+  flex-direction: column;
+}
+.page-dashboard .article .content-token .content-token__pos {
+  font-size: 0.4rem;
+}
+.page-dashboard .article .content-token--ADP {
+  border-bottom: 3px solid #1a7998;
+}
+.page-dashboard .article .content-token--PROPN {
+  border-bottom: 3px solid #a2b870;
+}
+.page-dashboard .article .content-token--VERB {
+  border-bottom: 3px solid #fd884f;
+}
+.page-dashboard .article .content-token--NOUN {
+  border-bottom: 3px solid #5fa793;
+}
+.page-dashboard .article .content-token--ADV {
+  border-bottom: 3px solid #feda5f;
+}
 .page-dashboard .article .content-token:hover {
   background-color: #92d4de;
   cursor: pointer;
