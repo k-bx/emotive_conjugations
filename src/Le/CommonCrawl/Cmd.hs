@@ -98,7 +98,8 @@ parseFilteredArticles = do
                   posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
                 articleNpContent = Le.Python.cprText res,
                 articleNpLang = Le.Python.cprLanguage res,
-                articleNpSpacyNer = Nothing
+                articleNpSpacyNer = Nothing,
+                articleNpSpacyPos = Nothing
               }
           logInfo $ display $ "> URI: " <> uriText
           -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
@@ -133,3 +134,12 @@ spacyNerArticles = do
             namedEntityEndChar = cseEndChar,
             namedEntityLabel_ = cseLabel_
           }
+
+spacyPosArticles :: Le ()
+spacyPosArticles = do
+  articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId]
+  -- articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId, P.LimitTo 10]
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articleNps $ \articleNp -> do
+    res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articleNpContent (ev articleNp)))
+    runDb $ do
+      P.update (entityKey articleNp) [ArticleNpSpacyPos P.=. (Just res)]

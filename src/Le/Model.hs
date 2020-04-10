@@ -32,6 +32,7 @@ ArticleNp
     content Text
     lang Text
     spacyNer Le.Python.CmdSpacyNerRes Maybe
+    spacyPos Le.Python.CmdSpacyPosRes Maybe
     deriving Show
 NamedEntity
     articleId ArticleId

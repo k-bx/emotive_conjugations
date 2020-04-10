@@ -17,35 +17,13 @@ import Le.Util
 import qualified Network.Wreq as W
 import qualified RIO.Process
 
-data Cmd
-  = CmdPing
-  | CmdParseArticle CmdParseArticleOpts
-  | CmdSpacyNer CmdSpacyNerOpts
-  deriving (Generic, Show)
-
-instance J.ToJSON Cmd where
-
-  toEncoding = J.genericToEncoding (jsonOpts 0)
-
-  toJSON = J.genericToJSON (jsonOpts 0)
-
-instance J.FromJSON Cmd where
-  parseJSON = J.genericParseJSON (jsonOpts 0)
-
 data CmdParseArticleOpts
   = CmdParseArticleOpts
       { cpaHtml :: Text
       }
   deriving (Generic, Show)
 
-instance J.ToJSON CmdParseArticleOpts where
-
-  toEncoding = J.genericToEncoding (jsonOpts 3)
-
-  toJSON = J.genericToJSON (jsonOpts 3)
-
-instance J.FromJSON CmdParseArticleOpts where
-  parseJSON = J.genericParseJSON (jsonOpts 3)
+deriveBoth (jsonOpts 3) ''CmdParseArticleOpts
 
 data CmdParseArticleRes
   = CmdParseArticleRes
@@ -58,14 +36,7 @@ data CmdParseArticleRes
       }
   deriving (Generic, Show)
 
-instance J.ToJSON CmdParseArticleRes where
-
-  toEncoding = J.genericToEncoding (jsonOpts 3)
-
-  toJSON = J.genericToJSON (jsonOpts 3)
-
-instance J.FromJSON CmdParseArticleRes where
-  parseJSON = J.genericParseJSON (jsonOpts 3)
+deriveBoth (jsonOpts 3) ''CmdParseArticleRes
 
 data CmdSpacyNerOpts
   = CmdSpacyNerOpts
@@ -73,38 +44,7 @@ data CmdSpacyNerOpts
       }
   deriving (Generic, Show)
 
-instance J.ToJSON CmdSpacyNerOpts where
-
-  toEncoding = J.genericToEncoding (jsonOpts 3)
-
-  toJSON = J.genericToJSON (jsonOpts 3)
-
-instance J.FromJSON CmdSpacyNerOpts where
-  parseJSON = J.genericParseJSON (jsonOpts 3)
-
-data CmdSpacyNerRes
-  = CmdSpacyNerRes
-      { csrEnts :: [CmdSpacyNerResEnt]
-      }
-  deriving (Generic, Show, Eq)
-
-instance J.ToJSON CmdSpacyNerRes where
-
-  toEncoding = J.genericToEncoding (jsonOpts 3)
-
-  toJSON = J.genericToJSON (jsonOpts 3)
-
-instance J.FromJSON CmdSpacyNerRes where
-  parseJSON = J.genericParseJSON (jsonOpts 3)
-
-instance P.PersistField CmdSpacyNerRes where
-
-  toPersistValue = P.toPersistValueJSON
-
-  fromPersistValue = P.fromPersistValueJSON
-
-instance P.PersistFieldSql CmdSpacyNerRes where
-  sqlType _ = P.SqlString
+deriveBoth (jsonOpts 3) ''CmdSpacyNerOpts
 
 data CmdSpacyNerResEnt
   = CmdSpacyNerResEnt
@@ -118,6 +58,101 @@ data CmdSpacyNerResEnt
   deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyNerResEnt
+
+data CmdSpacyNerRes
+  = CmdSpacyNerRes
+      { csrEnts :: [CmdSpacyNerResEnt]
+      }
+  deriving (Generic, Show, Eq)
+
+deriveBoth (jsonOpts 3) ''CmdSpacyNerRes
+
+instance P.PersistField CmdSpacyNerRes where
+
+  toPersistValue = P.toPersistValueJSON
+
+  fromPersistValue = P.fromPersistValueJSON
+
+instance P.PersistFieldSql CmdSpacyNerRes where
+  sqlType _ = P.SqlString
+
+data CmdSpacyPosOpts
+  = CmdSpacyPosOpts
+      { cspText :: Text
+      }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''CmdSpacyPosOpts
+
+data CmdSpacyPosResEnt
+  = CmdSpacyPosResEnt
+      { creText :: Text,
+        creLemma_ :: Text,
+        crePos_ :: Text,
+        creTag_ :: Text,
+        creDep_ :: Text,
+        creShape_ :: Text,
+        creIsAlpha :: Bool,
+        creIsAscii :: Bool,
+        creIsDigit :: Bool,
+        creIsPunct :: Bool,
+        creIsLeftPunct :: Bool,
+        creIsRightPunct :: Bool,
+        creIsSpace :: Bool,
+        creIsBracket :: Bool,
+        creIsQuote :: Bool,
+        creIsCurrency :: Bool,
+        creLikeUrl :: Bool,
+        creLikeNum :: Bool,
+        creLikeMail :: Bool,
+        creIsOov :: Bool,
+        creIsStop :: Bool,
+        creHeadI :: Int,
+        creLeftEdgeI :: Int,
+        creRightEdgeI :: Int,
+        creI :: Int,
+        creEntType_ :: Text,
+        creEntIob_ :: Text,
+        creEntKbId :: Int,
+        creEntKbId_ :: Text,
+        creNorm_ :: Text,
+        creLang_ :: Text,
+        creProb :: Double,
+        creIdx :: Int,
+        creSentiment :: Double,
+        creLexId :: Int,
+        creRank :: Int,
+        creCluster :: Int
+      }
+  deriving (Generic, Show, Eq)
+
+deriveBoth (jsonOpts 3) ''CmdSpacyPosResEnt
+
+data CmdSpacyPosRes
+  = CmdSpacyPosRes
+      { cprTokens :: [CmdSpacyPosResEnt]
+      }
+  deriving (Generic, Show, Eq)
+
+deriveBoth (jsonOpts 3) ''CmdSpacyPosRes
+
+instance P.PersistField CmdSpacyPosRes where
+
+  toPersistValue = P.toPersistValueJSON
+
+  fromPersistValue = P.fromPersistValueJSON
+
+instance P.PersistFieldSql CmdSpacyPosRes where
+  sqlType _ = P.SqlString
+
+data Cmd
+  = CmdPing
+  | CmdParseArticle CmdParseArticleOpts
+  | CmdSpacyNer CmdSpacyNerOpts
+  | CmdSpacyPos CmdSpacyPosOpts
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 0) ''Cmd
 
 runPython :: Cmd -> Le (BL.ByteString, BL.ByteString)
 runPython c = do
@@ -187,3 +222,6 @@ cmdParseArticle opts = runPythonParsing (CmdParseArticle opts)
 
 cmdSpacyNer :: CmdSpacyNerOpts -> Le CmdSpacyNerRes
 cmdSpacyNer opts = runPythonWeb (CmdSpacyNer opts)
+
+cmdSpacyPos :: CmdSpacyPosOpts -> Le CmdSpacyPosRes
+cmdSpacyPos opts = runPythonWeb (CmdSpacyPos opts)

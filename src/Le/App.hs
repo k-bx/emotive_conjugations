@@ -24,8 +24,8 @@ withApp f = do
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
     awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
-    -- runNoLoggingT $
-    P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5
+    runNoLoggingT
+      $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5
       $ \pool -> liftIO $ do
         withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
           let app = App

@@ -39,6 +39,13 @@ packages:
       sha256: ae6af45f3dba5a478ea9cc77c718f955fcc5c96f2dc0f4ede34c4a15a3e85ac1
   original:
     hackage: tz-0.1.3.3@sha256:b9de0c1b10825460ff14a237209a8bf7747f47979601d35621276556bf63d2ca,5086
+- completed:
+    hackage: deriving-aeson-0.2.2@sha256:6150cfdd6ae2083249ec387ec4bb808d99a6b730ce093b8920cd788e9e681c73,1210
+    pantry-tree:
+      size: 441
+      sha256: 1178a4b2464f76e1b873215f37f6c72168b5d1100822c60aef01f497202ae9ca
+  original:
+    hackage: deriving-aeson-0.2.2@sha256:6150cfdd6ae2083249ec387ec4bb808d99a6b730ce093b8920cd788e9e681c73,1210
 snapshots:
 - completed:
     size: 491372

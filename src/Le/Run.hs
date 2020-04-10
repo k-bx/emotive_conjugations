@@ -40,6 +40,7 @@ commands ver =
       "Shake things up"
       (flip withArgs Le.Shake.shake <$> many (strArgument (metavar "-- Shake arguments")))
     <> cmd "spacy-ner-articles" "Run NER on articles" (pure (run Le.CommonCrawl.Cmd.spacyNerArticles))
+    <> cmd "spacy-pos-articles" "Run POS on articles" (pure (run Le.CommonCrawl.Cmd.spacyPosArticles))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))
