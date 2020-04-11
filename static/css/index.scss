@@ -159,9 +159,17 @@ main > .container {
       overflow-y: scroll;
     }
     .applemail__controlpanel {
+      border-left: 1px solid #e5e5e5;
       width: 20rem;
       flex-shrink: 0;
       padding: 1rem;
+    }
+
+    .details-board {
+      font-size: .8rem;
+      background-color: #5fa793;
+      color: #fff;
+      padding: 2rem;
     }
   }
 

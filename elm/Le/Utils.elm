@@ -96,3 +96,13 @@ intToStringTwoSigns x =
 
     else
         String.fromInt x
+
+
+boolYesNo : Bool -> String
+boolYesNo x =
+    case x of
+        True ->
+            "Yes"
+
+        False ->
+            "No"

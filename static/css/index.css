@@ -10015,9 +10015,16 @@ main > .container {
   overflow-y: scroll;
 }
 .page-dashboard .applemail .applemail__controlpanel {
+  border-left: 1px solid #e5e5e5;
   width: 20rem;
   flex-shrink: 0;
   padding: 1rem;
+}
+.page-dashboard .applemail .details-board {
+  font-size: 0.8rem;
+  background-color: #5fa793;
+  color: #fff;
+  padding: 2rem;
 }
 .page-dashboard .articles-nav {
   border-right: 1px solid #e5e5e5;
