@@ -61,11 +61,11 @@ init key ner active =
       , articleFull = Nothing
       , articleNp = Nothing
       , selectTwo = Nothing
-      , ners = []
+      , ners = [ ner ]
       , ner = ner
       }
     , Cmd.batch <|
-        [ Api.getApiArticlesshortjson Nothing GotArticles
+        [ Api.getApiArticlesshortjson (Just ner) GotArticles
         ]
             ++ (case active of
                     Nothing ->
@@ -150,14 +150,21 @@ update msg model =
             SelectTwo.update SelectTwo stmsg ajaxCases model
 
         SelectNerAjax params reset ->
-            ( SelectTwo.setLoading params reset model
+            let
+                m2 =
+                    SelectTwo.setLoading params reset model
+
+                m3 =
+                    { m2 | articles = Nothing }
+            in
+            ( m3
             , Api.getApiPersonnamedentitieslistjson (Just params.term) (Just params.page) (GotNers params)
             )
 
         NerSelect ner ->
             let
                 m2 =
-                    { model | ner = ner }
+                    { model | ner = ner, articles = Nothing }
             in
             ( m2
             , Cmd.batch
@@ -255,7 +262,7 @@ mainContent model =
             div [ class "articles-nav" ] <|
                 case model.articles of
                     Nothing ->
-                        [ div [ class "text-center" ] [ loadingSpinner ] ]
+                        [ div [ class "text-center mt-4" ] [ loadingSpinner ] ]
 
                     Just articles ->
                         List.map renderArticleNav articles
