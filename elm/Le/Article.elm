@@ -26,27 +26,33 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
         spacyPoss =
             Maybe.withDefault [] mSpacyPoss
 
+        tokDots =
+            List.concatMap
+                (\x ->
+                    [ x.idx
+                    , x.idx + String.length x.text
+                    ]
+                )
+                spacyPoss
+
+        nerDots =
+            List.concatMap
+                (\x ->
+                    [ x.start_char
+                    , x.start_char + String.length x.text
+                    ]
+                )
+                spacyNers
+
+        parDots =
+            String.indexes "\n\n" inputText
+
         -- beginnings of various things to be wrapped in spans later
         dotsList : List Int
         dotsList =
-            List.Extra.unique
-                (List.sort
-                    (List.concatMap
-                        (\x ->
-                            [ x.idx
-                            , x.idx + String.length x.text
-                            ]
-                        )
-                        spacyPoss
-                        ++ List.concatMap
-                            (\x ->
-                                [ x.start_char
-                                , x.start_char + String.length x.text
-                                ]
-                            )
-                            spacyNers
-                    )
-                )
+            (tokDots ++ nerDots ++ parDots)
+                |> List.sort
+                |> List.Extra.unique
 
         -- map from dot to potential token info
         tokMap : Dict Int Api.CmdSpacyPosResEnt
@@ -69,6 +75,10 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     )
                     spacyNers
                 )
+
+        parMap : Dict Int ()
+        parMap =
+            Dict.fromList (List.map (\x -> ( x, () )) parDots)
 
         wrapInTok tok el =
             span [ class "content-token-wrap" ]
@@ -144,9 +154,17 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
 
                 el2 =
                     mOpeningNer |> Maybe.Extra.unwrap el1 (\openingNer -> wrapInNer openingNer el1)
+
+                els3 =
+                    case Dict.get dot parMap of
+                        Nothing ->
+                            [ el2 ]
+
+                        Just () ->
+                            [ el2, br [] [], br [] [] ]
             in
             { acc
-                | resAcc = el2 :: acc.resAcc
+                | resAcc = els3 ++ acc.resAcc
                 , textLeft = afterCut
                 , mTokTill = mOpeningTok
                 , mNerTill = mOpeningNer
