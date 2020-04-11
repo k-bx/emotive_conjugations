@@ -9942,6 +9942,17 @@ main > .container {
   color: #d61d1d;
 }
 
+.badge-highlighed-token {
+  background-color: #fd884f;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.25em 0.4em;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
 .page-dashboard .article {
   font-size: 1.2rem;
 }

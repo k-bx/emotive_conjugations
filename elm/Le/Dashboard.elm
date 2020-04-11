@@ -49,6 +49,7 @@ type alias Model =
     , ners : List String
     , ner : String
     , highlightPos : Bool
+    , selectedToken : Maybe Api.CmdSpacyPosResEnt
     }
 
 
@@ -65,6 +66,7 @@ init key ner active =
       , ners = [ ner ]
       , ner = ner
       , highlightPos = False
+      , selectedToken = Nothing
       }
     , Cmd.batch <|
         [ Api.getApiArticlesshortjson (Just ner) GotArticles
@@ -315,24 +317,30 @@ mainContent model =
                             [ Le.Article.renderContentNodes
                                 { nerToHighlight = model.ner
                                 , highlightPos = model.highlightPos
+                                , onClickToken =
+                                    \tok -> UpdateModel { model | selectedToken = Just tok }
+                                , selectedToken = Maybe.map .i model.selectedToken
                                 , nodes =
-                                    let
-                                        contentNodes =
-                                            Le.Article.computeContentNodes
-                                                { nerToHighlight = model.ner
-                                                , inputText = articleNp.content
-                                                , mSpacyNers = articleNp.spacy_ner_ents
-                                                , mSpacyPoss = articleNp.spacy_pos_ents
-                                                , highlightPos = model.highlightPos
-                                                }
-                                    in
-                                    contentNodes
+                                    Le.Article.computeContentNodes
+                                        { nerToHighlight = model.ner
+                                        , inputText = articleNp.content
+                                        , mSpacyNers = articleNp.spacy_ner_ents
+                                        , mSpacyPoss = articleNp.spacy_pos_ents
+                                        , highlightPos = model.highlightPos
+                                        }
                                 }
                             ]
                 ]
 
+        renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
+        renderSelectedToken selectedToken =
+            div [ class "mt-2" ]
+                [ text "Selected token: "
+                , span [ class "badge-highlighed-token" ] [ text selectedToken.text ]
+                ]
+
         articleControlPanel =
-            div []
+            div [] <|
                 [ div [ class "mt-2" ]
                     [ text "Highlight POS "
                     , input
@@ -345,6 +353,10 @@ mainContent model =
                         []
                     ]
                 ]
+                    ++ (model.selectedToken
+                            |> Maybe.map renderSelectedToken
+                            |> Maybe.Extra.unwrap [] List.singleton
+                       )
     in
     main_ [ class "main-content", attribute "role" "main" ]
         [ div [ class "applemail" ]

@@ -40,9 +40,9 @@ type ContentNode
     | CNTok
         { begin : Int
         , end : Int
+        , tok : Api.CmdSpacyPosResEnt
 
-        -- , tok : Api.CmdSpacyPosResEnt
-        , tok : { idx : Int, pos_ : String }
+        -- , tok : { idx : Int, pos_ : String }
         , children : List ContentNode
         }
 
@@ -162,9 +162,9 @@ computeContentNodes ps =
                                 CNTok
                                     { begin = pos.idx
                                     , end = pos.idx + String.length pos.text
+                                    , tok = pos
 
-                                    -- , tok = pos
-                                    , tok = { idx = pos.idx, pos_ = pos.pos_ }
+                                    -- , tok = { idx = pos.idx, pos_ = pos.pos_ }
                                     , children =
                                         [ CNText
                                             { begin = pos.idx
@@ -201,8 +201,10 @@ computeContentNodes ps =
 
 renderContentNodes :
     { nerToHighlight : String
+    , selectedToken : Maybe Int
     , highlightPos : Bool
     , nodes : List ContentNode
+    , onClickToken : Api.CmdSpacyPosResEnt -> msg
     }
     -> Html msg
 renderContentNodes ps =
@@ -234,7 +236,11 @@ renderContentNodes ps =
                                 [ ( "content-token--" ++ nd.tok.pos_
                                   , ps.highlightPos
                                   )
+                                , ("badge-highlighed-token"
+                                  , Just nd.tok.i == ps.selectedToken
+                                  )
                                 ]
+                            , onClick <| ps.onClickToken nd.tok
                             ]
                             (List.map renderNode nd.children)
                         ]

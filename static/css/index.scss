@@ -68,6 +68,18 @@ main > .container {
     }
 }
 
+.badge-highlighed-token {
+  background-color: #fd884f;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.25em 0.4em;
+  font-weight: 700;
+  // padding: .25em .4em;
+  border-radius: .25rem;
+  cursor: pointer;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
 // page-specific stuff
 
 .page-dashboard {
@@ -97,6 +109,7 @@ main > .container {
     .content-token--ADV {
       border-bottom: 3px solid #feda5f;
     }
+    // must match .badge-highlighed-token
     .content-token:hover {
       background-color: #fd884f;
       color: #fff;
