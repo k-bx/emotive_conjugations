@@ -73,12 +73,12 @@ main > .container {
 .page-dashboard {
   .article {
     font-size: 1.2rem;
-    .paragraph-halfsplit {
-      content: "";
-      margin: 2em;
-      display: block;
-      font-size: 24%;
-    }
+    // .paragraph-halfsplit {
+    //   content: "";
+    //   margin: 2em;
+    //   display: block;
+    //   font-size: 24%;
+    // }
 
     .content-token-wrap {
       display: inline-block;
@@ -158,6 +158,11 @@ main > .container {
       padding: 2rem;
       height: 100%;
       overflow-y: scroll;
+    }
+    .applemail__controlpanel {
+      width: 20rem;
+      flex-shrink: 0;
+      padding: 1rem;
     }
   }
 

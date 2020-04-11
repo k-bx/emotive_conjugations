@@ -48,6 +48,7 @@ type alias Model =
     , selectTwo : Maybe (SelectTwo Msg)
     , ners : List String
     , ner : String
+    , highlightPos : Bool
     }
 
 
@@ -63,6 +64,7 @@ init key ner active =
       , selectTwo = Nothing
       , ners = [ ner ]
       , ner = ner
+      , highlightPos = False
       }
     , Cmd.batch <|
         [ Api.getApiArticlesshortjson (Just ner) GotArticles
@@ -310,13 +312,38 @@ mainContent model =
                             [ div [] [] ]
 
                         Just articleNp ->
-                            [ Le.Article.renderContent
+                            [ Le.Article.renderContentNodes
                                 { nerToHighlight = model.ner
-                                , inputText = articleNp.content
-                                , mSpacyNers = articleNp.spacy_ner_ents
-                                , mSpacyPoss = articleNp.spacy_pos_ents
+                                , highlightPos = model.highlightPos
+                                , nodes =
+                                    let
+                                        contentNodes =
+                                            Le.Article.computeContentNodes
+                                                { nerToHighlight = model.ner
+                                                , inputText = articleNp.content
+                                                , mSpacyNers = articleNp.spacy_ner_ents
+                                                , mSpacyPoss = articleNp.spacy_pos_ents
+                                                , highlightPos = model.highlightPos
+                                                }
+                                    in
+                                    contentNodes
                                 }
                             ]
+                ]
+
+        articleControlPanel =
+            div []
+                [ div [ class "mt-2" ]
+                    [ text "Highlight POS "
+                    , input
+                        [ class "align-middle"
+                        , name "check"
+                        , type_ "checkbox"
+                        , checked model.highlightPos
+                        , onClick (UpdateModel { model | highlightPos = not model.highlightPos })
+                        ]
+                        []
+                    ]
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]
@@ -325,6 +352,9 @@ mainContent model =
                 [ articlesNav ]
             , div [ class "applemail__content" ]
                 [ articleFullDetailsBlock
+                ]
+            , div [ class "applemail__controlpanel" ]
+                [ articleControlPanel
                 ]
             ]
         ]
