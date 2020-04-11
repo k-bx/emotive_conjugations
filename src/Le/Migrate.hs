@@ -30,9 +30,8 @@ run = do
 
 ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
+  ensureIndex "article_np" "article_np_date_i" ["date"]
   pure ()
-
--- ensureIndex "workspace" "workspace_company_id_fkeyi" ["company_id"]
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()
 ensureIndex tableName indexName fieldNames = do

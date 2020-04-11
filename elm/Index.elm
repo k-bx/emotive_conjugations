@@ -7,6 +7,7 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Le.Api as Api
 import Le.Dashboard as Dashboard
 import Le.Types exposing (..)
 import Le.Utils exposing (..)
@@ -46,13 +47,13 @@ init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         ( dashboardInitModel, dashboardInitCmds ) =
-            Dashboard.init
+            Dashboard.init key "" Nothing
 
         m : Model
         m =
             { key = key
             , url = url
-            , route = Dashboard
+            , route = PageNotFound
             , pmodel = DashboardModel dashboardInitModel
             , viewport = Nothing
             , now = Nothing
@@ -81,15 +82,17 @@ type PageModel
 
 
 type Route
-    = Dashboard
+    = Dashboard String (Maybe Api.ArticleId)
     | PageNotFound
 
 
 routeParser : Parser (Route -> a) a
 routeParser =
     oneOf
-        [ P.map Dashboard P.top
-        , P.map Dashboard (P.s "dashboard")
+        [ P.map (Dashboard "" Nothing) P.top
+        , P.map
+            (\( mn, a ) -> Dashboard (Maybe.withDefault "" mn) a)
+            (P.s "dashboard" <?> Q.map2 (\a b -> ( a, b )) (Q.string "ner") (Q.int "article-id"))
         ]
 
 
@@ -97,11 +100,16 @@ onUrlChanged : Model -> Url -> ( Model, Cmd Msg )
 onUrlChanged model url =
     case P.parse routeParser url of
         Just route ->
-            let
-                ( pm, cmds ) =
-                    initPageModel model.key model.url route
-            in
-            ( { model | route = route, url = url, pmodel = pm }, cmds )
+            case sameTopRoute route model.route of
+                True ->
+                    ( { model | route = route, url = url }, Cmd.none )
+
+                False ->
+                    let
+                        ( pm, cmds ) =
+                            initPageModel model.key model.url route
+                    in
+                    ( { model | route = route, url = url, pmodel = pm }, cmds )
 
         Nothing ->
             ( { model
@@ -123,11 +131,21 @@ initSubpage doInit toModel toMsg =
 initPageModel : Nav.Key -> Url.Url -> Route -> ( PageModel, Cmd Msg )
 initPageModel key url r =
     case r of
-        Dashboard ->
-            initSubpage Dashboard.init DashboardModel DashboardMsg
+        Dashboard ner article ->
+            initSubpage (Dashboard.init key ner article) DashboardModel DashboardMsg
 
         PageNotFound ->
             ( PageNotFoundModel (), Cmd.none )
+
+
+sameTopRoute : Route -> Route -> Bool
+sameTopRoute r1 r2 =
+    case ( r1, r2 ) of
+        ( Dashboard _ _, Dashboard _ _ ) ->
+            True
+
+        _ ->
+            False
 
 
 main : Program Flags Model Msg
@@ -146,6 +164,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onResize ResizeHappened
+
         -- , Time.every 5000 GotTime
         ]
 
@@ -220,7 +239,7 @@ mainContent model =
             }
     in
     case ( model.route, model.pmodel ) of
-        ( Dashboard, DashboardModel pmodel ) ->
+        ( Dashboard ner article, DashboardModel pmodel ) ->
             Html.map DashboardMsg (Dashboard.view viewParams pmodel)
 
         ( _, _ ) ->

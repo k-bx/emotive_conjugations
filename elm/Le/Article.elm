@@ -18,6 +18,7 @@ renderContent :
     -> Maybe (List Api.CmdSpacyPosResEnt)
     -> List (Html msg)
 renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
+    -- [text inputText]
     let
         spacyNers =
             Maybe.withDefault [] mSpacyNers
@@ -47,9 +48,6 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     )
                 )
 
-        l0 =
-            Debug.log "dotsList" dotsList
-
         -- map from dot to potential token info
         tokMap : Dict Int Api.CmdSpacyPosResEnt
         tokMap =
@@ -72,75 +70,6 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     spacyNers
                 )
 
-        go textLeft dotsLeft consumed mTokTill mNerTill =
-            case dotsLeft of
-                [] ->
-                    []
-
-                dot :: dots ->
-                    let
-                        dot2 =
-                            case dots of
-                                [] ->
-                                    dot + String.length textLeft
-
-                                z :: _ ->
-                                    z
-
-                        cutLen =
-                            dot2 - dot
-
-                        currCut =
-                            String.left cutLen textLeft
-
-                        afterCut =
-                            String.dropLeft cutLen textLeft
-
-                        mContinuingTok =
-                            case mTokTill of
-                                Nothing ->
-                                    Nothing
-
-                                Just tok ->
-                                    case tok.idx + String.length tok.text > dot of
-                                        True ->
-                                            Just tok
-
-                                        False ->
-                                            Nothing
-
-                        mOpeningTok =
-                            Dict.get dot tokMap
-                                |> Maybe.Extra.orElse mContinuingTok
-
-                        mContinuingNer =
-                            case mNerTill of
-                                Nothing ->
-                                    Nothing
-
-                                Just ner ->
-                                    case ner.start_char + String.length ner.text > dot of
-                                        True ->
-                                            Just ner
-
-                                        False ->
-                                            Nothing
-
-                        mOpeningNer =
-                            Dict.get dot nerMap
-                                |> Maybe.Extra.orElse mContinuingNer
-
-                        el0 =
-                            text currCut
-
-                        el1 =
-                            mOpeningTok |> Maybe.Extra.unwrap el0 (\openingTok -> wrapInTok openingTok el0)
-
-                        el2 =
-                            mOpeningNer |> Maybe.Extra.unwrap el1 (\openingNer -> wrapInNer openingNer el1)
-                    in
-                    [ el2 ] ++ go afterCut dots (consumed + cutLen) mOpeningTok mOpeningNer
-
         wrapInTok tok el =
             span [ class "content-token-wrap" ]
                 [ span
@@ -161,5 +90,75 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                     ]
                 ]
                 [ el ]
+
+        foldfunc ( dot, dot2 ) acc =
+            let
+                cutLen =
+                    dot2 - dot
+
+                currCut =
+                    String.left cutLen acc.textLeft
+
+                afterCut =
+                    String.dropLeft cutLen acc.textLeft
+
+                mContinuingTok =
+                    case acc.mTokTill of
+                        Nothing ->
+                            Nothing
+
+                        Just tok ->
+                            case tok.idx + String.length tok.text > dot of
+                                True ->
+                                    Just tok
+
+                                False ->
+                                    Nothing
+
+                mOpeningTok =
+                    Dict.get dot tokMap
+                        |> Maybe.Extra.orElse mContinuingTok
+
+                mContinuingNer =
+                    case acc.mNerTill of
+                        Nothing ->
+                            Nothing
+
+                        Just ner ->
+                            case ner.start_char + String.length ner.text > dot of
+                                True ->
+                                    Just ner
+
+                                False ->
+                                    Nothing
+
+                mOpeningNer =
+                    Dict.get dot nerMap
+                        |> Maybe.Extra.orElse mContinuingNer
+
+                el0 =
+                    text currCut
+
+                el1 =
+                    mOpeningTok |> Maybe.Extra.unwrap el0 (\openingTok -> wrapInTok openingTok el0)
+
+                el2 =
+                    mOpeningNer |> Maybe.Extra.unwrap el1 (\openingNer -> wrapInNer openingNer el1)
+            in
+            { acc
+                | resAcc = el2 :: acc.resAcc
+                , textLeft = afterCut
+                , mTokTill = mOpeningTok
+                , mNerTill = mOpeningNer
+            }
+
+        res =
+            List.foldl foldfunc
+                { textLeft = inputText
+                , mTokTill = Nothing
+                , mNerTill = Nothing
+                , resAcc = []
+                }
+                (List.Extra.zip dotsList (List.drop 1 dotsList ++ [ String.length inputText ]))
     in
-    go inputText dotsList 0 Nothing Nothing
+    List.reverse res.resAcc

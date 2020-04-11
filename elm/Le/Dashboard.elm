@@ -1,5 +1,6 @@
 module Le.Dashboard exposing (..)
 
+import Browser.Navigation
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -39,6 +40,7 @@ type Msg
 type alias Model =
     { formErrors : Dict String String
     , toasts : Le.Block.Toast.Model
+    , key : Browser.Navigation.Key
     , articles : Maybe (List Api.ArticleShort)
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
@@ -49,19 +51,29 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Browser.Navigation.Key -> String -> Maybe Api.ArticleId -> ( Model, Cmd Msg )
+init key ner active =
     ( { formErrors = Dict.empty
       , toasts = Le.Block.Toast.init
+      , key = key
       , articles = Nothing
-      , active = Nothing
+      , active = active
       , articleFull = Nothing
       , articleNp = Nothing
       , selectTwo = Nothing
       , ners = []
-      , ner = ""
+      , ner = ner
       }
-    , Api.getApiArticlesshortjson Nothing GotArticles
+    , Cmd.batch <|
+        [ Api.getApiArticlesshortjson Nothing GotArticles
+        ]
+            ++ (case active of
+                    Nothing ->
+                        [ Cmd.none ]
+
+                    Just articleId ->
+                        [ Api.getApiArticleByArticleidArticlejson articleId GotArticle ]
+               )
     )
 
 
@@ -90,8 +102,16 @@ update msg model =
             )
 
         CellClicked articleId ->
-            ( { model | active = Just articleId }
-            , Api.getApiArticleByArticleidArticlejson articleId GotArticle
+            let
+                m2 =
+                    { model | active = Just articleId }
+            in
+            ( m2
+            , Cmd.batch
+                [ Api.getApiArticleByArticleidArticlejson articleId GotArticle
+                , Browser.Navigation.replaceUrl model.key <|
+                    Le.Routes.dashboard m2.ner m2.active
+                ]
             )
 
         GotArticle (Err e) ->
@@ -135,8 +155,16 @@ update msg model =
             )
 
         NerSelect ner ->
-            ( { model | ner = ner }
-            , Api.getApiArticlesshortjson (Just ner) GotArticles
+            let
+                m2 =
+                    { model | ner = ner }
+            in
+            ( m2
+            , Cmd.batch
+                [ Api.getApiArticlesshortjson (Just ner) GotArticles
+                , Browser.Navigation.replaceUrl model.key <|
+                    Le.Routes.dashboard m2.ner m2.active
+                ]
             )
 
         GotNers params (Err e) ->
@@ -166,7 +194,7 @@ navbarContent =
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark" ]
             [ a
                 [ class "navbar-brand"
-                , href <| Le.Routes.dashboard
+                , href <| Le.Routes.dashboard "" Nothing
                 ]
                 [ text "Emotive Conjugations" ]
             , button [ attribute "aria-controls" "navbarCollapse", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarCollapse", attribute "data-toggle" "collapse", type_ "button" ]
@@ -178,7 +206,7 @@ navbarContent =
                     [ li [ class "nav-item active" ]
                         [ a
                             [ class "nav-link"
-                            , href <| Le.Routes.dashboard
+                            , href <| Le.Routes.dashboard "" Nothing
                             ]
                             [ text "Dashboard"
                             ]

@@ -30,21 +30,28 @@ OFFSET {(page - 1) * lim}
 queryPersonArticleNps ::
   MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticleNp]
 queryPersonArticleNps mPerson = do
-  rawSql
-    [qc|
+  case fromMaybe "" (T.strip <$> mPerson) of
+    "" ->
+      rawSql
+        [qc|
 select ??
 from "article_np"
-inner join named_entity ne on ne.article_id = "article_np".id
-where {personQText}
-group by ("article_np"."id")
+where "article_np"."date" is not null
 order by "article_np"."date" desc, "article_np"."id" desc 
 limit {lim}
     |]
-    [PersistText personQParam]
+        []
+    person ->
+      rawSql
+        [qc|
+select ??
+from "article_np"
+inner join named_entity ne on ne.article_id = "article_np".id
+where ne.entity = ?
+group by ("article_np"."id")
+order by "article_np"."date" desc, "article_np"."id" desc 
+limit {lim}
+              |]
+        [PersistText person]
   where
     lim = Le.Config.articlesLimit
-    (personQText, personQParam) =
-      case mPerson of
-        Nothing -> ("'a'=coalesce('a',?)" :: Text, "a")
-        Just person ->
-          ("ne.entity = ?", person)
