@@ -10033,6 +10033,36 @@ main > .container {
 .page-dashboard .article .content-token--ADV {
   border-bottom: 3px solid #feda5f;
 }
+.page-dashboard .article .content-token--ADJ {
+  border-bottom: 3px solid #b0c2c4;
+}
+.page-dashboard .article .content-token--ADV {
+  border-bottom: 3px solid #feda5f;
+}
+.page-dashboard .article .content-token--CCONJ {
+  border-bottom: 3px solid #dcf3f5;
+}
+.page-dashboard .article .content-token--AUX {
+  border-bottom: 3px solid #4c4f6a;
+}
+.page-dashboard .article .content-token--DET {
+  border-bottom: 3px solid #ffe9da;
+}
+.page-dashboard .article .content-token--NUM {
+  border-bottom: 3px solid #c62535;
+}
+.page-dashboard .article .content-token--SCONJ {
+  border-bottom: 3px solid #003e21;
+}
+.page-dashboard .article .content-token--PRON {
+  border-bottom: 3px solid #1b8057;
+}
+.page-dashboard .article .content-token--PART {
+  border-bottom: 3px solid #55a44e;
+}
+.page-dashboard .article .content-token--INTJ {
+  border-bottom: 3px solid #d7c37a;
+}
 .page-dashboard .article .content-token:hover {
   background-color: #fd884f;
   color: #fff;

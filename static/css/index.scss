@@ -158,6 +158,40 @@ main > .container {
     .content-token--ADV {
       border-bottom: 3px solid #feda5f;
     }
+    .content-token--ADJ {
+      border-bottom: 3px solid #b0c2c4;
+    }
+    .content-token--ADV {
+      border-bottom: 3px solid #feda5f;
+    }
+    .content-token--CCONJ {
+      border-bottom: 3px solid #dcf3f5;
+    }
+    .content-token--AUX {
+      border-bottom: 3px solid #4c4f6a;
+    }
+    .content-token--DET {
+      border-bottom: 3px solid #ffe9da;
+    }
+    .content-token--NUM {
+      border-bottom: 3px solid #c62535;
+    }
+    .content-token--SCONJ {
+      border-bottom: 3px solid #003e21;
+    }
+    .content-token--PRON {
+      border-bottom: 3px solid #1b8057;
+    }
+    .content-token--PART {
+      border-bottom: 3px solid #55a44e;
+    }
+    .content-token--INTJ {
+      border-bottom: 3px solid #d7c37a;
+    }
+    // .content-token--? {
+    //   border-bottom: 3px solid #ede9a3;
+    // }
+
     // must match .badge-highlighed-token
     .content-token:hover {
       background-color: #fd884f;
