@@ -489,16 +489,24 @@ mainContent model =
 
         articleControlPanel =
             div [] <|
-                [ div [ class "mt-2" ]
-                    [ text "Highlight POS "
-                    , input
-                        [ class "align-middle"
-                        , name "check"
-                        , type_ "checkbox"
-                        , checked model.highlightPos
-                        , onClick (UpdateModel { model | highlightPos = not model.highlightPos })
+                [ div [ class "mt-2 d-flex flex-row justify-content-between" ]
+                    [ text "Highlight POS"
+                    , div [ class "switch" ]
+                        [ input
+                            [ class "switch-input"
+                            , id "highlight-pos-checkbox"
+                            , name "check"
+                            , type_ "checkbox"
+                            , checked model.highlightPos
+                            , onClick (UpdateModel { model | highlightPos = not model.highlightPos })
+                            ]
+                            []
+                        , label
+                            [ class "switch-label mb-0"
+                            , for "highlight-pos-checkbox"
+                            ]
+                            [ text "switch" ]
                         ]
-                        []
                     ]
                 ]
                     ++ (model.selectedToken
