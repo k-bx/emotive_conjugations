@@ -161,7 +161,7 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                             [ el2 ]
 
                         Just () ->
-                            [ el2, br [] [], br [] [] ]
+                            [ el2, br [ class "paragraph-halfsplit" ] [], br [ class "paragraph-halfsplit" ] [] ]
             in
             { acc
                 | resAcc = els3 ++ acc.resAcc

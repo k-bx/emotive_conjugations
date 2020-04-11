@@ -9945,6 +9945,12 @@ main > .container {
 .page-dashboard .article {
   font-size: 1.2rem;
 }
+.page-dashboard .article .paragraph-halfsplit {
+  content: "";
+  margin: 2em;
+  display: block;
+  font-size: 24%;
+}
 .page-dashboard .article .content-token-wrap {
   display: inline-block;
 }
