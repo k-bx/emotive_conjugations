@@ -73,31 +73,13 @@ main > .container {
 .page-dashboard {
   .article {
     font-size: 1.2rem;
-    // .paragraph-halfsplit {
-    //   content: "";
-    //   margin: 2em;
-    //   display: block;
-    //   font-size: 24%;
-    // }
 
     .content-token-wrap {
       display: inline-block;
     }
     .content-token {
-      // display: flex;
-      // flex-direction: column;
-      // position: relative;
-
       .content-token__pos {
         font-size: .4rem;
-        // color: #fff;
-        // background-color: #6c757d;
-      //   position: absolute;
-      //   top: 10px;
-      //   font-size: .4rem;
-      //   padding: .25em .4em;
-      //   border-radius: .25rem;
-      //   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
       }
     }
     .content-token--ADP {
@@ -116,7 +98,11 @@ main > .container {
       border-bottom: 3px solid #feda5f;
     }
     .content-token:hover {
-      background-color: #92d4de;
+      background-color: #fd884f;
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.25em 0.4em;
+      font-weight: 700;
       // padding: .25em .4em;
       border-radius: .25rem;
       cursor: pointer;

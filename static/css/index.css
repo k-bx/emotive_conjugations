@@ -9967,7 +9967,11 @@ main > .container {
   border-bottom: 3px solid #feda5f;
 }
 .page-dashboard .article .content-token:hover {
-  background-color: #92d4de;
+  background-color: #fd884f;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.25em 0.4em;
+  font-weight: 700;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
