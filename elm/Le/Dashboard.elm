@@ -310,7 +310,13 @@ mainContent model =
                             [ div [] [] ]
 
                         Just articleNp ->
-                            Le.Article.renderContent model.ner articleNp.content articleNp.spacy_ner_ents articleNp.spacy_pos_ents
+                            [ Le.Article.renderContent
+                                { nerToHighlight = model.ner
+                                , inputText = articleNp.content
+                                , mSpacyNers = articleNp.spacy_ner_ents
+                                , mSpacyPoss = articleNp.spacy_pos_ents
+                                }
+                            ]
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]

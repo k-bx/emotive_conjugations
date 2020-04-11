@@ -4,27 +4,40 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Lazy
 import Le.Api as Api
 import List.Extra
 import Maybe.Extra
 
 
+renderContentLazy :
+    { nerToHighlight : String
+    , inputText : String
+    , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
+    , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
+    }
+    -> Html msg
+renderContentLazy ps =
+    Html.Lazy.lazy renderContent ps
+
+
 {-| Converts `"\n\n"` to paragraphs, highlights NERs and stuff
 -}
 renderContent :
-    String
-    -> String
-    -> Maybe (List Api.CmdSpacyNerResEnt)
-    -> Maybe (List Api.CmdSpacyPosResEnt)
-    -> List (Html msg)
-renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
+    { nerToHighlight : String
+    , inputText : String
+    , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
+    , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
+    }
+    -> Html msg
+renderContent ps =
     -- [text inputText]
     let
         spacyNers =
-            Maybe.withDefault [] mSpacyNers
+            Maybe.withDefault [] ps.mSpacyNers
 
         spacyPoss =
-            Maybe.withDefault [] mSpacyPoss
+            Maybe.withDefault [] ps.mSpacyPoss
 
         tokDots =
             List.concatMap
@@ -45,7 +58,7 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                 spacyNers
 
         parDots =
-            String.indexes "\n\n" inputText
+            String.indexes "\n\n" ps.inputText
 
         -- beginnings of various things to be wrapped in spans later
         dotsList : List Int
@@ -95,7 +108,7 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
                 [ class "content-ner"
                 , classList
                     [ ( "badge badge-info article__spacy-ner"
-                      , ner.label_ == "PERSON" && ner.text == nerToHighlight
+                      , ner.label_ == "PERSON" && ner.text == ps.nerToHighlight
                       )
                     ]
                 ]
@@ -172,11 +185,11 @@ renderContent nerToHighlight inputText mSpacyNers mSpacyPoss =
 
         res =
             List.foldl foldfunc
-                { textLeft = inputText
+                { textLeft = ps.inputText
                 , mTokTill = Nothing
                 , mNerTill = Nothing
                 , resAcc = []
                 }
-                (List.Extra.zip dotsList (List.drop 1 dotsList ++ [ String.length inputText ]))
+                (List.Extra.zip dotsList (List.drop 1 dotsList ++ [ String.length ps.inputText ]))
     in
-    List.reverse res.resAcc
+    div [] (List.reverse res.resAcc)
