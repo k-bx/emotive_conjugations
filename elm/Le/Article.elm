@@ -7,15 +7,7 @@ import Html.Events exposing (..)
 import Le.Api as Api
 import List.Extra
 import Maybe.Extra
-
-
-type alias RenderParams =
-    { nerToHighlight : String
-    , inputText : String
-    , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
-    , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
-    , highlightPos : Bool
-    }
+import Set exposing (Set)
 
 
 type ContentNode
@@ -47,7 +39,12 @@ type ContentNode
         }
 
 
-computeContentNodes : RenderParams -> List ContentNode
+computeContentNodes :
+    { inputText : String
+    , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
+    , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
+    }
+    -> List ContentNode
 computeContentNodes ps =
     let
         parEndsDots =
@@ -206,6 +203,8 @@ renderContentNodes :
     , nodes : List ContentNode
     , onClickToken : Api.CmdSpacyPosResEnt -> msg
     , onClickNer : Api.CmdSpacyNerResEnt -> msg
+    , depChildren : Set Int
+    , depParent : Maybe Int
     }
     -> Html msg
 renderContentNodes ps =
@@ -240,6 +239,12 @@ renderContentNodes ps =
                                   )
                                 , ( "badge-highlighed-token"
                                   , Just nd.tok.i == ps.selectedToken
+                                  )
+                                , ( "badge-highlighed-token badge-highlighed-token--dep-parent"
+                                  , Just nd.tok.i == ps.depParent
+                                  )
+                                , ( "badge-highlighed-token badge-highlighed-token--dep-child"
+                                  , Set.member nd.tok.i ps.depChildren
                                   )
                                 ]
                             , onClick <| ps.onClickToken nd.tok

@@ -19,6 +19,7 @@ import Process
 import SelectTwo
 import SelectTwo.Html
 import SelectTwo.Types exposing (AjaxParams, SelectTwo, SelectTwoMsg)
+import Set
 import Task
 import Time
 
@@ -330,50 +331,64 @@ mainContent model =
                                 , onClickToken = TokenClicked
                                 , onClickNer = NerClicked
                                 , selectedToken = Maybe.map .i model.selectedToken
+                                , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
+                                , depParent = Maybe.map .i mDepHeadToken
                                 , nodes =
                                     Le.Article.computeContentNodes
-                                        { nerToHighlight = model.ner
-                                        , inputText = articleNp.content
+                                        { inputText = articleNp.content
                                         , mSpacyNers = articleNp.spacy_ner_ents
                                         , mSpacyPoss = articleNp.spacy_pos_ents
-                                        , highlightPos = model.highlightPos
                                         }
                                 }
                             ]
                 ]
 
-        renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
-        renderSelectedToken selectedToken =
-            let
-                mHeadToken =
+        mDepHeadToken : Maybe Api.CmdSpacyPosResEnt
+        mDepHeadToken =
+            case model.selectedToken of
+                Nothing ->
+                    Nothing
+
+                Just selectedToken ->
                     model.articleNp
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.i == selectedToken.head_i)
                         |> List.head
 
-                children =
+        depChildren : List Api.CmdSpacyPosResEnt
+        depChildren =
+            case model.selectedToken of
+                Nothing ->
+                    []
+
+                Just selectedToken ->
                     model.articleNp
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.head_i == selectedToken.i)
 
+        renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
+        renderSelectedToken selectedToken =
+            let
                 headTokenRealtionsTrs =
-                    case mHeadToken of
+                    case mDepHeadToken of
                         Nothing ->
                             []
 
                         Just headToken ->
                             [ tr []
-                                [ td []
+                                [ td [ class "text-right" ]
                                     [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                         [ text headToken.text ]
                                     ]
-                                , td [] [ i [ class "fas fa-long-arrow-right ml-2 mr-2" ] [] ]
-                                , td []
+                                , td [ class "applemail__controlpanel__reltable__arrow" ]
+                                    [ i [ class "fas fa-long-arrow-right" ] [] ]
+                                , td [ class "text-center" ]
                                     [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                         [ text selectedToken.dep_ ]
                                     ]
-                                , td [] [ i [ class "fas fa-long-arrow-right ml-2 mr-2" ] [] ]
-                                , td []
+                                , td [ class "applemail__controlpanel__reltable__arrow" ]
+                                    [ i [ class "fas fa-long-arrow-right" ] [] ]
+                                , td [ class "text-left" ]
                                     [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                         [ text selectedToken.text ]
                                     ]
@@ -382,17 +397,19 @@ mainContent model =
 
                 childTokenRelationTr childToken =
                     tr []
-                        [ td []
+                        [ td [ class "text-right" ]
                             [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                 [ text selectedToken.text ]
                             ]
-                        , td [] [ i [ class "fas fa-long-arrow-right ml-2 mr-2" ] [] ]
-                        , td []
+                        , td [ class "applemail__controlpanel__reltable__arrow" ]
+                            [ i [ class "fas fa-long-arrow-right" ] [] ]
+                        , td [ class "text-center" ]
                             [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                 [ text childToken.dep_ ]
                             ]
-                        , td [] [ i [ class "fas fa-long-arrow-right ml-2 mr-2" ] [] ]
-                        , td []
+                        , td [ class "applemail__controlpanel__reltable__arrow" ]
+                            [ i [ class "fas fa-long-arrow-right" ] [] ]
+                        , td [ class "text-left" ]
                             [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                 [ text childToken.text ]
                             ]
@@ -402,8 +419,155 @@ mainContent model =
                     table [ class "applemail__controlpanel__reltable mt-2" ]
                         [ tbody [] <|
                             headTokenRealtionsTrs
-                                ++ List.map childTokenRelationTr children
+                                ++ List.map childTokenRelationTr depChildren
                         ]
+
+                miscDetails =
+                    [ div []
+                        [ text "Lemma: "
+                        , span [] [ text selectedToken.lemma_ ]
+                        ]
+                    , div []
+                        [ text "Part Of Speech: "
+                        , span [] [ text selectedToken.pos_ ]
+                        ]
+                    , div []
+                        [ text "Tag: "
+                        , span [] [ text selectedToken.tag_ ]
+                        ]
+                    , div []
+                        [ text "Dependency relation: "
+                        , span [] [ text selectedToken.dep_ ]
+                        ]
+                    , div []
+                        [ text "Shape: "
+                        , span [] [ text selectedToken.shape_ ]
+                        ]
+                    , div []
+                        [ text "is_alpha: "
+                        , span [] [ text <| boolYesNo selectedToken.is_alpha ]
+                        ]
+                    , div []
+                        [ text "is_ascii: "
+                        , span [] [ text <| boolYesNo selectedToken.is_ascii ]
+                        ]
+                    , div []
+                        [ text "is_digit: "
+                        , span [] [ text <| boolYesNo selectedToken.is_digit ]
+                        ]
+                    , div []
+                        [ text "is_punct: "
+                        , span [] [ text <| boolYesNo selectedToken.is_punct ]
+                        ]
+                    , div []
+                        [ text "is_left_punct: "
+                        , span [] [ text <| boolYesNo selectedToken.is_left_punct ]
+                        ]
+                    , div []
+                        [ text "is_right_punct: "
+                        , span [] [ text <| boolYesNo selectedToken.is_right_punct ]
+                        ]
+                    , div []
+                        [ text "is_space: "
+                        , span [] [ text <| boolYesNo selectedToken.is_space ]
+                        ]
+                    , div []
+                        [ text "is_bracket: "
+                        , span [] [ text <| boolYesNo selectedToken.is_bracket ]
+                        ]
+                    , div []
+                        [ text "is_quote: "
+                        , span [] [ text <| boolYesNo selectedToken.is_quote ]
+                        ]
+                    , div []
+                        [ text "is_currency: "
+                        , span [] [ text <| boolYesNo selectedToken.is_currency ]
+                        ]
+                    , div []
+                        [ text "like_url: "
+                        , span [] [ text <| boolYesNo selectedToken.like_url ]
+                        ]
+                    , div []
+                        [ text "like_num: "
+                        , span [] [ text <| boolYesNo selectedToken.like_num ]
+                        ]
+                    , div []
+                        [ text "like_mail: "
+                        , span [] [ text <| boolYesNo selectedToken.like_mail ]
+                        ]
+                    , div []
+                        [ text "is_oov: "
+                        , span [] [ text <| boolYesNo selectedToken.is_oov ]
+                        ]
+                    , div []
+                        [ text "is_stop: "
+                        , span [] [ text <| boolYesNo selectedToken.is_stop ]
+                        ]
+                    , div []
+                        [ text "head_i: "
+                        , span [] [ text <| String.fromInt selectedToken.head_i ]
+                        ]
+                    , div []
+                        [ text "left_edge_i: "
+                        , span [] [ text <| String.fromInt selectedToken.left_edge_i ]
+                        ]
+                    , div []
+                        [ text "right_edge_i: "
+                        , span [] [ text <| String.fromInt selectedToken.right_edge_i ]
+                        ]
+                    , div []
+                        [ text "i: "
+                        , span [] [ text <| String.fromInt selectedToken.i ]
+                        ]
+                    , div []
+                        [ text "ent_type_: "
+                        , span [] [ text <| selectedToken.ent_type_ ]
+                        ]
+                    , div []
+                        [ text "ent_iob_: "
+                        , span [] [ text <| selectedToken.ent_iob_ ]
+                        ]
+                    , div []
+                        [ text "ent_kb_id: "
+                        , span [] [ text <| String.fromInt selectedToken.ent_kb_id ]
+                        ]
+                    , div []
+                        [ text "ent_kb_id_: "
+                        , span [] [ text <| selectedToken.ent_kb_id_ ]
+                        ]
+                    , div []
+                        [ text "norm_: "
+                        , span [] [ text <| selectedToken.norm_ ]
+                        ]
+                    , div []
+                        [ text "lang_: "
+                        , span [] [ text <| selectedToken.lang_ ]
+                        ]
+                    , div []
+                        [ text "prob: "
+                        , span [] [ text <| String.fromFloat selectedToken.prob ]
+                        ]
+                    , div []
+                        [ text "idx: "
+                        , span [] [ text <| String.fromInt selectedToken.idx ]
+                        ]
+                    , div []
+                        [ text "sentiment: "
+                        , span [] [ text <| String.fromFloat selectedToken.sentiment ]
+                        ]
+                    , div []
+                        [ text "lex_id: "
+                        , span [] [ text <| String.fromInt selectedToken.lex_id ]
+                        ]
+                    , div []
+                        [ text "rank: "
+                        , span [] [ text <| String.fromInt selectedToken.rank ]
+                        ]
+                    , div []
+                        [ text "cluster: "
+                        , span [] [ text <| String.fromInt selectedToken.cluster ]
+                        ]
+                    ]
             in
             div
                 [ class "mt-2"
@@ -414,154 +578,8 @@ mainContent model =
                     [ span [ class "badge-highlighed-token" ] [ text selectedToken.text ]
                     ]
                 ]
-                    ++ [ relTable ]
-                    -- ++ renderHeadTokenRelations
-                    -- ++ List.map renderChildrenRelation children
-                    ++ [ div []
-                            [ text "Lemma: "
-                            , span [] [ text selectedToken.lemma_ ]
-                            ]
-                       , div []
-                            [ text "Part Of Speech: "
-                            , span [] [ text selectedToken.pos_ ]
-                            ]
-                       , div []
-                            [ text "Tag: "
-                            , span [] [ text selectedToken.tag_ ]
-                            ]
-                       , div []
-                            [ text "Dependency relation: "
-                            , span [] [ text selectedToken.dep_ ]
-                            ]
-                       , div []
-                            [ text "Shape: "
-                            , span [] [ text selectedToken.shape_ ]
-                            ]
-                       , div []
-                            [ text "is_alpha: "
-                            , span [] [ text <| boolYesNo selectedToken.is_alpha ]
-                            ]
-                       , div []
-                            [ text "is_ascii: "
-                            , span [] [ text <| boolYesNo selectedToken.is_ascii ]
-                            ]
-                       , div []
-                            [ text "is_digit: "
-                            , span [] [ text <| boolYesNo selectedToken.is_digit ]
-                            ]
-                       , div []
-                            [ text "is_punct: "
-                            , span [] [ text <| boolYesNo selectedToken.is_punct ]
-                            ]
-                       , div []
-                            [ text "is_left_punct: "
-                            , span [] [ text <| boolYesNo selectedToken.is_left_punct ]
-                            ]
-                       , div []
-                            [ text "is_right_punct: "
-                            , span [] [ text <| boolYesNo selectedToken.is_right_punct ]
-                            ]
-                       , div []
-                            [ text "is_space: "
-                            , span [] [ text <| boolYesNo selectedToken.is_space ]
-                            ]
-                       , div []
-                            [ text "is_bracket: "
-                            , span [] [ text <| boolYesNo selectedToken.is_bracket ]
-                            ]
-                       , div []
-                            [ text "is_quote: "
-                            , span [] [ text <| boolYesNo selectedToken.is_quote ]
-                            ]
-                       , div []
-                            [ text "is_currency: "
-                            , span [] [ text <| boolYesNo selectedToken.is_currency ]
-                            ]
-                       , div []
-                            [ text "like_url: "
-                            , span [] [ text <| boolYesNo selectedToken.like_url ]
-                            ]
-                       , div []
-                            [ text "like_num: "
-                            , span [] [ text <| boolYesNo selectedToken.like_num ]
-                            ]
-                       , div []
-                            [ text "like_mail: "
-                            , span [] [ text <| boolYesNo selectedToken.like_mail ]
-                            ]
-                       , div []
-                            [ text "is_oov: "
-                            , span [] [ text <| boolYesNo selectedToken.is_oov ]
-                            ]
-                       , div []
-                            [ text "is_stop: "
-                            , span [] [ text <| boolYesNo selectedToken.is_stop ]
-                            ]
-                       , div []
-                            [ text "head_i: "
-                            , span [] [ text <| String.fromInt selectedToken.head_i ]
-                            ]
-                       , div []
-                            [ text "left_edge_i: "
-                            , span [] [ text <| String.fromInt selectedToken.left_edge_i ]
-                            ]
-                       , div []
-                            [ text "right_edge_i: "
-                            , span [] [ text <| String.fromInt selectedToken.right_edge_i ]
-                            ]
-                       , div []
-                            [ text "i: "
-                            , span [] [ text <| String.fromInt selectedToken.i ]
-                            ]
-                       , div []
-                            [ text "ent_type_: "
-                            , span [] [ text <| selectedToken.ent_type_ ]
-                            ]
-                       , div []
-                            [ text "ent_iob_: "
-                            , span [] [ text <| selectedToken.ent_iob_ ]
-                            ]
-                       , div []
-                            [ text "ent_kb_id: "
-                            , span [] [ text <| String.fromInt selectedToken.ent_kb_id ]
-                            ]
-                       , div []
-                            [ text "ent_kb_id_: "
-                            , span [] [ text <| selectedToken.ent_kb_id_ ]
-                            ]
-                       , div []
-                            [ text "norm_: "
-                            , span [] [ text <| selectedToken.norm_ ]
-                            ]
-                       , div []
-                            [ text "lang_: "
-                            , span [] [ text <| selectedToken.lang_ ]
-                            ]
-                       , div []
-                            [ text "prob: "
-                            , span [] [ text <| String.fromFloat selectedToken.prob ]
-                            ]
-                       , div []
-                            [ text "idx: "
-                            , span [] [ text <| String.fromInt selectedToken.idx ]
-                            ]
-                       , div []
-                            [ text "sentiment: "
-                            , span [] [ text <| String.fromFloat selectedToken.sentiment ]
-                            ]
-                       , div []
-                            [ text "lex_id: "
-                            , span [] [ text <| String.fromInt selectedToken.lex_id ]
-                            ]
-                       , div []
-                            [ text "rank: "
-                            , span [] [ text <| String.fromInt selectedToken.rank ]
-                            ]
-                       , div []
-                            [ text "cluster: "
-                            , span [] [ text <| String.fromInt selectedToken.cluster ]
-                            ]
-                       ]
+                    ++ [ div [ class "d-flex justify-content-center" ] [ relTable ] ]
+                    ++ [ div [ class "details-board__row" ] miscDetails ]
 
         renderSelectedNer : Api.CmdSpacyNerResEnt -> Html Msg
         renderSelectedNer selectedNer =
@@ -571,11 +589,6 @@ mainContent model =
                 ]
                 [ div [ class "text-center mb-4" ]
                     [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ] [ text selectedNer.text ]
-
-                    -- , div []
-                    --     [ text "Lemma: "
-                    --     , span [] [ text selectedToken.lemma_ ]
-                    --     ]
                     ]
                 ]
 

@@ -9966,6 +9966,16 @@ main > .container {
   color: #000;
 }
 
+.badge-highlighed-token--dep-parent {
+  background-color: #a2b870;
+  color: #000;
+}
+
+.badge-highlighed-token--dep-child {
+  background-color: #dcf3f5;
+  color: #000;
+}
+
 .switch {
   position: relative;
   display: inline-block;
@@ -10140,11 +10150,20 @@ main > .container {
   text-align: center;
   padding-bottom: 0.5rem;
 }
+.page-dashboard .applemail .applemail__controlpanel .applemail__controlpanel__reltable .applemail__controlpanel__reltable__arrow {
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+}
 .page-dashboard .applemail .details-board {
   font-size: 0.8rem;
   background-color: #5fa793;
   color: #fff;
-  padding: 2rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+.page-dashboard .applemail .details-board .details-board__row {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 .page-dashboard .articles-nav {
   border-right: 1px solid #e5e5e5;
