@@ -347,7 +347,7 @@ mainContent model =
         renderSelectedToken selectedToken =
             div
                 [ class "mt-2"
-                , class "details-board"
+                , class "details-board fade-in"
                 ]
                 [ div [ class "text-center mb-4" ]
                     [ span [ class "badge-highlighed-token" ] [ text selectedToken.text ]
@@ -502,7 +502,7 @@ mainContent model =
         renderSelectedNer selectedNer =
             div
                 [ class "mt-2"
-                , class "details-board"
+                , class "details-board fade-in"
                 ]
                 [ div [ class "text-center mb-4" ]
                     [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ] [ text selectedNer.text ]
