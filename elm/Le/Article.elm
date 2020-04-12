@@ -201,8 +201,7 @@ computeContentNodes ps =
 
 renderContentNodes :
     { nerToHighlight : String
-    , selectedToken : Maybe Int
-    , selectedNer : Maybe Int
+    , selectedToken : Maybe Int -- tok.i
     , highlightPos : Bool
     , nodes : List ContentNode
     , onClickToken : Api.CmdSpacyPosResEnt -> msg

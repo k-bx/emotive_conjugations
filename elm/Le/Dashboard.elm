@@ -330,7 +330,6 @@ mainContent model =
                                 , onClickToken = TokenClicked
                                 , onClickNer = NerClicked
                                 , selectedToken = Maybe.map .i model.selectedToken
-                                , selectedNer = Maybe.map .start_char model.selectedNer
                                 , nodes =
                                     Le.Article.computeContentNodes
                                         { nerToHighlight = model.ner
