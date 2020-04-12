@@ -32,9 +32,9 @@ type ContentNode
     | CNNer
         { begin : Int
         , end : Int
-        , ner : { text : String, start_char : Int, label_ : String }
 
-        -- , ner : Api.CmdSpacyNerResEnt
+        -- , ner : { text : String, start_char : Int, label_ : String }
+        , ner : Api.CmdSpacyNerResEnt
         , children : List ContentNode
         }
     | CNTok
@@ -100,9 +100,9 @@ computeContentNodes ps =
                                 CNNer
                                     { begin = ner.start_char
                                     , end = ner.start_char + String.length textNer
+                                    , ner = ner
 
-                                    -- , ner = ner
-                                    , ner = { text = textNer, start_char = ner.start_char, label_ = ner.label_ }
+                                    -- , ner = { text = textNer, start_char = ner.start_char, label_ = ner.label_ }
                                     , children = computeToks ner.start_char textNer
                                     }
                         in
@@ -202,9 +202,11 @@ computeContentNodes ps =
 renderContentNodes :
     { nerToHighlight : String
     , selectedToken : Maybe Int
+    , selectedNer : Maybe Int
     , highlightPos : Bool
     , nodes : List ContentNode
     , onClickToken : Api.CmdSpacyPosResEnt -> msg
+    , onClickNer : Api.CmdSpacyNerResEnt -> msg
     }
     -> Html msg
 renderContentNodes ps =
@@ -221,10 +223,11 @@ renderContentNodes ps =
                     span
                         [ class "content-ner"
                         , classList
-                            [ ( "badge badge-info article__spacy-ner"
+                            [ ( "badge-highlighed-token badge-highlighed-token--ner"
                               , nd.ner.label_ == "PERSON" && nd.ner.text == ps.nerToHighlight
                               )
                             ]
+                        , onClick <| ps.onClickNer nd.ner
                         ]
                         (List.map renderNode nd.children)
 
@@ -236,7 +239,7 @@ renderContentNodes ps =
                                 [ ( "content-token--" ++ nd.tok.pos_
                                   , ps.highlightPos
                                   )
-                                , ("badge-highlighed-token"
+                                , ( "badge-highlighed-token"
                                   , Just nd.tok.i == ps.selectedToken
                                   )
                                 ]

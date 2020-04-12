@@ -9953,6 +9953,10 @@ main > .container {
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+.badge-highlighed-token--ner {
+  background-color: #17a2b8;
+}
+
 .switch {
   position: relative;
   display: inline-block;

@@ -35,6 +35,8 @@ type Msg
     | NerSelect String
     | SelectNerAjax AjaxParams Bool
     | GotNers AjaxParams (Result Api.Error (Api.Paginated String))
+    | NerClicked Api.CmdSpacyNerResEnt
+    | TokenClicked Api.CmdSpacyPosResEnt
 
 
 type alias Model =
@@ -50,6 +52,7 @@ type alias Model =
     , ner : String
     , highlightPos : Bool
     , selectedToken : Maybe Api.CmdSpacyPosResEnt
+    , selectedNer : Maybe Api.CmdSpacyNerResEnt
     }
 
 
@@ -67,6 +70,7 @@ init key ner active =
       , ner = ner
       , highlightPos = False
       , selectedToken = Nothing
+      , selectedNer = Nothing
       }
     , Cmd.batch <|
         [ Api.getApiArticlesshortjson (Just ner) GotArticles
@@ -198,6 +202,12 @@ update msg model =
             , Cmd.none
             )
 
+        NerClicked ner ->
+            ( { model | selectedNer = Just ner }, Cmd.none )
+
+        TokenClicked tok ->
+            ( { model | selectedToken = Just tok }, Cmd.none )
+
 
 navbarContent : Html Msg
 navbarContent =
@@ -317,9 +327,10 @@ mainContent model =
                             [ Le.Article.renderContentNodes
                                 { nerToHighlight = model.ner
                                 , highlightPos = model.highlightPos
-                                , onClickToken =
-                                    \tok -> UpdateModel { model | selectedToken = Just tok }
+                                , onClickToken = TokenClicked
+                                , onClickNer = NerClicked
                                 , selectedToken = Maybe.map .i model.selectedToken
+                                , selectedNer = Maybe.map .start_char model.selectedNer
                                 , nodes =
                                     Le.Article.computeContentNodes
                                         { nerToHighlight = model.ner
@@ -487,6 +498,22 @@ mainContent model =
                     ]
                 ]
 
+        renderSelectedNer : Api.CmdSpacyNerResEnt -> Html Msg
+        renderSelectedNer selectedNer =
+            div
+                [ class "mt-2"
+                , class "details-board"
+                ]
+                [ div [ class "text-center mb-4" ]
+                    [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ] [ text selectedNer.text ]
+
+                    -- , div []
+                    --     [ text "Lemma: "
+                    --     , span [] [ text selectedToken.lemma_ ]
+                    --     ]
+                    ]
+                ]
+
         articleControlPanel =
             div [] <|
                 [ div [ class "mt-2 d-flex flex-row justify-content-between" ]
@@ -511,6 +538,10 @@ mainContent model =
                 ]
                     ++ (model.selectedToken
                             |> Maybe.map renderSelectedToken
+                            |> Maybe.Extra.unwrap [] List.singleton
+                       )
+                    ++ (model.selectedNer
+                            |> Maybe.map renderSelectedNer
                             |> Maybe.Extra.unwrap [] List.singleton
                        )
     in

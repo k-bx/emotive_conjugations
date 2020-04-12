@@ -80,6 +80,10 @@ main > .container {
   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
+.badge-highlighed-token--ner {
+  background-color: #17a2b8;
+}
+
 .switch {
   position: relative;
   display: inline-block;
@@ -203,8 +207,6 @@ main > .container {
       border-radius: .25rem;
       cursor: pointer;
       transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-    .article__spacy-ner {
     }
   }
 
