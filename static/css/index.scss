@@ -84,6 +84,15 @@ main > .container {
   background-color: #17a2b8;
 }
 
+.badge-highlighed-token--sm {
+  font-size: .8rem;
+}
+
+.badge-highlighed-token--neutral {
+  background-color: #fff;
+  color: #000;
+}
+
 .switch {
   position: relative;
   display: inline-block;
@@ -266,6 +275,13 @@ main > .container {
       flex-shrink: 0;
       padding: 1rem;
       overflow-y: scroll;
+
+      .applemail__controlpanel__reltable {
+        td {
+          text-align: center;
+          padding-bottom: .5rem;
+        }
+      }
     }
 
     .details-board {
