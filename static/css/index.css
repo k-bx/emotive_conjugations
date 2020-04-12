@@ -10109,6 +10109,7 @@ main > .container {
   width: 20rem;
   flex-shrink: 0;
   padding: 1rem;
+  overflow-y: scroll;
 }
 .page-dashboard .applemail .details-board {
   font-size: 0.8rem;
