@@ -54,6 +54,7 @@ type alias Model =
     , highlightPos : Bool
     , selectedToken : Maybe Api.CmdSpacyPosResEnt
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
+    , tokenCardExpanded : Bool
     }
 
 
@@ -72,6 +73,7 @@ init key ner active =
       , highlightPos = False
       , selectedToken = Nothing
       , selectedNer = Nothing
+      , tokenCardExpanded = False
       }
     , Cmd.batch <|
         [ Api.getApiArticlesshortjson (Just ner) GotArticles
@@ -572,14 +574,31 @@ mainContent model =
             div
                 [ class "mt-2"
                 , class "details-board fade-in"
+                , classList [ ( "details-board--collapsed", not model.tokenCardExpanded ) ]
                 ]
             <|
-                [ div [ class "text-center mb-4" ]
-                    [ span [ class "badge-highlighed-token" ] [ text selectedToken.text ]
+                [ div [ class "details-board__content" ] <|
+                    [ div [ class "text-center mb-4" ]
+                        [ span [ class "badge-highlighed-token" ] [ text selectedToken.text ]
+                        ]
+                    ]
+                        ++ [ div [ class "d-flex justify-content-center" ] [ relTable ] ]
+                        ++ [ div [ class "details-board__row" ] miscDetails ]
+                , div [ class "details-board__toggle" ]
+                    [ span
+                        [ class "details-board__toggle__switch"
+                        , onClick <| UpdateModel { model | tokenCardExpanded = not model.tokenCardExpanded }
+                        ]
+                        [ text <|
+                            case model.tokenCardExpanded of
+                                True ->
+                                    "show less"
+
+                                False ->
+                                    "show more"
+                        ]
                     ]
                 ]
-                    ++ [ div [ class "d-flex justify-content-center" ] [ relTable ] ]
-                    ++ [ div [ class "details-board__row" ] miscDetails ]
 
         renderSelectedNer : Api.CmdSpacyNerResEnt -> Html Msg
         renderSelectedNer selectedNer =

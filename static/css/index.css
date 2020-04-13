@@ -10135,6 +10135,7 @@ main > .container {
   scrollbar-width: thin;
 }
 .page-dashboard .applemail .applemail__content {
+  flex-grow: 1;
   padding: 2rem;
   height: 100%;
   overflow-y: scroll;
@@ -10160,10 +10161,33 @@ main > .container {
   color: #fff;
   padding-top: 2rem;
   padding-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .page-dashboard .applemail .details-board .details-board__row {
   padding-left: 2rem;
   padding-right: 2rem;
+}
+.page-dashboard .applemail .details-board .details-board__content {
+  flex-grow: 1;
+  max-height: 100rem;
+  overflow-y: auto;
+  transition: max-height 0.3s ease-in-out;
+}
+.page-dashboard .applemail .details-board .details-board__toggle {
+  flex-grow: 0;
+  height: 2rem;
+  text-align: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.page-dashboard .applemail .details-board .details-board__toggle .details-board__toggle__switch {
+  cursor: pointer;
+}
+.page-dashboard .applemail .details-board--collapsed .details-board__content {
+  max-height: 25rem;
+  overflow-y: hidden;
 }
 .page-dashboard .articles-nav {
   border-right: 1px solid #e5e5e5;
