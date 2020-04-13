@@ -55,5 +55,40 @@ window.mainInit = null;
          *         reportError(error);
          *     }
          * }); */
+        app.ports.initTooltips.subscribe(function(data) {
+            try {
+                console.log('> initTooltips', data);
+                $('[data-toggle="tooltip"]').tooltip();
+            } catch (error) {
+                reportError(error);
+            }
+        });
+        /* app.ports.tooltipToggle.subscribe(function(data) {
+         *     // data.id - tooltip element id
+         *     try {
+         *         console.log('> tooltipToggle', data);
+         *         $('#' + data.id).tooltip('toggle');
+         *     } catch (error) {
+         *         reportError(error);
+         *     }
+         * });
+         * app.ports.tooltipShow.subscribe(function(data) {
+         *     // data.id - tooltip element id
+         *     try {
+         *         console.log('> tooltipShow', data);
+         *         $('#' + data.id).tooltip('show');
+         *     } catch (error) {
+         *         reportError(error);
+         *     }
+         * });
+         * app.ports.tooltipHide.subscribe(function(data) {
+         *     // data.id - tooltip element id
+         *     try {
+         *         console.log('> tooltipHide', data);
+         *         $('#' + data.id).tooltip('hide');
+         *     } catch (error) {
+         *         reportError(error);
+         *     }
+         * }); */
     };
 })();

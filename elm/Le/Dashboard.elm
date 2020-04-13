@@ -11,7 +11,9 @@ import Le.Block.Toast
 import Le.Components exposing (..)
 import Le.Config
 import Le.Lib exposing (..)
+import Le.Ports
 import Le.Routes
+import Le.Spacy
 import Le.Types exposing (..)
 import Le.Utils exposing (..)
 import Maybe.Extra
@@ -38,6 +40,7 @@ type Msg
     | GotNers AjaxParams (Result Api.Error (Api.Paginated String))
     | NerClicked Api.CmdSpacyNerResEnt
     | TokenClicked Api.CmdSpacyPosResEnt
+    | RenderedSomeTooltipsAndSlept ()
 
 
 type alias Model =
@@ -209,7 +212,12 @@ update msg model =
             ( { model | selectedNer = Just ner }, Cmd.none )
 
         TokenClicked tok ->
-            ( { model | selectedToken = Just tok }, Cmd.none )
+            ( { model | selectedToken = Just tok }
+            , Process.sleep 100 |> Task.perform RenderedSomeTooltipsAndSlept
+            )
+
+        RenderedSomeTooltipsAndSlept () ->
+            ( model, Le.Ports.initTooltips () )
 
 
 navbarContent : Html Msg
@@ -371,51 +379,76 @@ mainContent model =
         renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
         renderSelectedToken selectedToken =
             let
+                popoverKeyForDep dep =
+                    "page-dashboard-popover-dep-" ++ dep
+
+                tooltipHtml dep =
+                    "<div>"
+                        ++ Le.Spacy.depExplanation dep
+                        ++ "</div>"
+
+                -- ++ """
+                --    <div class="text-center">
+                --      <a href="https://spacy.io/api/annotation#dependency-parsing" target="_blank">see details</a>
+                --    </div>
+                --    """
+                depPopover dep =
+                    let
+                        key =
+                            popoverKeyForDep dep
+                    in
+                    i
+                        [ class "fas fa-question-circle"
+                        , id key
+                        , attribute "data-toggle" "tooltip"
+
+                        -- , attribute "data-trigger" "click"
+                        , attribute "data-html" "true"
+                        , attribute "data-original-title" (tooltipHtml dep)
+
+                        -- , attribute "data-offset" "0, 0"
+                        ]
+                        []
+
+                depTr from dep to =
+                    tr []
+                        [ td [ class "text-right" ]
+                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
+                                [ text from ]
+                            ]
+                        , td [ class "applemail__controlpanel__reltable__arrow" ]
+                            [ i [ class "fas fa-long-arrow-right" ] [] ]
+                        , td [ class "text-center" ]
+                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
+                                [ text <| dep ++ "\u{00A0}"
+                                , depPopover dep
+                                ]
+                            ]
+
+                        -- [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
+                        --     [ text <| dep ++ " "
+                        --     , depPopover dep
+                        --     ]
+                        -- ]
+                        , td [ class "applemail__controlpanel__reltable__arrow" ]
+                            [ i [ class "fas fa-long-arrow-right" ] [] ]
+                        , td [ class "text-left" ]
+                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
+                                [ text to ]
+                            ]
+                        ]
+
                 headTokenRealtionsTrs =
                     case mDepHeadToken of
                         Nothing ->
                             []
 
                         Just headToken ->
-                            [ tr []
-                                [ td [ class "text-right" ]
-                                    [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                        [ text headToken.text ]
-                                    ]
-                                , td [ class "applemail__controlpanel__reltable__arrow" ]
-                                    [ i [ class "fas fa-long-arrow-right" ] [] ]
-                                , td [ class "text-center" ]
-                                    [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                        [ text selectedToken.dep_ ]
-                                    ]
-                                , td [ class "applemail__controlpanel__reltable__arrow" ]
-                                    [ i [ class "fas fa-long-arrow-right" ] [] ]
-                                , td [ class "text-left" ]
-                                    [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                        [ text selectedToken.text ]
-                                    ]
-                                ]
+                            [ depTr headToken.text selectedToken.dep_ selectedToken.text
                             ]
 
                 childTokenRelationTr childToken =
-                    tr []
-                        [ td [ class "text-right" ]
-                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                [ text selectedToken.text ]
-                            ]
-                        , td [ class "applemail__controlpanel__reltable__arrow" ]
-                            [ i [ class "fas fa-long-arrow-right" ] [] ]
-                        , td [ class "text-center" ]
-                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                [ text childToken.dep_ ]
-                            ]
-                        , td [ class "applemail__controlpanel__reltable__arrow" ]
-                            [ i [ class "fas fa-long-arrow-right" ] [] ]
-                        , td [ class "text-left" ]
-                            [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
-                                [ text childToken.text ]
-                            ]
-                        ]
+                    depTr selectedToken.text childToken.dep_ childToken.text
 
                 relTable =
                     table [ class "applemail__controlpanel__reltable mt-2" ]
