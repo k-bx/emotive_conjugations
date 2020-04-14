@@ -87,43 +87,45 @@ parseFilteredArticles = do
                   . at "WARC-Target-URI"
                   & fromMaybe ""
                   & S.toText
-          let warcRecId =
-                recHeader ^. recHeaders
-                  . at "WARC-Record-ID"
-                  & Safe.fromJustNote "Warc record ID is empty"
-                  & S.toText
-          let warcDt =
-                recHeader ^. recHeaders
-                  . at "WARC-Date"
-                  & fromMaybe ""
-                  & S.toString
-                  & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
-                  & Safe.fromJustNote "Couldn't parse time"
-          res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html uriText)
-          void $ runDb $ do
-            articleId <- P.insert $ Article
-              { articleWarcId = warcRecId,
-                articleWarcDate = warcDt,
-                articleUrl = uriText,
-                articleHost = Le.Article.extractHostUnsafe uriText
-              }
-            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticleNp
-              { articleNpUrl = uriText,
-                articleNpHost = Le.Article.extractHostUnsafe uriText,
-                articleNpTitle = Le.Python.cprTitle res,
-                articleNpAuthors = JsonList (Le.Python.cprAuthors res),
-                articleNpDate =
-                  posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
-                articleNpContent = Le.Python.cprText res,
-                articleNpLang = Le.Python.cprLanguage res,
-                articleNpSpacyNer = Nothing,
-                articleNpSpacyPos = Nothing
-              }
-          logInfo $ display $ "> URI: " <> uriText
-          -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-          -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
-          -- logInfo $ display $ "> text: " <> Le.Python.cprText res
-          pure ()
+          let host = Le.Article.extractHostUnsafe uriText
+          when (any (`T.isInfixOf` host) Le.Config.newsHosts) $ do
+            let warcRecId =
+                  recHeader ^. recHeaders
+                    . at "WARC-Record-ID"
+                    & Safe.fromJustNote "Warc record ID is empty"
+                    & S.toText
+            let warcDt =
+                  recHeader ^. recHeaders
+                    . at "WARC-Date"
+                    & fromMaybe ""
+                    & S.toString
+                    & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+                    & Safe.fromJustNote "Couldn't parse time"
+            res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html uriText)
+            void $ runDb $ do
+              articleId <- P.insert $ Article
+                { articleWarcId = warcRecId,
+                  articleWarcDate = warcDt,
+                  articleUrl = uriText,
+                  articleHost = host
+                }
+              P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticleNp
+                { articleNpUrl = uriText,
+                  articleNpHost = host,
+                  articleNpTitle = Le.Python.cprTitle res,
+                  articleNpAuthors = JsonList (Le.Python.cprAuthors res),
+                  articleNpDate =
+                    posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
+                  articleNpContent = Le.Python.cprText res,
+                  articleNpLang = Le.Python.cprLanguage res,
+                  articleNpSpacyNer = Nothing,
+                  articleNpSpacyPos = Nothing
+                }
+            logInfo $ display $ "> URI: " <> uriText
+            -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+            -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+            -- logInfo $ display $ "> text: " <> Le.Python.cprText res
+            pure ()
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
