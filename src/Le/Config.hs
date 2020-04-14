@@ -14,8 +14,8 @@ newsHosts =
     "msnbc.com",
     "foxnews.com",
     "bbc.com",
-    "bbc.co.uk",
-    "dailymail.co.uk"
+    "bbc.co.uk"
+    -- "dailymail.co.uk"
   ]
 
 cheapWorkers :: [BaseUrl]

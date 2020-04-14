@@ -30,6 +30,7 @@ commands ver =
     <> cmd "download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.downloadAndFilter))
     <> cmd "test-download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.testDownloadAndFilter))
     <> cmd "migrate" "Run migrations" (pure Le.Migrate.run)
+    <> cmd "clean-db-data" "Clean some data" (pure Le.Migrate.cleanDbData)
     <> cmd "test-python-subcommand" "Ping python" (pure (run Le.Python.runTest))
     <> cmd "test-python-article" "Newspaper python library test" (pure (run Le.Python.parseArticleNewspaperTest))
     <> cmd "extract-articles" "Parse filtered articles via newspaper" (pure (run Le.CommonCrawl.Cmd.parseFilteredArticles))

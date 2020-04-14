@@ -98,3 +98,8 @@ getMigrationInfo = do
 setMigrationVersion :: Int -> ReaderT P.SqlBackend IO ()
 setMigrationVersion n = do
   P.updateWhere [] [MigrationInfoVersion P.=. n]
+
+cleanDbData :: IO ()
+cleanDbData = Le.App.run $ do
+  Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticleNp])
+  Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])
