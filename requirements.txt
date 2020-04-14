@@ -7,4 +7,5 @@ spacy-lookups-data
 flask
 gunicorn
 jupyterlab
-git+https://github.com/fhamborg/news-please.git
+# git+https://github.com/fhamborg/news-please.git
+./vendor/news-please

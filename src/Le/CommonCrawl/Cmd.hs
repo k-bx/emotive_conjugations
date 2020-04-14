@@ -107,41 +107,44 @@ parseFilteredArticles = do
                     & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
                     & Safe.fromJustNote "Couldn't parse time"
             res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
-            void $ runDb $ do
-              articleId <- P.insert $ Article
-                { articleWarcId = warcRecId,
-                  articleWarcDate = warcDt,
-                  articleUrl = uriText,
-                  articleHost = host
-                }
-              P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
-                { articlePleaseUrl = uriText,
-                  articlePleaseHost = host,
-                  articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
-                  articlePleaseDateDownload =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
-                  articlePleaseDatePublish =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
-                  articlePleaseDateModify =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
-                  articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
-                  articlePleaseFilename = Le.Python.cnrFilename res,
-                  articlePleaseImageUrl = Le.Python.cnrImageUrl res,
-                  articlePleaseLanguage = Le.Python.cnrLanguage res,
-                  articlePleaseLocalpath = Le.Python.cnrLocalpath res,
-                  articlePleaseTitle = Le.Python.cnrTitle res,
-                  articlePleaseTitlePage = Le.Python.cnrTitlePage res,
-                  articlePleaseTitleRss = Le.Python.cnrTitleRss res,
-                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
-                  articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
-                  articlePleaseSpacyNer = Nothing,
-                  articlePleaseSpacyPos = Nothing
-                }
-            logInfo $ display $ "> URI: " <> uriText
-            -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-            -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
-            -- logInfo $ display $ "> text: " <> Le.Python.cprText res
-            pure ()
+            case Le.Python.cnrLanguage res of
+              "en" -> do
+                void $ runDb $ do
+                  articleId <- P.insert $ Article
+                    { articleWarcId = warcRecId,
+                      articleWarcDate = warcDt,
+                      articleUrl = uriText,
+                      articleHost = host
+                    }
+                  P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
+                    { articlePleaseUrl = uriText,
+                      articlePleaseHost = host,
+                      articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
+                      articlePleaseDateDownload =
+                        posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
+                      articlePleaseDatePublish =
+                        posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
+                      articlePleaseDateModify =
+                        posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
+                      articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
+                      articlePleaseFilename = Le.Python.cnrFilename res,
+                      articlePleaseImageUrl = Le.Python.cnrImageUrl res,
+                      articlePleaseLanguage = Le.Python.cnrLanguage res,
+                      articlePleaseLocalpath = Le.Python.cnrLocalpath res,
+                      articlePleaseTitle = Le.Python.cnrTitle res,
+                      articlePleaseTitlePage = Le.Python.cnrTitlePage res,
+                      articlePleaseTitleRss = Le.Python.cnrTitleRss res,
+                      articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
+                      articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
+                      articlePleaseSpacyNer = Nothing,
+                      articlePleaseSpacyPos = Nothing
+                    }
+                logInfo $ display $ "> URI: " <> uriText
+                -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+                -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+                -- logInfo $ display $ "> text: " <> Le.Python.cprText res
+                pure ()
+              _ -> pure ()
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do

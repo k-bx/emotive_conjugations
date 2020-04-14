@@ -50,8 +50,11 @@ class Extractor:
         article_candidates = []
 
         for extractor in self.extractor_list:
-            article_candidate = extractor.extract(item)
-            article_candidates.append(article_candidate)
+            try:
+                article_candidate = extractor.extract(item)
+                article_candidates.append(article_candidate)
+            except Exception as e:
+                self.log.error(e)
 
         article_candidates = self.cleaner.clean(article_candidates)
         article = self.comparer.compare(item, article_candidates)
