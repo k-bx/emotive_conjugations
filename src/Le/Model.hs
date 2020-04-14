@@ -20,6 +20,7 @@ User
     deriving Show
 Article
     warcId Text 
+    warcDate UTCTime
     url Text
     host Text
 -- | Article extracted via Python newspaper library.

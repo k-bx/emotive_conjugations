@@ -5,6 +5,7 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.List
 import qualified Data.String.Class as S
 import qualified Data.Text as T
+import qualified Data.Time.Format
 import Data.Warc
 import qualified Database.Persist.Postgresql as P
 import qualified Le.ApiTypes as AT
@@ -19,6 +20,7 @@ import qualified Le.WebClient
 import qualified Network.AWS.Data.Text as AWS
 import qualified Network.AWS.S3 as S3
 import qualified Network.URI.Encode
+import qualified Safe
 import Servant.Client
 import qualified System.Directory
 
@@ -81,15 +83,31 @@ parseFilteredArticles = do
         then pure ()
         else do
           let uriText =
-                recHeader
-                  ^. recHeaders
+                recHeader ^. recHeaders
                   . at "WARC-Target-URI"
                   & fromMaybe ""
                   & S.toText
+          let warcRecId =
+                recHeader ^. recHeaders
+                  . at "WARC-Record-ID"
+                  & Safe.fromJustNote "Warc record ID is empty"
+                  & S.toText
+          let warcDt =
+                recHeader ^. recHeaders
+                  . at "WARC-Date"
+                  & fromMaybe ""
+                  & S.toString
+                  & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+                  & Safe.fromJustNote "Couldn't parse time"
           res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html uriText)
           void $ runDb $ do
-            -- articleId <- ensureArticle uriText
-            P.insert $ ArticleNp
+            articleId <- P.insert $ Article
+              { articleWarcId = warcRecId,
+                articleWarcDate = warcDt,
+                articleUrl = uriText,
+                articleHost = Le.Article.extractHostUnsafe uriText
+              }
+            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticleNp
               { articleNpUrl = uriText,
                 articleNpHost = Le.Article.extractHostUnsafe uriText,
                 articleNpTitle = Le.Python.cprTitle res,
@@ -106,16 +124,6 @@ parseFilteredArticles = do
           -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
           -- logInfo $ display $ "> text: " <> Le.Python.cprText res
           pure ()
-
--- ensureArticle :: Text -> ReaderT P.SqlBackend IO ArticleId
--- ensureArticle uriText = do
---   mArticle <- P.getBy (ArticleUrlUniq uriText)
---   case mArticle of
---     Nothing -> P.insert $ Article
---       { articleUrl = uriText,
---         articleHost = Le.Article.extractHostUnsafe uriText
---       }
---     Just article -> pure $ entityKey article
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
