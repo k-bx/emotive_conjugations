@@ -74,16 +74,17 @@ migration01 = do
 -- 1 -> 2
 migration02 :: ReaderT P.SqlBackend IO ()
 migration02 = do
-  articlesNp <- P.selectList [] [P.Desc ArticleNpId]
-  forM_ articlesNp $ \articleNp -> do
-    let articleId = P.toSqlKey (P.fromSqlKey (entityKey articleNp))
-    P.repsert
-      articleId
-      ( Article
-          { articleUrl = articleNpUrl (ev articleNp),
-            articleHost = articleNpHost (ev articleNp)
-          }
-      )
+  -- articlesNp <- P.selectList [] [P.Desc ArticleNpId]
+  -- forM_ articlesNp $ \articleNp -> do
+  --   let articleId = P.toSqlKey (P.fromSqlKey (entityKey articleNp))
+  --   P.repsert
+  --     articleId
+  --     ( Article
+  --         { articleUrl = articleNpUrl (ev articleNp),
+  --           articleHost = articleNpHost (ev articleNp)
+  --         }
+  --     )
+  pure ()
 
 getMigrationInfo :: ReaderT P.SqlBackend IO MigrationInfo
 getMigrationInfo = do

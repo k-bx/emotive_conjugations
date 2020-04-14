@@ -19,8 +19,9 @@ User
     email Text
     deriving Show
 Article
-    url Text -- duplicate for convenience
-    host Text -- duplicate for convenience
+    warcId Text 
+    url Text
+    host Text
 -- | Article extracted via Python newspaper library.
 -- Article.id == ANewspaper.id
 ArticleNp
