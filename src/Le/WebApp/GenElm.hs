@@ -33,7 +33,7 @@ moduleDefs =
   [ DefineElm (Proxy :: Proxy AT.NoOp),
     DefineElm (Proxy :: Proxy AT.ArticleShort),
     DefineElm (Proxy :: Proxy AT.Article),
-    DefineElm (Proxy :: Proxy AT.ArticleNp),
+    DefineElm (Proxy :: Proxy AT.ArticlePlease),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyPosResEnt),
     DefineElm (Proxy :: Proxy (AT.Paginated Text))

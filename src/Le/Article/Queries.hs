@@ -27,17 +27,46 @@ OFFSET {(page - 1) * lim}
   where
     lim = 20
 
-queryPersonArticleNps ::
-  MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticleNp]
-queryPersonArticleNps mPerson = do
+-- queryPersonArticleNps ::
+--   MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticleNp]
+-- queryPersonArticleNps mPerson = do
+--   case fromMaybe "" (T.strip <$> mPerson) of
+--     "" ->
+--       rawSql
+--         [qc|
+-- select ??
+-- from "article_np"
+-- where "article_np"."date" is not null
+-- order by "article_np"."date" desc, "article_np"."id" desc 
+-- limit {lim}
+--     |]
+--         []
+--     person ->
+--       rawSql
+--         [qc|
+-- select ??
+-- from "article_np"
+-- inner join named_entity ne on ne.article_id = "article_np".id
+-- where ne.entity = ?
+-- group by ("article_np"."id")
+-- order by "article_np"."date" desc, "article_np"."id" desc 
+-- limit {lim}
+--               |]
+--         [PersistText person]
+--   where
+--     lim = Le.Config.articlesLimit
+
+queryPersonArticlesPlease ::
+  MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticlePlease]
+queryPersonArticlesPlease mPerson = do
   case fromMaybe "" (T.strip <$> mPerson) of
     "" ->
       rawSql
         [qc|
 select ??
-from "article_np"
-where "article_np"."date" is not null
-order by "article_np"."date" desc, "article_np"."id" desc 
+from "article_please"
+where "article_please"."date_publish" is not null
+order by "article_np"."date_publish" desc, "article_please"."id" desc 
 limit {lim}
     |]
         []
@@ -45,11 +74,11 @@ limit {lim}
       rawSql
         [qc|
 select ??
-from "article_np"
-inner join named_entity ne on ne.article_id = "article_np".id
+from "article_please"
+inner join named_entity ne on ne.rticle_please_id = "article_please".id
 where ne.entity = ?
-group by ("article_np"."id")
-order by "article_np"."date" desc, "article_np"."id" desc 
+group by ("article_please"."id")
+order by "article_please"."date" desc, "article_please"."id" desc 
 limit {lim}
               |]
         [PersistText person]

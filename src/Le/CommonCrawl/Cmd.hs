@@ -13,6 +13,7 @@ import Le.App
 import qualified Le.Article
 import Le.CommonCrawl
 import qualified Le.Config
+import qualified Le.Html
 import Le.Import
 import Le.Model
 import qualified Le.Python
@@ -78,7 +79,11 @@ parseFilteredArticles = do
     recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
     logInfo $ display $ "> warc path: " <> S.toText warcPath
     forM_ recs $ \(recHeader, recBs) -> do
-      let html = T.strip (S.toText recBs)
+      let headersAndhtml = T.strip (S.toText recBs)
+      -- logInfo $ "> headersAndhtml: " <> display (T.take 2000 headersAndhtml)
+      let (_headers, html0) = Le.Html.splitHeadersAndHtml headersAndhtml
+      let html = T.strip html0
+      -- logInfo $ "> html: " <> display (T.take 2000 html)
       if html == ""
         then pure ()
         else do
@@ -101,7 +106,7 @@ parseFilteredArticles = do
                     & S.toString
                     & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
                     & Safe.fromJustNote "Couldn't parse time"
-            res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html uriText)
+            res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
             void $ runDb $ do
               articleId <- P.insert $ Article
                 { articleWarcId = warcRecId,
@@ -109,17 +114,28 @@ parseFilteredArticles = do
                   articleUrl = uriText,
                   articleHost = host
                 }
-              P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticleNp
-                { articleNpUrl = uriText,
-                  articleNpHost = host,
-                  articleNpTitle = Le.Python.cprTitle res,
-                  articleNpAuthors = JsonList (Le.Python.cprAuthors res),
-                  articleNpDate =
-                    posixSecondsToUTCTime <$> Le.Python.cprPubDate res,
-                  articleNpContent = Le.Python.cprText res,
-                  articleNpLang = Le.Python.cprLanguage res,
-                  articleNpSpacyNer = Nothing,
-                  articleNpSpacyPos = Nothing
+              P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
+                { articlePleaseUrl = uriText,
+                  articlePleaseHost = host,
+                  articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
+                  articlePleaseDateDownload =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
+                  articlePleaseDatePublish =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
+                  articlePleaseDateModify =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
+                  articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
+                  articlePleaseFilename = Le.Python.cnrFilename res,
+                  articlePleaseImageUrl = Le.Python.cnrImageUrl res,
+                  articlePleaseLanguage = Le.Python.cnrLanguage res,
+                  articlePleaseLocalpath = Le.Python.cnrLocalpath res,
+                  articlePleaseTitle = Le.Python.cnrTitle res,
+                  articlePleaseTitlePage = Le.Python.cnrTitlePage res,
+                  articlePleaseTitleRss = Le.Python.cnrTitleRss res,
+                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
+                  articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
+                  articlePleaseSpacyNer = Nothing,
+                  articlePleaseSpacyPos = Nothing
                 }
             logInfo $ display $ "> URI: " <> uriText
             -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
@@ -129,14 +145,14 @@ parseFilteredArticles = do
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
-  articleNps <- runDb $ P.selectList [ArticleNpSpacyNer P.==. Nothing] [P.Desc ArticleNpId]
-  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articleNps $ \articleNp -> do
-    res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articleNpContent (ev articleNp)))
+  articlePleases <- runDb $ P.selectList [ArticlePleaseSpacyNer P.==. Nothing] [P.Desc ArticlePleaseId]
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articlePleases $ \articlePlease -> do
+    res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseMaintext (ev articlePlease)))
     runDb $ do
-      P.update (entityKey articleNp) [ArticleNpSpacyNer P.=. (Just res)]
+      P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
       forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
         P.insert $ NamedEntity
-          { namedEntityArticleId = P.toSqlKey (P.fromSqlKey (entityKey articleNp)),
+          { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
             namedEntityEntity = cseText,
             namedEntityStart = cseStart,
             namedEntityStartChar = cseStartChar,
@@ -147,9 +163,9 @@ spacyNerArticles = do
 
 spacyPosArticles :: Le ()
 spacyPosArticles = do
-  articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId]
+  articleNps <- runDb $ P.selectList [ArticlePleaseSpacyPos P.==. Nothing] [P.Desc ArticlePleaseId]
   -- articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId, P.LimitTo 10]
   pooledForConcurrentlyN_ Le.Config.numPythonWorkers articleNps $ \articleNp -> do
-    res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articleNpContent (ev articleNp)))
+    res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseMaintext (ev articleNp)))
     runDb $ do
-      P.update (entityKey articleNp) [ArticleNpSpacyPos P.=. (Just res)]
+      P.update (entityKey articleNp) [ArticlePleaseSpacyPos P.=. (Just res)]

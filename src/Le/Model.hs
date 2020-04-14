@@ -23,21 +23,43 @@ Article
     warcDate UTCTime
     url Text
     host Text
--- | Article extracted via Python newspaper library.
--- Article.id == ANewspaper.id
-ArticleNp
+-- -- | Article extracted via Python newspaper library.
+-- -- Article.id == ArticleNp.id
+-- ArticleNp
+--     url Text -- duplicate for convenience
+--     host Text -- duplicate for convenience
+--     title Text
+--     authors (JsonList Text)
+--     date UTCTime Maybe
+--     content Text
+--     lang Text
+--     spacyNer Le.Python.CmdSpacyNerRes Maybe
+--     spacyPos Le.Python.CmdSpacyPosRes Maybe
+--     deriving Show
+-- | Article extracted via Python news-please library.
+-- Article.id == ArticlePlease.id
+ArticlePlease
     url Text -- duplicate for convenience
     host Text -- duplicate for convenience
-    title Text
     authors (JsonList Text)
-    date UTCTime Maybe
-    content Text
-    lang Text
+    dateDownload UTCTime Maybe
+    datePublish UTCTime Maybe
+    dateModify UTCTime Maybe
+    description Text
+    filename Text
+    imageUrl Text
+    language Text
+    localpath Text Maybe
+    title Text Maybe
+    titlePage Text Maybe
+    titleRss Text Maybe
+    sourceDomain Text Maybe
+    maintext Text
     spacyNer Le.Python.CmdSpacyNerRes Maybe
     spacyPos Le.Python.CmdSpacyPosRes Maybe
     deriving Show
 NamedEntity
-    articleId ArticleId
+    articlePleaseId ArticlePleaseId
     entity Text
     start Int
     startChar Int

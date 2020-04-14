@@ -15,41 +15,41 @@ articlesShortHandler ::
   Maybe Text ->
   Le [AT.ArticleShort]
 articlesShortHandler mPerson = do
-  articleNps <- runDb $ Q.queryPersonArticleNps mPerson
-  forM articleNps $ \articleNp -> do
-    let mdate = articleNpDate (ev articleNp)
+  articlesPlease <- runDb $ Q.queryPersonArticlesPlease mPerson
+  forM articlesPlease $ \articlePlease -> do
+    let mdate = articlePleaseDatePublish (ev articlePlease)
     pure $ AT.ArticleShort
-      { artId = P.toSqlKey (P.fromSqlKey (entityKey articleNp)),
+      { artId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
         artDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> mdate,
-        artPaperName = newspaperNameFromHost (articleNpHost (ev articleNp)),
-        artTitleShort = articleNpTitle (ev articleNp)
+        artPaperName = newspaperNameFromHost (articlePleaseHost (ev articlePlease)),
+        artTitleShort = fromMaybe "<unknown>" (articlePleaseTitle (ev articlePlease))
       }
 
 articleDetails :: ArticleId -> Le AT.Article
 articleDetails articleId = do
-  let articleNpId = P.toSqlKey (P.fromSqlKey articleId)
-  articleNp <- mustFindM $ runDb $ P.get articleNpId
+  let articlePleaseId = P.toSqlKey (P.fromSqlKey articleId)
+  articlePlease <- mustFindM $ runDb $ P.get articlePleaseId
   pure $ AT.Article
     { arcId = articleId,
-      arcUrl = articleNpUrl articleNp,
-      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate articleNp,
-      arcPaperName = newspaperNameFromHost (articleNpHost articleNp),
-      arcTitle = articleNpTitle articleNp,
-      arcAuthors = unpack (articleNpAuthors articleNp),
-      arcLang = articleNpLang articleNp
+      arcUrl = articlePleaseUrl articlePlease,
+      arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
+      arcPaperName = newspaperNameFromHost (articlePleaseHost articlePlease),
+      arcTitle = fromMaybe "<unknown>" (articlePleaseTitle articlePlease),
+      arcAuthors = unpack (articlePleaseAuthors articlePlease),
+      arcLang = articlePleaseLanguage articlePlease
     }
 
-articleNpDetails :: ArticleNpId -> Le AT.ArticleNp
-articleNpDetails articleNpId = do
-  articleNp <- mustFindM $ runDb $ P.get articleNpId
-  pure $ AT.ArticleNp
-    { arnId = articleNpId,
-      arnAuthors = unpack (articleNpAuthors articleNp),
-      arnDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articleNpDate articleNp,
-      arnContent = articleNpContent articleNp,
-      arnLang = articleNpLang articleNp,
-      arnSpacyNerEnts = fmap Le.Python.csrEnts (articleNpSpacyNer articleNp),
-      arnSpacyPosEnts = fmap Le.Python.cprTokens (articleNpSpacyPos articleNp)
+articlePleaseDetails :: ArticlePleaseId -> Le AT.ArticlePlease
+articlePleaseDetails articleNpId = do
+  articlePlease <- mustFindM $ runDb $ P.get articleNpId
+  pure $ AT.ArticlePlease
+    { arpId = articleNpId,
+      arpAuthors = unpack (articlePleaseAuthors articlePlease),
+      arpDatePublish = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
+      arpMaintext = articlePleaseMaintext articlePlease,
+      arpLanguage = articlePleaseLanguage articlePlease,
+      arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),
+      arpSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseSpacyPos articlePlease)
     }
 
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)

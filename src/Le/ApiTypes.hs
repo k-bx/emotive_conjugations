@@ -58,19 +58,33 @@ data Article
 
 deriveBoth (jsonOpts 3) ''Article
 
-data ArticleNp
-  = ArticleNp
-      { arnId :: M.ArticleNpId,
-        arnAuthors :: [Text],
-        arnDate :: Maybe IntZonedTime,
-        arnContent :: Text,
-        arnLang :: Text,
-        arnSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
-        arnSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+-- data ArticleNp
+--   = ArticleNp
+--       { arnId :: M.ArticleNpId,
+--         arnAuthors :: [Text],
+--         arnDate :: Maybe IntZonedTime,
+--         arnContent :: Text,
+--         arnLang :: Text,
+--         arnSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+--         arnSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+--       }
+--   deriving (Show, Eq, Generic)
+
+-- deriveBoth (jsonOpts 3) ''ArticleNp
+
+data ArticlePlease
+  = ArticlePlease
+      { arpId :: M.ArticlePleaseId,
+        arpAuthors :: [Text],
+        arpDatePublish :: Maybe IntZonedTime,
+        arpMaintext :: Text,
+        arpLanguage :: Text,
+        arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+        arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
       }
   deriving (Show, Eq, Generic)
 
-deriveBoth (jsonOpts 3) ''ArticleNp
+deriveBoth (jsonOpts 3) ''ArticlePlease
 
 data Paginated item
   = Paginated

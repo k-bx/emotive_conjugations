@@ -30,7 +30,8 @@ run = do
 
 ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
-  ensureIndex "article_np" "article_np_date_i" ["date"]
+  -- ensureIndex "article_np" "article_np_date_i" ["date"]
+  ensureIndex "article_please" "article_please_date_publish_i" ["date_publish"]
   pure ()
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()
@@ -102,5 +103,6 @@ setMigrationVersion n = do
 
 cleanDbData :: IO ()
 cleanDbData = Le.App.run $ do
-  Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticleNp])
+  -- Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticleNp])
+  Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticlePlease])
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])

@@ -146,9 +146,42 @@ instance P.PersistField CmdSpacyPosRes where
 instance P.PersistFieldSql CmdSpacyPosRes where
   sqlType _ = P.SqlString
 
+data CmdParseNewsPleaseOpts
+  = CmdParseNewsPleaseOpts
+      { cnpHtml :: Text,
+        cnpUrl :: Text,
+        cnpDownloadDate :: POSIXTime
+      }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''CmdParseNewsPleaseOpts
+
+data CmdParseNewsPleaseRes
+  = CmdParseNewsPleaseRes
+      { cnrAuthors :: [Text],
+        cnrDateDownload :: Maybe POSIXTime,
+        cnrDatePublish :: Maybe POSIXTime,
+        cnrDateModify :: Maybe POSIXTime,
+        cnrDescription :: Maybe Text,
+        cnrFilename :: Text,
+        cnrImageUrl :: Text,
+        cnrLanguage :: Text,
+        cnrLocalpath :: Maybe Text,
+        cnrTitle :: Maybe Text,
+        cnrTitlePage :: Maybe Text,
+        cnrTitleRss :: Maybe Text,
+        cnrSourceDomain :: Maybe Text,
+        cnrMaintext :: Maybe Text,
+        cnrUrl :: Text
+      }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''CmdParseNewsPleaseRes
+
 data Cmd
   = CmdPing
   | CmdParseArticle CmdParseArticleOpts
+  | CmdParseNewsPlease CmdParseNewsPleaseOpts
   | CmdSpacyNer CmdSpacyNerOpts
   | CmdSpacyPos CmdSpacyPosOpts
   deriving (Generic, Show)
@@ -221,6 +254,9 @@ parseArticleNewspaperTest = do
 
 cmdParseArticle :: CmdParseArticleOpts -> Le CmdParseArticleRes
 cmdParseArticle opts = runPythonParsing (CmdParseArticle opts)
+
+cmdParseNewsPlease :: CmdParseNewsPleaseOpts -> Le CmdParseNewsPleaseRes
+cmdParseNewsPlease opts = runPythonParsing (CmdParseNewsPlease opts)
 
 cmdSpacyNer :: CmdSpacyNerOpts -> Le CmdSpacyNerRes
 cmdSpacyNer opts = runPythonWeb (CmdSpacyNer opts)
