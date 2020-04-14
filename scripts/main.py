@@ -17,7 +17,7 @@ def main():
             html = args['contents']['html']
             url = args['contents']['url']
 
-            article = Article(url, )
+            article = Article(url)
             article.set_html(html)
             article.parse()
             print('> title', article.title, file=sys.stderr)
