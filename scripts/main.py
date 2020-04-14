@@ -15,8 +15,9 @@ def main():
             print('pong')
         elif args['tag'] == 'cmd_parse_article':
             html = args['contents']['html']
+            url = args['contents']['url']
 
-            article = Article('')
+            article = Article(url, )
             article.set_html(html)
             article.parse()
             print('> title', article.title, file=sys.stderr)

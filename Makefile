@@ -43,7 +43,7 @@ generate-elm:
 
 .PHONY: hs-dev
 hs-dev:
-	$(STACK) build --fast --ghc-options="-j +RTS -A32M -RTS" --test --no-run-tests
+	$(STACK) build --fast --ghc-options="-j +RTS -A32M -RTS"
 
 .PHONY: hs-prod
 hs-prod:

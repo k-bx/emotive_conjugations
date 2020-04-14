@@ -86,7 +86,7 @@ parseFilteredArticles = do
                   . at "WARC-Target-URI"
                   & fromMaybe ""
                   & S.toText
-          res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html)
+          res <- Le.Python.cmdParseArticle (Le.Python.CmdParseArticleOpts html uriText)
           void $ runDb $ do
             -- articleId <- ensureArticle uriText
             P.insert $ ArticleNp

@@ -19,7 +19,8 @@ import qualified RIO.Process
 
 data CmdParseArticleOpts
   = CmdParseArticleOpts
-      { cpaHtml :: Text
+      { cpaHtml :: Text,
+        cpaUrl :: Text
       }
   deriving (Generic, Show)
 
@@ -213,7 +214,8 @@ parseArticleNewspaperTest :: Le ()
 parseArticleNewspaperTest = do
   -- https://www.nytimes.com/2020/03/29/arts/music/krzysztof-penderecki-dead.html
   html <- liftIO $ T.readFile "/home/kb/workspace/emotive_conjugations/data/test/penderecki-dead.html"
-  res <- cmdParseArticle (CmdParseArticleOpts html)
+  let url = "https://www.nytimes.com/2020/03/29/arts/music/krzysztof-penderecki-dead.html"
+  res <- cmdParseArticle (CmdParseArticleOpts html url)
   logInfo $ display $ "> Title: " <> tshow (cprTitle res)
   logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (cprPubDate res))
 
