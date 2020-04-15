@@ -230,6 +230,16 @@ renderContentNodes ps =
                         (List.map renderNode nd.children)
 
                 CNTok nd ->
+                    let
+                        isHighlighted =
+                            Just nd.tok.i == ps.selectedToken
+
+                        isParent =
+                            Just nd.tok.i == ps.depParent
+
+                        isChild =
+                            not isParent && Set.member nd.tok.i ps.depChildren
+                    in
                     span [ class "content-token-wrap" ]
                         [ span
                             [ class "content-token"
@@ -238,13 +248,13 @@ renderContentNodes ps =
                                   , ps.highlightPos
                                   )
                                 , ( "badge-highlighed-token"
-                                  , Just nd.tok.i == ps.selectedToken
+                                  , isHighlighted || isChild
+                                  )
+                                , ( "badge-highlighed-token--dep-child"
+                                  , isChild
                                   )
                                 , ( "badge-highlighed-token badge-highlighed-token--dep-parent"
-                                  , Just nd.tok.i == ps.depParent
-                                  )
-                                , ( "badge-highlighed-token badge-highlighed-token--dep-child"
-                                  , Set.member nd.tok.i ps.depChildren
+                                  , isParent
                                   )
                                 ]
                             , onClick <| ps.onClickToken nd.tok

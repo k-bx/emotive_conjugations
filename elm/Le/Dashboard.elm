@@ -418,7 +418,7 @@ mainContent model =
                             ]
                         , td [ class "applemail__controlpanel__reltable__arrow" ]
                             [ i [ class "fas fa-long-arrow-right" ] [] ]
-                        , td [ class "text-center" ]
+                        , td [ class "text-center text-nowrap" ]
                             [ span [ class "badge-highlighed-token badge-highlighed-token--sm badge-highlighed-token--neutral" ]
                                 [ text <| dep ++ "\u{00A0}"
                                 , depPopover dep
