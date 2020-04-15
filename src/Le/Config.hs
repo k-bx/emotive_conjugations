@@ -54,6 +54,9 @@ pythonPath =
 articlesLimit :: Int
 articlesLimit = 100
 
+entitiesPerPage :: Int
+entitiesPerPage = 20
+
 -- | For now we hardcode the usage of this timezone everywhere, in
 -- future we can put it in company's settings or even accept in API if
 -- needed.

@@ -59,5 +59,8 @@ listNamedEntities mQuery mPage = do
   entities <- runDb $ Q.queryPersonNamedEntities query page
   pure $ AT.Paginated
     { pgnItems = entities,
-      pgnOverallPages = page + 1
+      pgnOverallPages =
+        if length entities >= Le.Config.entitiesPerPage
+          then page + 1
+          else page
     }

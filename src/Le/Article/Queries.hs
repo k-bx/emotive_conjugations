@@ -13,21 +13,38 @@ import qualified Prelude
 queryPersonNamedEntities ::
   MonadIO m => Text -> Int -> ReaderT SqlBackend m [Text]
 queryPersonNamedEntities query page = do
-  fmap concat $ forM (T.words query) $ \word -> do
-    let qu = PersistText (T.toLower word <> "%")
-    let q =
-          [qc|
-    SELECT entity FROM "named_entity" ne
-    WHERE label_ = 'PERSON'
-      AND (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
-    GROUP BY ne.entity
-    LIMIT {lim}
-    OFFSET {(page - 1) * lim}
-        |]
-    liftIO $ Prelude.putStrLn (show (q, [qu, qu, qu]))
-    fmap (map unSingle) $ rawSql q [qu, qu, qu]
+  case map T.toLower (T.words query ++ ["", "", ""]) of
+    (w1 : w2 : w3 : _) -> do
+      let q =
+            [qc|
+      SELECT entity FROM "named_entity" ne
+      WHERE label_ = 'PERSON'
+        AND ((ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
+             and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
+             and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
+            )
+      GROUP BY ne.entity
+      LIMIT {lim}
+      OFFSET {(page - 1) * lim}
+          |]
+      let qus =
+            map
+              PersistText
+              [ w1 <> "%",
+                w1 <> "%",
+                w1 <> "%",
+                w2 <> "%",
+                w2 <> "%",
+                w2 <> "%",
+                w3 <> "%",
+                w3 <> "%",
+                w3 <> "%"
+              ]
+      liftIO $ Prelude.putStrLn (show (q, qus))
+      fmap (map unSingle) $ rawSql q qus
+    _ -> error "impossible!"
   where
-    lim = 20
+    lim = Le.Config.entitiesPerPage
 
 queryPersonArticlesPlease ::
   MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticlePlease]
