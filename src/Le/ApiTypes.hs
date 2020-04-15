@@ -78,7 +78,7 @@ data ArticlePlease
         arpAuthors :: [Text],
         arpDatePublish :: Maybe IntZonedTime,
         arpMaintext :: Text,
-        arpLanguage :: Text,
+        arpLanguage :: Maybe Text,
         arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
         arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
       }

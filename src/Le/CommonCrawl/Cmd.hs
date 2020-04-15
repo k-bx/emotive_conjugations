@@ -108,7 +108,7 @@ parseFilteredArticles = do
                     & Safe.fromJustNote "Couldn't parse time"
             res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
             case Le.Python.cnrLanguage res of
-              "en" -> do
+              Just "en" -> do
                 void $ runDb $ do
                   articleId <- P.insert $ Article
                     { articleWarcId = warcRecId,
@@ -129,7 +129,7 @@ parseFilteredArticles = do
                       articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
                       articlePleaseFilename = Le.Python.cnrFilename res,
                       articlePleaseImageUrl = Le.Python.cnrImageUrl res,
-                      articlePleaseLanguage = Le.Python.cnrLanguage res,
+                      articlePleaseLanguage = "en",
                       articlePleaseLocalpath = Le.Python.cnrLocalpath res,
                       articlePleaseTitle = Le.Python.cnrTitle res,
                       articlePleaseTitlePage = Le.Python.cnrTitlePage res,

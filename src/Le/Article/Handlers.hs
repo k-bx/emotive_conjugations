@@ -47,7 +47,7 @@ articlePleaseDetails articleNpId = do
       arpAuthors = unpack (articlePleaseAuthors articlePlease),
       arpDatePublish = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
       arpMaintext = articlePleaseMaintext articlePlease,
-      arpLanguage = articlePleaseLanguage articlePlease,
+      arpLanguage = Just (articlePleaseLanguage articlePlease),
       arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),
       arpSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseSpacyPos articlePlease)
     }

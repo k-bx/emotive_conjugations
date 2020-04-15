@@ -165,7 +165,7 @@ data CmdParseNewsPleaseRes
         cnrDescription :: Maybe Text,
         cnrFilename :: Text,
         cnrImageUrl :: Text,
-        cnrLanguage :: Text,
+        cnrLanguage :: Maybe Text,
         cnrLocalpath :: Maybe Text,
         cnrTitle :: Maybe Text,
         cnrTitlePage :: Maybe Text,
