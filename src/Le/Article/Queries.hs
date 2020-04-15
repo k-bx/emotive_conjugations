@@ -66,6 +66,7 @@ queryPersonArticlesPlease mPerson = do
 select ??
 from "article_please"
 where "article_please"."date_publish" is not null
+  and "article_please".title is not null
 order by "article_please"."date_publish" desc, "article_please"."id" desc 
 limit {lim}
     |]
@@ -77,6 +78,7 @@ select ??
 from "article_please"
 inner join named_entity ne on ne.article_please_id = "article_please".id
 where ne.entity = ?
+  and "article_please".title is not null
 group by ("article_please"."id")
 order by "article_please"."date_publish" desc, "article_please"."id" desc 
 limit {lim}
