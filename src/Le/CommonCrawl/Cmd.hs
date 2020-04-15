@@ -75,76 +75,83 @@ parseFilteredArticles = do
   cfg <- asks appConfig
   app <- ask
   filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
-  pooledForConcurrentlyN_ (appNumCapabilities app) filteredWarcPaths $ \warcPath -> do
-    recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
-    logInfo $ display $ "> warc path: " <> S.toText warcPath
-    forM_ recs $ \(recHeader, recBs) -> do
-      let headersAndhtml = T.strip (S.toText recBs)
-      -- logInfo $ "> headersAndhtml: " <> display (T.take 2000 headersAndhtml)
-      let (_headers, html0) = Le.Html.splitHeadersAndHtml headersAndhtml
-      let html = T.strip html0
-      -- logInfo $ "> html: " <> display (T.take 2000 html)
-      if html == ""
-        then pure ()
-        else do
-          let uriText =
-                recHeader ^. recHeaders
-                  . at "WARC-Target-URI"
-                  & fromMaybe ""
-                  & S.toText
-          let host = Le.Article.extractHostUnsafe uriText
-          when (any (`T.isInfixOf` host) Le.Config.newsHosts) $ do
-            let warcRecId =
+  pooledForConcurrentlyN_ (appNumCapabilities app) filteredWarcPaths (processWarc cfg)
+  where
+    processWarc cfg warcPath = do
+      recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
+      logInfo $ display $ "> warc path: " <> S.toText warcPath
+      forM_ recs $ \(recHeader, recBs) -> do
+        let headersAndhtml = T.strip (S.toText recBs)
+        -- logInfo $ "> headersAndhtml: " <> display (T.take 2000 headersAndhtml)
+        let (_headers, html0) = Le.Html.splitHeadersAndHtml headersAndhtml
+        let html = T.strip html0
+        -- logInfo $ "> html: " <> display (T.take 2000 html)
+        if html == ""
+          then pure ()
+          else do
+            let uriText =
                   recHeader ^. recHeaders
-                    . at "WARC-Record-ID"
-                    & Safe.fromJustNote "Warc record ID is empty"
-                    & S.toText
-            let warcDt =
-                  recHeader ^. recHeaders
-                    . at "WARC-Date"
+                    . at "WARC-Target-URI"
                     & fromMaybe ""
-                    & S.toString
-                    & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
-                    & Safe.fromJustNote "Couldn't parse time"
-            res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
-            case Le.Python.cnrLanguage res of
-              Just "en" -> do
-                void $ runDb $ do
-                  articleId <- P.insert $ Article
-                    { articleWarcId = warcRecId,
-                      articleWarcDate = warcDt,
-                      articleUrl = uriText,
-                      articleHost = host
-                    }
-                  P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
-                    { articlePleaseUrl = uriText,
-                      articlePleaseHost = host,
-                      articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
-                      articlePleaseDateDownload =
-                        posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
-                      articlePleaseDatePublish =
-                        posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
-                      articlePleaseDateModify =
-                        posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
-                      articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
-                      articlePleaseFilename = Le.Python.cnrFilename res,
-                      articlePleaseImageUrl = Le.Python.cnrImageUrl res,
-                      articlePleaseLanguage = "en",
-                      articlePleaseLocalpath = Le.Python.cnrLocalpath res,
-                      articlePleaseTitle = Le.Python.cnrTitle res,
-                      articlePleaseTitlePage = Le.Python.cnrTitlePage res,
-                      articlePleaseTitleRss = Le.Python.cnrTitleRss res,
-                      articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
-                      articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
-                      articlePleaseSpacyNer = Nothing,
-                      articlePleaseSpacyPos = Nothing
-                    }
-                logInfo $ display $ "> URI: " <> uriText
-                -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-                -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
-                -- logInfo $ display $ "> text: " <> Le.Python.cprText res
-                pure ()
-              _ -> pure ()
+                    & S.toText
+            let host = Le.Article.extractHostUnsafe uriText
+            when (any (`T.isInfixOf` host) Le.Config.newsHosts) $ do
+              let warcRecId =
+                    recHeader ^. recHeaders
+                      . at "WARC-Record-ID"
+                      & Safe.fromJustNote "Warc record ID is empty"
+                      & S.toText
+              let warcDt =
+                    recHeader ^. recHeaders
+                      . at "WARC-Date"
+                      & fromMaybe ""
+                      & S.toString
+                      & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
+                      & Safe.fromJustNote "Couldn't parse time"
+              mArticlePresent <- runDb $ P.selectFirst [ArticleWarcId P.==. warcRecId] []
+              case mArticlePresent of
+                Just _ -> pure ()
+                Nothing -> runCmd warcRecId host html uriText warcDt
+    runCmd warcRecId host html uriText warcDt = do
+      res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
+      case Le.Python.cnrLanguage res of
+        Just "en" -> do
+          void $ runDb $ do
+            articleId <- P.insert $ Article
+              { articleWarcId = warcRecId,
+                articleWarcDate = warcDt,
+                articleUrl = uriText,
+                articleHost = host
+              }
+            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
+              { articlePleaseUrl = uriText,
+                articlePleaseHost = host,
+                articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
+                articlePleaseDateDownload =
+                  posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
+                articlePleaseDatePublish =
+                  posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
+                articlePleaseDateModify =
+                  posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
+                articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
+                articlePleaseFilename = Le.Python.cnrFilename res,
+                articlePleaseImageUrl = Le.Python.cnrImageUrl res,
+                articlePleaseLanguage = "en",
+                articlePleaseLocalpath = Le.Python.cnrLocalpath res,
+                articlePleaseTitle = Le.Python.cnrTitle res,
+                articlePleaseTitlePage = Le.Python.cnrTitlePage res,
+                articlePleaseTitleRss = Le.Python.cnrTitleRss res,
+                articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
+                articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
+                articlePleaseSpacyNer = Nothing,
+                articlePleaseSpacyPos = Nothing
+              }
+          logInfo $ display $ "> URI: " <> uriText
+          -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
+          -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
+          -- logInfo $ display $ "> text: " <> Le.Python.cprText res
+          pure ()
+        _ -> pure ()
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do

@@ -32,6 +32,7 @@ ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
   -- ensureIndex "article_np" "article_np_date_i" ["date"]
   ensureIndex "article_please" "article_please_date_publish_i" ["date_publish"]
+  ensureIndex "article" "article_warc_id_i" ["warc_id"]
   pure ()
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()
@@ -58,21 +59,19 @@ migrateData :: ReaderT P.SqlBackend IO ()
 migrateData = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
-  when (version <= 1) migration01
-  when (version <= 2) migration02
-  when (version <= 3) migration02
+  when (version <= 1) migration01 -- 1 -> 2
+  when (version <= 2) migration02 -- 2 -> 3
+  when (version <= 3) migration02 -- 3 -> 4
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations
 latestVersion :: Int
 latestVersion = 4
 
--- 1 -> 2
 migration01 :: ReaderT P.SqlBackend IO ()
 migration01 = do
   pure ()
 
--- 1 -> 2
 migration02 :: ReaderT P.SqlBackend IO ()
 migration02 = do
   -- articlesNp <- P.selectList [] [P.Desc ArticleNpId]
