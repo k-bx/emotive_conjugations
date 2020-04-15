@@ -10173,6 +10173,7 @@ main > .container {
   flex-grow: 1;
   max-height: 100rem;
   overflow-y: hidden;
+  overflow-x: hidden;
   transition: max-height 0.3s ease-in-out;
 }
 .page-dashboard .applemail .details-board .details-board__toggle {

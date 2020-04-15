@@ -318,6 +318,7 @@ main > .container {
         flex-grow: 1;
         max-height: 100rem;
         overflow-y: hidden;
+        overflow-x: hidden;
         transition: max-height .3s ease-in-out;
       }
       .details-board__toggle {
