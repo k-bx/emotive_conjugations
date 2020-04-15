@@ -10,6 +10,7 @@ import qualified Le.App
 import Le.AppUtils
 import Le.Import
 import Le.Model
+import qualified Le.Search
 import Text.InterpolatedString.Perl6 (q, qc)
 import qualified Prelude
 
@@ -33,6 +34,10 @@ ensureIndexes = do
   -- ensureIndex "article_np" "article_np_date_i" ["date"]
   ensureIndex "article_please" "article_please_date_publish_i" ["date_publish"]
   ensureIndex "article" "article_warc_id_i" ["warc_id"]
+  ensureIndex "named_entity" "named_entity_label_search1_i" ["label_", "search1"]
+  ensureIndex "named_entity" "named_entity_label_search2_i" ["label_","search2"]
+  ensureIndex "named_entity" "named_entity_label_search3_i" ["label_","search3"]
+  ensureIndex "named_entity" "named_entity_canonical_i" ["canonical"]
   pure ()
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()
@@ -62,11 +67,12 @@ migrateData = do
   when (version <= 1) migration01 -- 1 -> 2
   when (version <= 2) migration02 -- 2 -> 3
   when (version <= 3) migration02 -- 3 -> 4
+  when (version <= 4) Le.Search.reindexNers -- 4 -> 5
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations
 latestVersion :: Int
-latestVersion = 4
+latestVersion = 5
 
 migration01 :: ReaderT P.SqlBackend IO ()
 migration01 = do

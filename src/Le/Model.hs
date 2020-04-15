@@ -66,6 +66,10 @@ NamedEntity
     end Int
     endChar Int
     label_ Text
+    search1 Text Maybe
+    search2 Text Maybe
+    search3 Text Maybe
+    canonical Text Maybe
     deriving Show
 --
 -- Migration data. Singleton object

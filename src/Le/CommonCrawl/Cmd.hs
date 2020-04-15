@@ -17,6 +17,7 @@ import qualified Le.Html
 import Le.Import
 import Le.Model
 import qualified Le.Python
+import qualified Le.Search
 import qualified Le.WebClient
 import qualified Network.AWS.Data.Text as AWS
 import qualified Network.AWS.S3 as S3
@@ -161,6 +162,7 @@ spacyNerArticles = do
     runDb $ do
       P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
       forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
+        let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
         P.insert $ NamedEntity
           { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
             namedEntityEntity = cseText,
@@ -168,7 +170,11 @@ spacyNerArticles = do
             namedEntityStartChar = cseStartChar,
             namedEntityEnd = cseEnd,
             namedEntityEndChar = cseEndChar,
-            namedEntityLabel_ = cseLabel_
+            namedEntityLabel_ = cseLabel_,
+            namedEntitySearch1 = Just search1,
+            namedEntitySearch2 = Just search2,
+            namedEntitySearch3 = Just search3,
+            namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
           }
 
 spacyPosArticles :: Le ()
