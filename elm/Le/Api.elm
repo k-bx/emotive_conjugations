@@ -181,35 +181,35 @@ jsonEncArticle  val =
 
 
 
-type alias ArticleNp  =
-   { id: ArticleNpId
+type alias ArticlePlease  =
+   { id: ArticlePleaseId
    , authors: (List String)
-   , date: (Maybe IntZonedTime)
-   , content: String
-   , lang: String
+   , date_publish: (Maybe IntZonedTime)
+   , maintext: String
+   , language: (Maybe String)
    , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
    , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
    }
 
-jsonDecArticleNp : Json.Decode.Decoder ( ArticleNp )
-jsonDecArticleNp =
-   Json.Decode.succeed (\pid pauthors pdate pcontent plang pspacy_ner_ents pspacy_pos_ents -> {id = pid, authors = pauthors, date = pdate, content = pcontent, lang = plang, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
-   |> required "id" (jsonDecArticleNpId)
+jsonDecArticlePlease : Json.Decode.Decoder ( ArticlePlease )
+jsonDecArticlePlease =
+   Json.Decode.succeed (\pid pauthors pdate_publish pmaintext planguage pspacy_ner_ents pspacy_pos_ents -> {id = pid, authors = pauthors, date_publish = pdate_publish, maintext = pmaintext, language = planguage, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
+   |> required "id" (jsonDecArticlePleaseId)
    |> required "authors" (Json.Decode.list (Json.Decode.string))
-   |> fnullable "date" (jsonDecIntZonedTime)
-   |> required "content" (Json.Decode.string)
-   |> required "lang" (Json.Decode.string)
+   |> fnullable "date_publish" (jsonDecIntZonedTime)
+   |> required "maintext" (Json.Decode.string)
+   |> fnullable "language" (Json.Decode.string)
    |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
    |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
 
-jsonEncArticleNp : ArticleNp -> Value
-jsonEncArticleNp  val =
+jsonEncArticlePlease : ArticlePlease -> Value
+jsonEncArticlePlease  val =
    Json.Encode.object
-   [ ("id", jsonEncArticleNpId val.id)
+   [ ("id", jsonEncArticlePleaseId val.id)
    , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
-   , ("date", (maybeEncode (jsonEncIntZonedTime)) val.date)
-   , ("content", Json.Encode.string val.content)
-   , ("lang", Json.Encode.string val.lang)
+   , ("date_publish", (maybeEncode (jsonEncIntZonedTime)) val.date_publish)
+   , ("maintext", Json.Encode.string val.maintext)
+   , ("language", (maybeEncode (Json.Encode.string)) val.language)
    , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
    , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.spacy_pos_ents)
    ]
@@ -589,8 +589,8 @@ getApiArticleByArticleidArticlejson capture_article_id toMsg =
 
 
 
-getApiArticleByArticlenpidArticlenpjson : ArticleNpId -> (Result Error  (ArticleNp)  -> msg) -> Cmd msg
-getApiArticleByArticlenpidArticlenpjson capture_article_np_id toMsg =
+getApiArticleByArticlepleaseidArticlepleasejson : (Key ArticlePlease) -> (Result Error  (ArticlePlease)  -> msg) -> Cmd msg
+getApiArticleByArticlepleaseidArticlepleasejson capture_article_please_id toMsg =
     let
         params =
             List.filterMap identity
@@ -606,15 +606,15 @@ getApiArticleByArticlenpidArticlenpjson capture_article_np_id toMsg =
                 Url.Builder.crossOrigin ""
                     [ "api"
                     , "article"
-                    , (capture_article_np_id
+                    , (capture_article_please_id
                        |> String.fromInt)
-                    , "article-np.json"
+                    , "article-please.json"
                     ]
                     params
             , body =
                 Http.emptyBody
             , expect =
-                leExpectJson toMsg jsonDecArticleNp
+                leExpectJson toMsg jsonDecArticlePlease
             , timeout =
                 Nothing
             , tracker =

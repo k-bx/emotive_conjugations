@@ -43,6 +43,7 @@ replacements :: [(Text, Text)]
 replacements =
   [ ("(Key Article)", "ArticleId"),
     ("(Key ArticleNp)", "ArticleNpId"),
+    ("(Key ArticlePlease)", "ArticlePleaseId"),
     ( "jsonDec(Tuple2 Text Text)",
       "jsonDecTuple2 Json.Decode.string Json.Decode.string"
     ),
@@ -60,7 +61,7 @@ intAliases =
       "IntZonedTime",
       "Milliseconds",
       "ArticleId",
-      "ArticleNpId"
+      "ArticlePleaseId"
     ]
 
 stringAliases :: [String]
