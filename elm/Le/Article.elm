@@ -48,7 +48,7 @@ computeContentNodes :
 computeContentNodes ps =
     let
         parEndsDots =
-            String.indexes "\n\n" ps.inputText
+            String.indexes "\n\n" (ps.inputText ++ "\n\n")
 
         paragraphs : List ContentNode
         paragraphs =
