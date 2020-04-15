@@ -404,9 +404,9 @@ jsonEncMilliseconds = Json.Encode.int
 type alias ArticleId = Int
 jsonDecArticleId = Json.Decode.int
 jsonEncArticleId = Json.Encode.int
-type alias ArticleNpId = Int
-jsonDecArticleNpId = Json.Decode.int
-jsonEncArticleNpId = Json.Encode.int
+type alias ArticlePleaseId = Int
+jsonDecArticlePleaseId = Json.Decode.int
+jsonEncArticlePleaseId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -589,7 +589,7 @@ getApiArticleByArticleidArticlejson capture_article_id toMsg =
 
 
 
-getApiArticleByArticlepleaseidArticlepleasejson : (Key ArticlePlease) -> (Result Error  (ArticlePlease)  -> msg) -> Cmd msg
+getApiArticleByArticlepleaseidArticlepleasejson : ArticlePleaseId -> (Result Error  (ArticlePlease)  -> msg) -> Cmd msg
 getApiArticleByArticlepleaseidArticlepleasejson capture_article_please_id toMsg =
     let
         params =

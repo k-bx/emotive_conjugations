@@ -33,7 +33,7 @@ type Msg
     | GotArticles (Result Api.Error (List Api.ArticleShort))
     | CellClicked Api.ArticleId
     | GotArticle (Result Api.Error Api.Article)
-    | GotArticleNp (Result Api.Error Api.ArticleNp)
+    | GotArticlePlease (Result Api.Error Api.ArticlePlease)
     | SelectTwo (SelectTwoMsg Msg)
     | NerSelect String
     | SelectNerAjax AjaxParams Bool
@@ -50,7 +50,7 @@ type alias Model =
     , articles : Maybe (List Api.ArticleShort)
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
-    , articleNp : Maybe Api.ArticleNp
+    , articlePlease : Maybe Api.ArticlePlease
     , selectTwo : Maybe (SelectTwo Msg)
     , ners : List String
     , ner : String
@@ -69,7 +69,7 @@ init key ner active =
       , articles = Nothing
       , active = active
       , articleFull = Nothing
-      , articleNp = Nothing
+      , articlePlease = Nothing
       , selectTwo = Nothing
       , ners = [ ner ]
       , ner = ner
@@ -133,14 +133,14 @@ update msg model =
 
         GotArticle (Ok article) ->
             ( { model | articleFull = Just article }
-            , Api.getApiArticleByArticlenpidArticlenpjson article.id GotArticleNp
+            , Api.getApiArticleByArticlepleaseidArticlepleasejson article.id GotArticlePlease
             )
 
-        GotArticleNp (Err e) ->
+        GotArticlePlease (Err e) ->
             handleHttpError ToastMsg e model
 
-        GotArticleNp (Ok articleNp) ->
-            ( { model | articleNp = Just articleNp }
+        GotArticlePlease (Ok articlePlease) ->
+            ( { model | articlePlease = Just articlePlease }
             , Cmd.none
             )
 
@@ -330,11 +330,11 @@ mainContent model =
             div []
                 [ h2 [] [ text article.title ]
                 , div [ class "article" ] <|
-                    case model.articleNp of
+                    case model.articlePlease of
                         Nothing ->
                             [ div [] [] ]
 
-                        Just articleNp ->
+                        Just articlePlease ->
                             [ Le.Article.renderContentNodes
                                 { nerToHighlight = model.ner
                                 , highlightPos = model.highlightPos
@@ -345,9 +345,9 @@ mainContent model =
                                 , depParent = Maybe.map .i mDepHeadToken
                                 , nodes =
                                     Le.Article.computeContentNodes
-                                        { inputText = articleNp.content
-                                        , mSpacyNers = articleNp.spacy_ner_ents
-                                        , mSpacyPoss = articleNp.spacy_pos_ents
+                                        { inputText = articlePlease.maintext
+                                        , mSpacyNers = articlePlease.spacy_ner_ents
+                                        , mSpacyPoss = articlePlease.spacy_pos_ents
                                         }
                                 }
                             ]
@@ -360,7 +360,7 @@ mainContent model =
                     Nothing
 
                 Just selectedToken ->
-                    model.articleNp
+                    model.articlePlease
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.i == selectedToken.head_i)
                         |> List.head
@@ -372,7 +372,7 @@ mainContent model =
                     []
 
                 Just selectedToken ->
-                    model.articleNp
+                    model.articlePlease
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.head_i == selectedToken.i)
 
