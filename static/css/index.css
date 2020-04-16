@@ -10048,6 +10048,10 @@ main > .container {
     opacity: 1;
   }
 }
+.logo {
+  height: 2rem;
+}
+
 .page-dashboard .article {
   font-size: 1.2rem;
 }

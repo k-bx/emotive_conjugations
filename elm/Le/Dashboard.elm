@@ -228,7 +228,13 @@ navbarContent =
                 [ class "navbar-brand"
                 , href <| Le.Routes.dashboard "" Nothing
                 ]
-                [ text "Emotive Conjugations" ]
+                [ img
+                    [ src "/images/blue-tailed-bee-eater.svg"
+                    , class "logo mr-3"
+                    ]
+                    []
+                , text "Emotive Conjugations"
+                ]
             , button [ attribute "aria-controls" "navbarCollapse", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarCollapse", attribute "data-toggle" "collapse", type_ "button" ]
                 [ span [ class "navbar-toggler-icon" ]
                     []
