@@ -26,11 +26,15 @@ computeSearchTerms t =
 namedEntityCanonicalForm :: Text -> Text
 namedEntityCanonicalForm t =
   let (s1, s2, s3) = computeSearchTerms t
-   in [stripNonAlpha s1, stripNonAlpha s2, stripNonAlpha s3]
+   in [s1, s2, s3]
+        |> map (stripNonAlpha . removePrimeS)
         |> Data.List.intersperse "-"
         |> T.concat
   where
     stripNonAlpha = T.filter Data.Char.isLetter
+    -- `elon musk's` -> `elon musk`
+    removePrimeS = T.replace "'s" ""
+                   . T.replace "’s" ""
 
 reindexNers :: ReaderT P.SqlBackend IO ()
 reindexNers = do
