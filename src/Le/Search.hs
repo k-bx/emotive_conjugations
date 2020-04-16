@@ -1,5 +1,7 @@
 module Le.Search where
 
+import qualified Safe
+import qualified Data.HashMap.Monoidal as MHM
 import qualified Data.Char
 import qualified Data.List
 import qualified Data.Text as T
@@ -52,3 +54,20 @@ reindexNers = do
                 (namedEntityEntity (ev ner))
             )
       ]
+
+reindexProper :: ReaderT P.SqlBackend IO ()
+reindexProper = do
+  ners <- P.selectList [] []
+  forM_ ners $ \ner -> do
+    nersSameCanonical <- P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
+    let mostPopularEntity :: Text
+        mostPopularEntity =
+          nersSameCanonical
+            |> map (\x -> (namedEntityEntity (ev x), Sum (1::Int)))
+            |> MHM.fromList
+            |> MHM.toList
+            |> Data.List.sortBy (flip compare `on` fst)
+            |> Safe.headMay
+            |> fmap fst
+            |> fromMaybe (namedEntityEntity (ev ner))
+    P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]

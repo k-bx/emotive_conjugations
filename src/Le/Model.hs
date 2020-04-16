@@ -70,6 +70,7 @@ NamedEntity
     search2 Text Maybe
     search3 Text Maybe
     canonical Text Maybe
+    proper Text Maybe
     deriving Show
 --
 -- Migration data. Singleton object

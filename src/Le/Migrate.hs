@@ -14,8 +14,8 @@ import qualified Le.Search
 import Text.InterpolatedString.Perl6 (q, qc)
 import qualified Prelude
 
-run :: IO ()
-run = do
+runMigrations :: IO ()
+runMigrations = do
   Le.App.withApp $ \app -> do
     runNoLoggingT
       $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString (appConfig app))) 1
@@ -65,7 +65,7 @@ migrateData = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
   when (version <= 1) Le.Search.reindexNers -- 1 -> 2
-  when (version <= 2) (pure ()) -- 2 -> 3
+  when (version <= 2) Le.Search.reindexProper -- 2 -> 3
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations
