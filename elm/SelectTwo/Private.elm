@@ -13,9 +13,10 @@ filterGroup filter list =
 
 filterList : Maybe String -> SelectTwoOption a -> Bool
 filterList filter ( _, text, _ ) =
-    filter
-        |> Maybe.andThen (String.toLower >> (\a -> String.contains a (text |> String.toLower)) >> Just)
-        |> Maybe.withDefault True
+    True
+    -- filter
+    --     |> Maybe.andThen (String.toLower >> (\a -> String.contains a (text |> String.toLower)) >> Just)
+    --     |> Maybe.withDefault True
 
 
 location : String -> (SelectTwoMsg msg -> msg) -> List (SelectTwoOption msg) -> List (GroupSelectTwoOption msg) -> Bool -> Maybe String -> Bool -> Float -> JD.Decoder { message : msg, preventDefault : Bool, stopPropagation : Bool }
