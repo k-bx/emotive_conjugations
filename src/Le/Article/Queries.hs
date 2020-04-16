@@ -17,13 +17,13 @@ queryPersonNamedEntities query page = do
     (w1 : w2 : w3 : _) -> do
       let q =
             [qc|
-      SELECT entity FROM "named_entity" ne
+      SELECT proper FROM "named_entity" ne
       WHERE label_ = 'PERSON'
         AND ((ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
              and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
              and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
             )
-      GROUP BY ne.entity
+      GROUP BY ne.proper
       LIMIT {lim}
       OFFSET {(page - 1) * lim}
           |]
