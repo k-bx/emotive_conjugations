@@ -7,13 +7,12 @@ import Le.Import
 reportDelay :: NominalDiffTime
 reportDelay = 5
 
-data Speed
-  = Speed
-      { spdStarted :: UTCTime,
-        spdOverall :: Int,
-        spdLastReport :: TVar UTCTime,
-        spdLastRecord :: TVar Int
-      }
+data Speed = Speed
+  { spdStarted :: UTCTime,
+    spdOverall :: Int,
+    spdLastReport :: TVar UTCTime,
+    spdLastRecord :: TVar Int
+  }
 
 newSpeed :: MonadIO m => Int -> m Speed
 newSpeed overall = do
@@ -33,34 +32,13 @@ withProgress curr Speed {..} f = do
       writeTVar spdLastReport t
       writeTVar spdLastRecord curr
     let timePassedSinceLastTime = Data.Time.diffUTCTime t lastReport
-        -- timeLeftLocal :: NominalDiffTime
-        -- timeLeftLocal =
-        --   case curr - lastRecord of
-        --     0 -> 1000000000
-        --     recsProcessedSinceLastTime ->
-        --       timePassedSinceLastTime
-        --         * ( fromIntegral
-        --               ( round
-        --                   ( (fromIntegral spdOverall :: Double)
-        --                       / fromIntegral recsProcessedSinceLastTime
-        --                   ) ::
-        --                   Int
-        --               )
-        --           )
         timeLeftGlobal :: NominalDiffTime
         timeLeftGlobal =
           case curr of
             0 -> 1000000000
-            recsProcessed ->
-              (Data.Time.diffUTCTime t spdStarted)
-                * ( fromIntegral
-                      ( round
-                          ( (fromIntegral spdOverall :: Double)
-                              / fromIntegral recsProcessed
-                          ) ::
-                          Int
-                      )
-                  )
+            _ ->
+              (fromIntegral ((spdOverall - curr) `div` curr))
+                * (Data.Time.diffUTCTime t spdStarted)
         recsPerSecond :: Int
         recsPerSecond =
           case round (nominalDiffTimeToSeconds timePassedSinceLastTime) of
