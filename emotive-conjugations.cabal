@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f03001a1186879251d4106fa2860303eb8e6c931efd2a03df380f09c9f20db2c
+-- hash: ad15e10f95b5577176a4f4f2520cb6d17b36cf573ca7186af134de563a3e7b28
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -50,6 +50,7 @@ library
       Le.S3Loc
       Le.Search
       Le.Shake
+      Le.Speed
       Le.Time
       Le.Types
       Le.Util
@@ -114,6 +115,7 @@ library
     , typed-process
     , tz
     , tzdata
+    , unliftio
     , uri-encode
     , wai
     , wai-app-static
@@ -186,6 +188,7 @@ executable conj
     , typed-process
     , tz
     , tzdata
+    , unliftio
     , uri-encode
     , wai
     , wai-app-static
@@ -259,6 +262,7 @@ test-suite emotive-conjugations-test
     , typed-process
     , tz
     , tzdata
+    , unliftio
     , uri-encode
     , wai
     , wai-app-static

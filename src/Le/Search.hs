@@ -1,5 +1,6 @@
 module Le.Search where
 
+import qualified Le.Speed
 import qualified Safe
 import qualified Data.HashMap.Monoidal as MHM
 import qualified Data.Char
@@ -60,16 +61,18 @@ reindexProper :: Le ()
 reindexProper = do
   ners <- Le.App.runDb $ P.selectList [NamedEntityProper P.==. Nothing] []
   let overallLen = length ners
-  app <- ask
-  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0..] ners) $ \(i, ner) -> do
-    when ((i::Int) `mod` 100 == 0) $ do
-      logInfo $ display $ "> Processing ner " <> tshow i <> "/" <> tshow overallLen
+  speed <- Le.Speed.newSpeed overallLen
+  -- app <- ask
+  -- pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0..] ners) $ \(i, ner) -> do
+  pooledForConcurrentlyN_ 2 (zip [0..] ners) $ \(i, ner) -> do
+    Le.Speed.withProgress i speed $ \t -> do
+      logInfo $ display $ "> Processing ner: " <> t
     nersSameCanonical <- Le.App.runDb $ P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
     let mostPopularEntity :: Text
         mostPopularEntity =
           nersSameCanonical
             |> map (\x -> (namedEntityEntity (ev x), Sum (1::Int)))
-            |> MHM.fromList
+            |> MHM.fromListWith (<>)
             |> MHM.toList
             |> Data.List.sortBy (flip compare `on` fst)
             |> Safe.headMay
