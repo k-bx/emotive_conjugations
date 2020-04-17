@@ -27,7 +27,7 @@ runMigrations = do
         (S.fromText (cfgPsqlConnString (appConfig app)))
         1
       $ \mpool -> do
-        liftIO $ flip P.runSqlPool mpool $ migrateData
+        liftIO $ flip P.runSqlPool mpool $ migrateData app
 
 ensureIndexes :: ReaderT P.SqlBackend IO ()
 ensureIndexes = do
@@ -60,12 +60,12 @@ where schemaname = 'public'
       rawExecute query []
     (_ :: [P.Single Text]) -> pure ()
 
-migrateData :: ReaderT P.SqlBackend IO ()
-migrateData = do
+migrateData :: App -> ReaderT P.SqlBackend IO ()
+migrateData app = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
   when (version <= 1) Le.Search.reindexNers -- 1 -> 2
-  when (version <= 2) Le.Search.reindexProper -- 2 -> 3
+  when (version <= 2) (runRIO app Le.Search.reindexProper) -- 2 -> 3
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations

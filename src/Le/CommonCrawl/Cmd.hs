@@ -177,7 +177,7 @@ spacyNerArticles = do
             namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
             namedEntityProper = Nothing
           }
-    runDb $ Le.Search.reindexProper
+    Le.Search.reindexProper
 
 spacyPosArticles :: Le ()
 spacyPosArticles = do

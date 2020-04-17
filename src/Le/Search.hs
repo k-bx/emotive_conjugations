@@ -8,6 +8,7 @@ import qualified Data.Text as T
 import qualified Database.Persist.Postgresql as P
 import Le.Import
 import Le.Model
+import qualified Le.App
 import Le.Util
 
 -- | Used for named entities indexing
@@ -55,11 +56,15 @@ reindexNers = do
             )
       ]
 
-reindexProper :: ReaderT P.SqlBackend IO ()
+reindexProper :: Le ()
 reindexProper = do
-  ners <- P.selectList [] []
-  forM_ ners $ \ner -> do
-    nersSameCanonical <- P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
+  ners <- Le.App.runDb $ P.selectList [NamedEntityProper P.==. Nothing] []
+  let overallLen = length ners
+  app <- ask
+  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0..] ners) $ \(i, ner) -> do
+    when ((i::Int) `mod` 100 == 0) $ do
+      logInfo $ display $ "> Processing ner " <> tshow i <> "/" <> tshow overallLen
+    nersSameCanonical <- Le.App.runDb $ P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
     let mostPopularEntity :: Text
         mostPopularEntity =
           nersSameCanonical
@@ -70,4 +75,4 @@ reindexProper = do
             |> Safe.headMay
             |> fmap fst
             |> fromMaybe (namedEntityEntity (ev ner))
-    P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
+    Le.App.runDb $ P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
