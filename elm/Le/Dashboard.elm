@@ -357,7 +357,7 @@ mainContent model =
 
                         Just articlePlease ->
                             [ Le.Article.renderContentNodes
-                                { nerToHighlight = model.ner
+                                { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
                                 , highlightPos = model.highlightPos
                                 , onClickToken = TokenClicked
                                 , onClickNer = NerClicked

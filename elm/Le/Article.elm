@@ -197,7 +197,7 @@ computeContentNodes ps =
 
 
 renderContentNodes :
-    { nerToHighlight : String
+    { nersToHighlight : List String
     , selectedToken : Maybe Int -- tok.i
     , highlightPos : Bool
     , nodes : List ContentNode
@@ -222,7 +222,7 @@ renderContentNodes ps =
                         [ class "content-ner"
                         , classList
                             [ ( "badge-highlighed-token badge-highlighed-token--ner"
-                              , nd.ner.label_ == "PERSON" && nd.ner.text == ps.nerToHighlight
+                              , nd.ner.label_ == "PERSON" && List.member nd.ner.text ps.nersToHighlight
                               )
                             ]
                         , onClick <| ps.onClickNer nd.ner
