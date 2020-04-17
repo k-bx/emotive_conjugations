@@ -72,6 +72,12 @@ NamedEntity
     canonical Text Maybe
     proper Text Maybe
     deriving Show
+-- | Cache for named entity propers
+NamedPropers
+    entity Text
+    proper Text
+    Primary entity
+    -- UniqueNamedPropersEntity entity
 --
 -- Migration data. Singleton object
 --

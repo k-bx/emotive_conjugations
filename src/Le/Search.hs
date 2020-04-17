@@ -1,16 +1,16 @@
 module Le.Search where
 
-import qualified Le.Speed
-import qualified Safe
-import qualified Data.HashMap.Monoidal as MHM
 import qualified Data.Char
+import qualified Data.HashMap.Monoidal as MHM
 import qualified Data.List
 import qualified Data.Text as T
 import qualified Database.Persist.Postgresql as P
+import qualified Le.App
 import Le.Import
 import Le.Model
-import qualified Le.App
+import qualified Le.Speed
 import Le.Util
+import qualified Safe
 
 -- | Used for named entities indexing
 computeSearchTerms :: Text -> (Text, Text, Text)
@@ -37,8 +37,9 @@ namedEntityCanonicalForm t =
   where
     stripNonAlpha = T.filter Data.Char.isLetter
     -- `elon musk's` -> `elon musk`
-    removePrimeS = T.replace "'s" ""
-                   . T.replace "’s" ""
+    removePrimeS =
+      T.replace "'s" ""
+        . T.replace "’s" ""
 
 reindexNers :: ReaderT P.SqlBackend IO ()
 reindexNers = do
@@ -64,18 +65,33 @@ reindexProper = do
   speed <- Le.Speed.newSpeed overallLen
   -- app <- ask
   -- pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0..] ners) $ \(i, ner) -> do
-  pooledForConcurrentlyN_ 2 (zip [0..] ners) $ \(i, ner) -> do
+  pooledForConcurrentlyN_ 1 (zip [0 ..] ners) $ \(i, ner) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner: " <> t
-    nersSameCanonical <- Le.App.runDb $ P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
-    let mostPopularEntity :: Text
-        mostPopularEntity =
-          nersSameCanonical
-            |> map (\x -> (namedEntityEntity (ev x), Sum (1::Int)))
-            |> MHM.fromListWith (<>)
-            |> MHM.toList
-            |> Data.List.sortBy (flip compare `on` fst)
-            |> Safe.headMay
-            |> fmap fst
-            |> fromMaybe (namedEntityEntity (ev ner))
-    Le.App.runDb $ P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
+    Le.App.runDb $ do
+      -- mNEProp <- P.getBy (UniqueNamedPropersEntity (namedEntityEntity (ev ner)))
+      mNEProp <- P.get (NamedPropersKey (namedEntityEntity (ev ner)))
+      case mNEProp of
+        Just neProp -> do
+          P.update (entityKey ner) [NamedEntityProper P.=. Just (namedPropersProper neProp)]
+        Nothing -> do
+          nersSameCanonical <- P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
+          let mostPopularEntity :: Text
+              mostPopularEntity =
+                nersSameCanonical
+                  |> map (\x -> (namedEntityEntity (ev x), Sum (1 :: Int)))
+                  |> MHM.fromListWith (<>)
+                  |> MHM.toList
+                  |> Data.List.sortBy (flip compare `on` fst)
+                  |> Safe.headMay
+                  |> fmap fst
+                  |> fromMaybe (namedEntityEntity (ev ner))
+          P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
+          P.repsert
+            (NamedPropersKey (namedEntityEntity (ev ner)))
+            ( NamedPropers
+                { namedPropersEntity = namedEntityEntity (ev ner),
+                  namedPropersProper = mostPopularEntity
+                }
+            )
+          pure ()
