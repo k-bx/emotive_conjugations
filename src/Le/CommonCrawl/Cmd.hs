@@ -162,21 +162,22 @@ spacyNerArticles = do
     runDb $ do
       P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
       forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
-        let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
-        P.insert $ NamedEntity
-          { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
-            namedEntityEntity = cseText,
-            namedEntityStart = cseStart,
-            namedEntityStartChar = cseStartChar,
-            namedEntityEnd = cseEnd,
-            namedEntityEndChar = cseEndChar,
-            namedEntityLabel_ = cseLabel_,
-            namedEntitySearch1 = Just search1,
-            namedEntitySearch2 = Just search2,
-            namedEntitySearch3 = Just search3,
-            namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
-            namedEntityProper = Nothing
-          }
+        when (cseLabel_ == "PERSON") $ do
+          let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
+          void $ P.insert $ NamedEntity
+            { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
+              namedEntityEntity = cseText,
+              namedEntityStart = cseStart,
+              namedEntityStartChar = cseStartChar,
+              namedEntityEnd = cseEnd,
+              namedEntityEndChar = cseEndChar,
+              namedEntityLabel_ = cseLabel_,
+              namedEntitySearch1 = Just search1,
+              namedEntitySearch2 = Just search2,
+              namedEntitySearch3 = Just search3,
+              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
+              namedEntityProper = Nothing
+            }
     Le.Search.reindexProper
 
 spacyPosArticles :: Le ()

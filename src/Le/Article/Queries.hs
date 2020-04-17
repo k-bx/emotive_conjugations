@@ -2,13 +2,15 @@
 
 module Le.Article.Queries where
 
+import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import Database.Esqueleto
+import qualified Database.Persist.Postgresql as P
 import qualified Le.Config
 import Le.Import hiding ((^.), isNothing, on)
 import Le.Model
+import Le.Util
 import Text.InterpolatedString.Perl6 (qc)
-import qualified Prelude
 
 queryPersonNamedEntities ::
   MonadIO m => Text -> Int -> ReaderT SqlBackend m [Text]
@@ -40,8 +42,21 @@ queryPersonNamedEntities query page = do
                 w3 <> "%",
                 w3 <> "%"
               ]
-      liftIO $ Prelude.putStrLn (show (q, qus))
-      fmap (map unSingle) $ rawSql q qus
+      ents0 <- fmap (map unSingle) $ rawSql q qus
+      (namedPropersMap :: Map Text NamedPropers) <-
+        P.selectList [NamedPropersEntity P.<-. ents0] []
+          |> fmap (map (\e -> (unNamedPropersKey (entityKey e), ev e)))
+          |> fmap M.fromList
+      pure
+        ( ents0
+            |> map
+              ( \ent ->
+                  M.lookup ent namedPropersMap
+                    |> fmap namedPropersProper
+                    |> fromMaybe ent
+              )
+            |> nubSet
+        )
     _ -> error "impossible!"
   where
     lim = Le.Config.entitiesPerPage

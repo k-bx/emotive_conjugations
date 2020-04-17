@@ -4,6 +4,7 @@
 -- case.
 module Le.Util where
 
+import qualified Data.Set
 import Le.Import
 
 eitherErr :: Either String c -> c
@@ -16,3 +17,7 @@ eitherErrShow = either (error . show) id
 (|>) a f = f a
 
 infixl 0 |>
+
+-- | Like `Data.List.nub` but done via 'Data.Set'
+nubSet :: Ord a => [a] -> [a]
+nubSet xs = Data.Set.toList $ Data.Set.fromList xs

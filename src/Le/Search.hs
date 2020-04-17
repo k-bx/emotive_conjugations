@@ -82,7 +82,7 @@ reindexProper = do
                   |> map (\x -> (namedEntityEntity (ev x), Sum (1 :: Int)))
                   |> MHM.fromListWith (<>)
                   |> MHM.toList
-                  |> Data.List.sortBy (flip compare `on` fst)
+                  |> Data.List.sortBy (flip compare `on` snd)
                   |> Safe.headMay
                   |> fmap fst
                   |> fromMaybe (namedEntityEntity (ev ner))
