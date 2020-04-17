@@ -8,24 +8,21 @@ import Le.Import
 import qualified Le.Model as M
 import qualified Le.Python
 
-data NoOp
-  = NoOp
-      { nooField :: Text
-      }
+data NoOp = NoOp
+  { nooField :: Text
+  }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''NoOp
 
 type IntZonedTime = Int
 
-data DownloadAndFilterForm
-  = DownloadAndFilterForm
-      { dafWarcFile :: Text
-      }
+data DownloadAndFilterForm = DownloadAndFilterForm
+  { dafWarcFile :: Text
+  }
   deriving (Show, Eq, Generic)
 
 instance J.ToJSON DownloadAndFilterForm where
-
   toEncoding = J.genericToEncoding (jsonOpts 3)
 
   toJSON = J.genericToJSON (jsonOpts 3)
@@ -33,27 +30,25 @@ instance J.ToJSON DownloadAndFilterForm where
 instance J.FromJSON DownloadAndFilterForm where
   parseJSON = J.genericParseJSON (jsonOpts 3)
 
-data ArticleShort
-  = ArticleShort
-      { artId :: M.ArticleId,
-        artDate :: Maybe IntZonedTime,
-        artPaperName :: Text,
-        artTitleShort :: Text
-      }
+data ArticleShort = ArticleShort
+  { artId :: M.ArticleId,
+    artDate :: Maybe IntZonedTime,
+    artPaperName :: Text,
+    artTitleShort :: Text
+  }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''ArticleShort
 
-data Article
-  = Article
-      { arcId :: M.ArticleId,
-        arcUrl :: Text,
-        arcDate :: Maybe IntZonedTime,
-        arcPaperName :: Text,
-        arcTitle :: Text,
-        arcAuthors :: [Text],
-        arcLang :: Text
-      }
+data Article = Article
+  { arcId :: M.ArticleId,
+    arcUrl :: Text,
+    arcDate :: Maybe IntZonedTime,
+    arcPaperName :: Text,
+    arcTitle :: Text,
+    arcAuthors :: [Text],
+    arcLang :: Text
+  }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''Article
@@ -72,25 +67,31 @@ deriveBoth (jsonOpts 3) ''Article
 
 -- deriveBoth (jsonOpts 3) ''ArticleNp
 
-data ArticlePlease
-  = ArticlePlease
-      { arpId :: M.ArticlePleaseId,
-        arpAuthors :: [Text],
-        arpDatePublish :: Maybe IntZonedTime,
-        arpMaintext :: Text,
-        arpLanguage :: Maybe Text,
-        arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
-        arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
-      }
+data ArticlePlease = ArticlePlease
+  { arpId :: M.ArticlePleaseId,
+    arpAuthors :: [Text],
+    arpDatePublish :: Maybe IntZonedTime,
+    arpMaintext :: Text,
+    arpLanguage :: Maybe Text,
+    arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+    arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+  }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''ArticlePlease
 
-data Paginated item
-  = Paginated
-      { pgnItems :: [item],
-        pgnOverallPages :: Int
-      }
+data Paginated item = Paginated
+  { pgnItems :: [item],
+    pgnOverallPages :: Int
+  }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''Paginated
+
+data NamedEntityGroup = NamedEntityGroup
+  { nerEntity :: Text,
+    nerGroup :: [Text]
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''NamedEntityGroup

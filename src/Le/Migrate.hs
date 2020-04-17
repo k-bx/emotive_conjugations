@@ -38,6 +38,7 @@ ensureIndexes = do
   ensureIndex "named_entity" "named_entity_label_search2_i" ["label_", "search2"]
   ensureIndex "named_entity" "named_entity_label_search3_i" ["label_", "search3"]
   ensureIndex "named_entity" "named_entity_canonical_i" ["canonical"]
+  ensureIndex "named_propers" "named_propers_proper_i" ["proper"]
   pure ()
 
 ensureIndex :: Text -> Text -> [Text] -> ReaderT P.SqlBackend IO ()

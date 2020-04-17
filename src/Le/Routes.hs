@@ -93,7 +93,12 @@ data JsonAPI route
             :- "api" :> "person-named-entities-list.json"
               :> QueryParam "q" Text
               :> QueryParam "page" Int
-              :> Get '[JSON] (AT.Paginated Text)
+              :> Get '[JSON] (AT.Paginated Text),
+        _namedEntityGroup ::
+          route
+            :- "api" :> "ner-group.json"
+              :> QueryParam "ner" Text
+              :> Get '[JSON] AT.NamedEntityGroup
       }
   deriving (Generic)
 
@@ -117,5 +122,6 @@ server =
           _articlesShortHandler = articlesShortHandler,
           _articleDetails = articleDetails,
           _articlePleaseDetails = articlePleaseDetails,
-          _listNamedEntities = listNamedEntities
+          _listNamedEntities = listNamedEntities,
+          _namedEntityGroup = namedEntityGroup
         }

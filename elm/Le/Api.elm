@@ -216,6 +216,26 @@ jsonEncArticlePlease  val =
 
 
 
+type alias NamedEntityGroup  =
+   { entity: String
+   , group: (List String)
+   }
+
+jsonDecNamedEntityGroup : Json.Decode.Decoder ( NamedEntityGroup )
+jsonDecNamedEntityGroup =
+   Json.Decode.succeed (\pentity pgroup -> {entity = pentity, group = pgroup})
+   |> required "entity" (Json.Decode.string)
+   |> required "group" (Json.Decode.list (Json.Decode.string))
+
+jsonEncNamedEntityGroup : NamedEntityGroup -> Value
+jsonEncNamedEntityGroup  val =
+   Json.Encode.object
+   [ ("entity", Json.Encode.string val.entity)
+   , ("group", (Json.Encode.list Json.Encode.string) val.group)
+   ]
+
+
+
 type alias CmdSpacyNerResEnt  =
    { text: String
    , start: Int
@@ -651,6 +671,39 @@ getApiPersonnamedentitieslistjson query_q query_page toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg (jsonDecPaginated jsonDecText)
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiNergroupjson : (Maybe String) -> (Result Error  (NamedEntityGroup)  -> msg) -> Cmd msg
+getApiNergroupjson query_ner toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [ [ query_ner
+                    |> Maybe.map (Url.Builder.string "ner") ]
+                ])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "ner-group.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg jsonDecNamedEntityGroup
             , timeout =
                 Nothing
             , tracker =
