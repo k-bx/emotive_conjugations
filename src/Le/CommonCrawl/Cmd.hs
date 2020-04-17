@@ -18,6 +18,7 @@ import Le.Import
 import Le.Model
 import qualified Le.Python
 import qualified Le.Search
+import qualified Le.Speed
 import qualified Le.WebClient
 import qualified Network.AWS.Data.Text as AWS
 import qualified Network.AWS.S3 as S3
@@ -56,12 +57,13 @@ downloadAndFilter = do
 testDownloadAndFilter :: Le ()
 testDownloadAndFilter = do
   dataDir <- asks appDataDir
-  let baseUrl = BaseUrl
-        { baseUrlScheme = Http,
-          baseUrlHost = "localhost",
-          baseUrlPort = 6666,
-          baseUrlPath = ""
-        }
+  let baseUrl =
+        BaseUrl
+          { baseUrlScheme = Http,
+            baseUrlHost = "localhost",
+            baseUrlPort = 6666,
+            baseUrlPath = ""
+          }
   -- let baseUrl = Data.List.head Le.Config.cheapWorkers
   mgr <- asks appHttpManagerNoTimeout
   let cliEnv = (mkClientEnv mgr baseUrl)
@@ -76,9 +78,10 @@ parseFilteredArticles = do
   cfg <- asks appConfig
   app <- ask
   filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
-  pooledForConcurrentlyN_ (appNumCapabilities app) filteredWarcPaths (processWarc cfg)
+  speed <- Le.Speed.newSpeed (length filteredWarcPaths)
+  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
   where
-    processWarc cfg warcPath = do
+    processWarc cfg speed (i, warcPath) = do
       recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
       logInfo $ display $ "> warc path: " <> S.toText warcPath
       forM_ recs $ \(recHeader, recBs) -> do
@@ -112,79 +115,88 @@ parseFilteredArticles = do
               mArticlePresent <- runDb $ P.selectFirst [ArticleWarcId P.==. warcRecId] []
               case mArticlePresent of
                 Just _ -> pure ()
-                Nothing -> runCmd warcRecId host html uriText warcDt
-    runCmd warcRecId host html uriText warcDt = do
+                Nothing -> runCmd speed i warcRecId host html uriText warcDt
+    runCmd speed i warcRecId host html uriText warcDt = do
       res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
       case Le.Python.cnrLanguage res of
         Just "en" -> do
           void $ runDb $ do
-            articleId <- P.insert $ Article
-              { articleWarcId = warcRecId,
-                articleWarcDate = warcDt,
-                articleUrl = uriText,
-                articleHost = host
-              }
-            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $ ArticlePlease
-              { articlePleaseUrl = uriText,
-                articlePleaseHost = host,
-                articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
-                articlePleaseDateDownload =
-                  posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
-                articlePleaseDatePublish =
-                  posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
-                articlePleaseDateModify =
-                  posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
-                articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
-                articlePleaseFilename = Le.Python.cnrFilename res,
-                articlePleaseImageUrl = Le.Python.cnrImageUrl res,
-                articlePleaseLanguage = "en",
-                articlePleaseLocalpath = Le.Python.cnrLocalpath res,
-                articlePleaseTitle = Le.Python.cnrTitle res,
-                articlePleaseTitlePage = Le.Python.cnrTitlePage res,
-                articlePleaseTitleRss = Le.Python.cnrTitleRss res,
-                articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
-                articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
-                articlePleaseSpacyNer = Nothing,
-                articlePleaseSpacyPos = Nothing
-              }
-          logInfo $ display $ "> URI: " <> uriText
-          -- logInfo $ display $ "> Title: " <> tshow (Le.Python.cprTitle res)
-          -- logInfo $ display $ "> Pub date: " <> tshow (fmap posixSecondsToUTCTime (Le.Python.cprPubDate res))
-          -- logInfo $ display $ "> text: " <> Le.Python.cprText res
+            articleId <-
+              P.insert $
+                Article
+                  { articleWarcId = warcRecId,
+                    articleWarcDate = warcDt,
+                    articleUrl = uriText,
+                    articleHost = host
+                  }
+            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $
+              ArticlePlease
+                { articlePleaseUrl = uriText,
+                  articlePleaseHost = host,
+                  articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
+                  articlePleaseDateDownload =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
+                  articlePleaseDatePublish =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
+                  articlePleaseDateModify =
+                    posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
+                  articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
+                  articlePleaseFilename = Le.Python.cnrFilename res,
+                  articlePleaseImageUrl = Le.Python.cnrImageUrl res,
+                  articlePleaseLanguage = "en",
+                  articlePleaseLocalpath = Le.Python.cnrLocalpath res,
+                  articlePleaseTitle = Le.Python.cnrTitle res,
+                  articlePleaseTitlePage = Le.Python.cnrTitlePage res,
+                  articlePleaseTitleRss = Le.Python.cnrTitleRss res,
+                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
+                  articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
+                  articlePleaseSpacyNer = Nothing,
+                  articlePleaseSpacyPos = Nothing
+                }
+          Le.Speed.withProgress i speed $ \t -> do
+            logInfo $ display $ "> Processing WARC: " <> t
+          -- logInfo $ display $ "> URI: " <> uriText
           pure ()
         _ -> pure ()
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
   articlePleases <- runDb $ P.selectList [ArticlePleaseSpacyNer P.==. Nothing] [P.Desc ArticlePleaseId]
-  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articlePleases $ \articlePlease -> do
+  speed <- Le.Speed.newSpeed (length articlePleases)
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articlePleases) $ \(i, articlePlease) -> do
+    Le.Speed.withProgress i speed $ \t -> do
+      logInfo $ display $ "> Processing article: " <> t
     res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseMaintext (ev articlePlease)))
     runDb $ do
       P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
       forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
         when (cseLabel_ == "PERSON") $ do
           let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
-          void $ P.insert $ NamedEntity
-            { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
-              namedEntityEntity = cseText,
-              namedEntityStart = cseStart,
-              namedEntityStartChar = cseStartChar,
-              namedEntityEnd = cseEnd,
-              namedEntityEndChar = cseEndChar,
-              namedEntityLabel_ = cseLabel_,
-              namedEntitySearch1 = Just search1,
-              namedEntitySearch2 = Just search2,
-              namedEntitySearch3 = Just search3,
-              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
-              namedEntityProper = Nothing
-            }
+          void $ P.insert $
+            NamedEntity
+              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
+                namedEntityEntity = cseText,
+                namedEntityStart = cseStart,
+                namedEntityStartChar = cseStartChar,
+                namedEntityEnd = cseEnd,
+                namedEntityEndChar = cseEndChar,
+                namedEntityLabel_ = cseLabel_,
+                namedEntitySearch1 = Just search1,
+                namedEntitySearch2 = Just search2,
+                namedEntitySearch3 = Just search3,
+                namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
+                namedEntityProper = Nothing
+              }
     Le.Search.reindexProper
 
 spacyPosArticles :: Le ()
 spacyPosArticles = do
   articleNps <- runDb $ P.selectList [ArticlePleaseSpacyPos P.==. Nothing] [P.Desc ArticlePleaseId]
+  speed <- Le.Speed.newSpeed (length articleNps)
   -- articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId, P.LimitTo 10]
-  pooledForConcurrentlyN_ Le.Config.numPythonWorkers articleNps $ \articleNp -> do
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articleNps) $ \(i, articleNp) -> do
+    Le.Speed.withProgress i speed $ \t -> do
+      logInfo $ display $ "> Processing article: " <> t
     res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseMaintext (ev articleNp)))
     runDb $ do
       P.update (entityKey articleNp) [ArticlePleaseSpacyPos P.=. (Just res)]

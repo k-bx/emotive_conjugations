@@ -34,6 +34,7 @@ ensureIndexes = do
   -- ensureIndex "article_np" "article_np_date_i" ["date"]
   ensureIndex "article_please" "article_please_date_publish_i" ["date_publish"]
   ensureIndex "article" "article_warc_id_i" ["warc_id"]
+  ensureIndex "named_entity" "named_entity_entity_i" ["entity"]
   ensureIndex "named_entity" "named_entity_label_search1_i" ["label_", "search1"]
   ensureIndex "named_entity" "named_entity_label_search2_i" ["label_", "search2"]
   ensureIndex "named_entity" "named_entity_label_search3_i" ["label_", "search3"]

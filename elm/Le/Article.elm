@@ -47,17 +47,23 @@ computeContentNodes :
     -> List ContentNode
 computeContentNodes ps =
     let
+        parDelim =
+            "\n\n"
+
+        parDelimLen =
+            String.length parDelim
+
         parEndsDots =
-            String.indexes "\n\n" (ps.inputText ++ "\n\n")
+            String.indexes parDelim (ps.inputText ++ parDelim)
 
         paragraphs : List ContentNode
         paragraphs =
-            List.Extra.zip ([ -2 ] ++ parEndsDots) parEndsDots
+            List.Extra.zip ([ -1 * parDelimLen ] ++ parEndsDots) parEndsDots
                 |> List.map
                     (\( prevParEnd, parEnd ) ->
                         let
                             begin =
-                                prevParEnd + 2
+                                prevParEnd + parDelimLen
 
                             end =
                                 parEnd
