@@ -41,6 +41,7 @@ type Msg
     | NerClicked Api.CmdSpacyNerResEnt
     | TokenClicked Api.CmdSpacyPosResEnt
     | RenderedSomeTooltipsAndSlept ()
+    | GotNerGroup (Result Api.Error Api.NamedEntityGroup)
 
 
 type alias Model =
@@ -58,6 +59,7 @@ type alias Model =
     , selectedToken : Maybe Api.CmdSpacyPosResEnt
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
     , tokenCardExpanded : Bool
+    , nerGroup : Maybe Api.NamedEntityGroup
     }
 
 
@@ -77,9 +79,11 @@ init key ner active =
       , selectedToken = Nothing
       , selectedNer = Nothing
       , tokenCardExpanded = False
+      , nerGroup = Nothing
       }
     , Cmd.batch <|
         [ Api.getApiArticlesshortjson (Just ner) GotArticles
+        , Api.getApiNergroupjson (Just ner) GotNerGroup
         ]
             ++ (case active of
                     Nothing ->
@@ -185,6 +189,7 @@ update msg model =
                 [ Api.getApiArticlesshortjson (Just ner) GotArticles
                 , Browser.Navigation.replaceUrl model.key <|
                     Le.Routes.dashboard m2.ner m2.active
+                , Api.getApiNergroupjson (Just ner) GotNerGroup
                 ]
             )
 
@@ -209,7 +214,9 @@ update msg model =
             )
 
         NerClicked ner ->
-            ( { model | selectedNer = Just ner }, Cmd.none )
+            ( { model | selectedNer = Just ner }
+            , Cmd.none
+            )
 
         TokenClicked tok ->
             ( { model | selectedToken = Just tok }
@@ -218,6 +225,14 @@ update msg model =
 
         RenderedSomeTooltipsAndSlept () ->
             ( model, Le.Ports.initTooltips () )
+
+        GotNerGroup (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotNerGroup (Ok nerGroup) ->
+            ( { model | nerGroup = Just nerGroup }
+            , Cmd.none
+            )
 
 
 navbarContent : Html Msg
@@ -650,6 +665,25 @@ mainContent model =
                     ]
                 ]
 
+        renderNerGroup nerGroup =
+            let
+                renderItem t =
+                    li [ class "mb-2" ]
+                        [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ]
+                            [ text t ]
+                        ]
+            in
+            div [ class "mt-2 details-board fade-in" ] <|
+                [ div [ class "text-center mb-4" ]
+                    [ -- span [ class "badge-highlighed-token badge-highlighed-token--ner" ]
+                      --    [ text <| nerGroup.entity
+                      --    ]
+                      span [ class "badge-highlighed-nearby-font badge-highlighed-nearby-font--white" ] [ text " NER group" ]
+                    ]
+                , ul [] <|
+                    List.map renderItem nerGroup.group
+                ]
+
         articleControlPanel =
             div [] <|
                 [ div [ class "mt-2 d-flex flex-row justify-content-between" ]
@@ -678,6 +712,10 @@ mainContent model =
                        )
                     ++ (model.selectedNer
                             |> Maybe.map renderSelectedNer
+                            |> Maybe.Extra.unwrap [] List.singleton
+                       )
+                    ++ (model.nerGroup
+                            |> Maybe.map renderNerGroup
                             |> Maybe.Extra.unwrap [] List.singleton
                        )
     in

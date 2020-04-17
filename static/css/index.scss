@@ -103,6 +103,14 @@ main > .container {
   color: #000;
 }
 
+.badge-highlighed-nearby-font {
+  font-size: 1rem;
+}
+.badge-highlighed-nearby-font--white {
+  color: #fff;
+  font-weight: 700;
+}
+
 .switch {
   position: relative;
   display: inline-block;
