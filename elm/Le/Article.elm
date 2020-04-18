@@ -48,7 +48,7 @@ computeContentNodes :
 computeContentNodes ps =
     let
         parDelim =
-            "\n\n"
+            "\n"
 
         parDelimLen =
             String.length parDelim
