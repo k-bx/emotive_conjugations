@@ -56,6 +56,17 @@ articlePleaseDetails articleNpId = sg $ do
         -- arpSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseSpacyPos articlePlease)
       }
 
+articlePleaseDetailsBig :: ArticlePleaseBigId -> Le AT.ArticlePleaseBig
+articlePleaseDetailsBig bigId = sg $ do
+  articlePleaseBig <- mustFindM $ runDb $ P.get bigId
+  pure $
+    AT.ArticlePleaseBig
+      { arbId = bigId,
+        arbMaintext = articlePleaseBigMaintext articlePleaseBig,
+        arbSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseBigSpacyNer articlePleaseBig),
+        arbSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigSpacyPos articlePleaseBig)
+      }
+
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)
 listNamedEntities mQuery mPage = sg $ do
   let page = fromMaybe 1 mPage

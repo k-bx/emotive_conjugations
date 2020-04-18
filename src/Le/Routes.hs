@@ -88,6 +88,12 @@ data JsonAPI route
               :> Capture "article-please-id" ArticlePleaseId
               :> "article-please.json"
               :> Get '[JSON] AT.ArticlePlease,
+        _articlePleaseDetailsBig ::
+          route
+            :- "api" :> "article"
+              :> Capture "article-please-big-id" ArticlePleaseBigId
+              :> "article-please-big.json"
+              :> Get '[JSON] AT.ArticlePleaseBig,
         _listNamedEntities ::
           route
             :- "api" :> "person-named-entities-list.json"
@@ -121,6 +127,7 @@ server =
           _errorOut = errorOut,
           _articlesShortHandler = articlesShortHandler,
           _articleDetails = articleDetails,
+          _articlePleaseDetailsBig = articlePleaseDetailsBig,
           _articlePleaseDetails = articlePleaseDetails,
           _listNamedEntities = listNamedEntities,
           _namedEntityGroup = namedEntityGroup

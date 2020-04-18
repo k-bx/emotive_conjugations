@@ -185,22 +185,16 @@ type alias ArticlePlease  =
    { id: ArticlePleaseId
    , authors: (List String)
    , date_publish: (Maybe IntZonedTime)
-   , maintext: String
    , language: (Maybe String)
-   , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
-   , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
    }
 
 jsonDecArticlePlease : Json.Decode.Decoder ( ArticlePlease )
 jsonDecArticlePlease =
-   Json.Decode.succeed (\pid pauthors pdate_publish pmaintext planguage pspacy_ner_ents pspacy_pos_ents -> {id = pid, authors = pauthors, date_publish = pdate_publish, maintext = pmaintext, language = planguage, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
+   Json.Decode.succeed (\pid pauthors pdate_publish planguage -> {id = pid, authors = pauthors, date_publish = pdate_publish, language = planguage})
    |> required "id" (jsonDecArticlePleaseId)
    |> required "authors" (Json.Decode.list (Json.Decode.string))
    |> fnullable "date_publish" (jsonDecIntZonedTime)
-   |> required "maintext" (Json.Decode.string)
    |> fnullable "language" (Json.Decode.string)
-   |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
-   |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
 
 jsonEncArticlePlease : ArticlePlease -> Value
 jsonEncArticlePlease  val =
@@ -208,8 +202,31 @@ jsonEncArticlePlease  val =
    [ ("id", jsonEncArticlePleaseId val.id)
    , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
    , ("date_publish", (maybeEncode (jsonEncIntZonedTime)) val.date_publish)
-   , ("maintext", Json.Encode.string val.maintext)
    , ("language", (maybeEncode (Json.Encode.string)) val.language)
+   ]
+
+
+
+type alias ArticlePleaseBig  =
+   { id: ArticlePleaseBigId
+   , maintext: String
+   , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
+   , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
+   }
+
+jsonDecArticlePleaseBig : Json.Decode.Decoder ( ArticlePleaseBig )
+jsonDecArticlePleaseBig =
+   Json.Decode.succeed (\pid pmaintext pspacy_ner_ents pspacy_pos_ents -> {id = pid, maintext = pmaintext, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
+   |> required "id" (jsonDecArticlePleaseBigId)
+   |> required "maintext" (Json.Decode.string)
+   |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
+   |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
+
+jsonEncArticlePleaseBig : ArticlePleaseBig -> Value
+jsonEncArticlePleaseBig  val =
+   Json.Encode.object
+   [ ("id", jsonEncArticlePleaseBigId val.id)
+   , ("maintext", Json.Encode.string val.maintext)
    , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
    , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.spacy_pos_ents)
    ]
@@ -427,6 +444,9 @@ jsonEncArticleId = Json.Encode.int
 type alias ArticlePleaseId = Int
 jsonDecArticlePleaseId = Json.Decode.int
 jsonEncArticlePleaseId = Json.Encode.int
+type alias ArticlePleaseBigId = Int
+jsonDecArticlePleaseBigId = Json.Decode.int
+jsonEncArticlePleaseBigId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -635,6 +655,40 @@ getApiArticleByArticlepleaseidArticlepleasejson capture_article_please_id toMsg 
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg jsonDecArticlePlease
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiArticleByArticlepleasebigidArticlepleasebigjson : ArticlePleaseBigId -> (Result Error  (ArticlePleaseBig)  -> msg) -> Cmd msg
+getApiArticleByArticlepleasebigidArticlepleasebigjson capture_article_please_big_id toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "article"
+                    , (capture_article_please_big_id
+                       |> String.fromInt)
+                    , "article-please-big.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg jsonDecArticlePleaseBig
             , timeout =
                 Nothing
             , tracker =

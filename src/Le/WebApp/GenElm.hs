@@ -34,6 +34,7 @@ moduleDefs =
     DefineElm (Proxy :: Proxy AT.ArticleShort),
     DefineElm (Proxy :: Proxy AT.Article),
     DefineElm (Proxy :: Proxy AT.ArticlePlease),
+    DefineElm (Proxy :: Proxy AT.ArticlePleaseBig),
     DefineElm (Proxy :: Proxy AT.NamedEntityGroup),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyPosResEnt),
@@ -45,6 +46,7 @@ replacements =
   [ ("(Key Article)", "ArticleId"),
     ("(Key ArticleNp)", "ArticleNpId"),
     ("(Key ArticlePlease)", "ArticlePleaseId"),
+    ("(Key ArticlePleaseBig)", "ArticlePleaseBigId"),
     ( "jsonDec(Tuple2 Text Text)",
       "jsonDecTuple2 Json.Decode.string Json.Decode.string"
     ),
@@ -62,7 +64,8 @@ intAliases =
       "IntZonedTime",
       "Milliseconds",
       "ArticleId",
-      "ArticlePleaseId"
+      "ArticlePleaseId",
+      "ArticlePleaseBigId"
     ]
 
 stringAliases :: [String]

@@ -71,14 +71,21 @@ data ArticlePlease = ArticlePlease
   { arpId :: M.ArticlePleaseId,
     arpAuthors :: [Text],
     arpDatePublish :: Maybe IntZonedTime,
-    -- arpMaintext :: Text,
     arpLanguage :: Maybe Text
-    -- arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
-    -- arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
   }
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''ArticlePlease
+
+data ArticlePleaseBig = ArticlePleaseBig
+  { arbId :: M.ArticlePleaseBigId,
+    arbMaintext :: Text,
+    arbSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+    arbSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''ArticlePleaseBig
 
 data Paginated item = Paginated
   { pgnItems :: [item],

@@ -34,6 +34,7 @@ type Msg
     | CellClicked Api.ArticleId
     | GotArticle (Result Api.Error Api.Article)
     | GotArticlePlease (Result Api.Error Api.ArticlePlease)
+    | GotArticlePleaseBig (Result Api.Error Api.ArticlePleaseBig)
     | SelectTwo (SelectTwoMsg Msg)
     | NerSelect String
     | SelectNerAjax AjaxParams Bool
@@ -52,6 +53,7 @@ type alias Model =
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
     , articlePlease : Maybe Api.ArticlePlease
+    , articlePleaseBig : Maybe Api.ArticlePleaseBig
     , selectTwo : Maybe (SelectTwo Msg)
     , ners : List String
     , ner : String
@@ -72,6 +74,7 @@ init key ner active =
       , active = active
       , articleFull = Nothing
       , articlePlease = Nothing
+      , articlePleaseBig = Nothing
       , selectTwo = Nothing
       , ners = [ ner ]
       , ner = ner
@@ -137,7 +140,10 @@ update msg model =
 
         GotArticle (Ok article) ->
             ( { model | articleFull = Just article }
-            , Api.getApiArticleByArticlepleaseidArticlepleasejson article.id GotArticlePlease
+            , Cmd.batch
+                [ Api.getApiArticleByArticlepleaseidArticlepleasejson article.id GotArticlePlease
+                , Api.getApiArticleByArticlepleasebigidArticlepleasebigjson article.id GotArticlePleaseBig
+                ]
             )
 
         GotArticlePlease (Err e) ->
@@ -145,6 +151,14 @@ update msg model =
 
         GotArticlePlease (Ok articlePlease) ->
             ( { model | articlePlease = Just articlePlease }
+            , Cmd.none
+            )
+
+        GotArticlePleaseBig (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotArticlePleaseBig (Ok articlePleaseBig) ->
+            ( { model | articlePleaseBig = Just articlePleaseBig }
             , Cmd.none
             )
 
@@ -351,11 +365,8 @@ mainContent model =
             div []
                 [ h2 [] [ text article.title ]
                 , div [ class "article" ] <|
-                    case model.articlePlease of
-                        Nothing ->
-                            [ div [] [] ]
-
-                        Just articlePlease ->
+                    case ( model.articlePlease, model.articlePleaseBig ) of
+                        ( Just articlePlease, Just articlePleaseBig ) ->
                             [ Le.Article.renderContentNodes
                                 { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
                                 , highlightPos = model.highlightPos
@@ -366,12 +377,15 @@ mainContent model =
                                 , depParent = Maybe.map .i mDepHeadToken
                                 , nodes =
                                     Le.Article.computeContentNodes
-                                        { inputText = articlePlease.maintext
-                                        , mSpacyNers = articlePlease.spacy_ner_ents
-                                        , mSpacyPoss = articlePlease.spacy_pos_ents
+                                        { inputText = articlePleaseBig.maintext
+                                        , mSpacyNers = articlePleaseBig.spacy_ner_ents
+                                        , mSpacyPoss = articlePleaseBig.spacy_pos_ents
                                         }
                                 }
                             ]
+
+                        _ ->
+                            [ div [] [] ]
                 ]
 
         mDepHeadToken : Maybe Api.CmdSpacyPosResEnt
@@ -381,7 +395,7 @@ mainContent model =
                     Nothing
 
                 Just selectedToken ->
-                    model.articlePlease
+                    model.articlePleaseBig
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.i == selectedToken.head_i)
                         |> List.head
@@ -393,7 +407,7 @@ mainContent model =
                     []
 
                 Just selectedToken ->
-                    model.articlePlease
+                    model.articlePleaseBig
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.head_i == selectedToken.i)
 
