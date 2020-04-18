@@ -1,5 +1,7 @@
 module Le.Speed where
 
+import qualified Control.Concurrent
+import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import Data.Time
 import Le.Import
@@ -11,26 +13,41 @@ data Speed = Speed
   { spdStarted :: UTCTime,
     spdOverall :: Int,
     spdLastReport :: TVar UTCTime,
-    spdLastRecord :: TVar Int
+    spdLastReportPerThread :: TVar (Map ThreadId UTCTime),
+    spdLastRecord :: TVar Int,
+    spdLastRecordPerThread :: TVar (Map ThreadId Int)
   }
 
 newSpeed :: MonadIO m => Int -> m Speed
 newSpeed overall = do
   t <- liftIO $ getCurrentTime
   lrep <- atomically $ newTVar t
+  lrept <- atomically $ newTVar M.empty
   lrec <- atomically $ newTVar 0
-  pure $ Speed t overall lrep lrec
+  lrect <- atomically $ newTVar M.empty
+  pure $ Speed t overall lrep lrept lrec lrect
 
 withProgress :: MonadIO m => Int -> Speed -> (Text -> m ()) -> m ()
 withProgress curr Speed {..} f = do
-  lastReport <- atomically $ readTVar spdLastReport
+  tid <- liftIO Control.Concurrent.myThreadId
+  lastReportOverall <- readTVarIO spdLastReport
+  mLastReportOfThread <-
+    readTVarIO spdLastReportPerThread
+      & fmap (M.lookup tid)
+  let lastReport = fromMaybe lastReportOverall mLastReportOfThread
   let noReportTillThisMark = addUTCTime reportDelay lastReport
   t <- liftIO getCurrentTime
   when (t > noReportTillThisMark) $ do
-    lastRecord <- readTVarIO (spdLastRecord)
+    lastRecordOverall <- readTVarIO spdLastRecord
+    lastRecordOfThread <-
+      readTVarIO spdLastRecordPerThread
+        & fmap (M.lookup tid)
+    let lastRecord = fromMaybe lastRecordOverall lastRecordOfThread
     atomically $ do
       writeTVar spdLastReport t
+      modifyTVar spdLastReportPerThread $ M.insert tid t
       writeTVar spdLastRecord curr
+      modifyTVar spdLastRecordPerThread $ M.insert tid curr
     let timePassedSinceLastTime = Data.Time.diffUTCTime t lastReport
         timeLeftGlobal :: NominalDiffTime
         timeLeftGlobal =

@@ -100,24 +100,27 @@ cleanDbData = Le.App.run $ do
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])
 
 migrate03 :: App -> ReaderT P.SqlBackend IO ()
-migrate03 app = do
-  pure ()
---   runRIO app $ logInfo $ display $ ("> starting migrate03" :: Text)
---   [Single lengthArticlePleases] <- E.rawSql [q|select count(*) from article_please|] []
---   runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthArticlePleases)
---   speed <- Le.Speed.newSpeed lengthArticlePleases
---   articlesRes <- selectSourceRes ([] :: [P.Filter ArticlePlease]) []
---   C.withAcquire articlesRes $ \src ->
---     C.runConduit $
---       (C.getZipSource ((,) <$> C.ZipSource (C.yieldMany [0 ..]) <*> C.ZipSource src))
---         .| C.mapM_C (act speed)
---   where
---     act speed (i, articlePlease) = do
---       Le.Speed.withProgress i speed $ \t -> do
---         runRIO app $ logInfo $ display $ "> Processing article please: " <> t
---       void $ P.insert $
---         ArticlePleaseBig
---           { articlePleaseBigMaintext = articlePleaseMaintext (ev articlePlease),
---             articlePleaseBigSpacyNer = articlePleaseSpacyNer (ev articlePlease),
---             articlePleaseBigSpacyPos = articlePleaseSpacyPos (ev articlePlease)
---           }
+migrate03 app = pure ()
+  where
+    _legacy = do
+      runRIO app $ logInfo $ display $ ("> starting migrate03" :: Text)
+      [Single lengthArticlePleases] <- E.rawSql [q|select count(*) from article_please|] []
+      runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthArticlePleases)
+      speed <- Le.Speed.newSpeed lengthArticlePleases
+      articlesRes <- selectSourceRes ([] :: [P.Filter ArticlePlease]) []
+      C.withAcquire articlesRes $ \src ->
+        C.runConduit $
+          (C.getZipSource ((,) <$> C.ZipSource (C.yieldMany [0 ..]) <*> C.ZipSource src))
+            .| C.mapM_C (act speed)
+      where
+        act :: Le.Speed.Speed -> (Int, Entity ArticlePlease) -> ReaderT P.SqlBackend IO ()
+        act speed (i, _articlePlease) = do
+          Le.Speed.withProgress i speed $ \t -> do
+            runRIO app $ logInfo $ display $ "> Processing article please: " <> t
+          -- void $ P.insert $ undefined
+          -- ArticlePleaseBig
+          --   { articlePleaseBigMaintext = articlePleaseMaintext (ev articlePlease),
+          --     articlePleaseBigSpacyNer = articlePleaseSpacyNer (ev articlePlease),
+          --     articlePleaseBigSpacyPos = articlePleaseSpacyPos (ev articlePlease)
+          --   }
+          pure ()
