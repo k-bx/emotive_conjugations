@@ -1,9 +1,12 @@
+{-# LANGUAGE QuasiQuotes #-}
+
 module Le.Search where
 
 import qualified Data.Char
 import qualified Data.HashMap.Monoidal as MHM
 import qualified Data.List
 import qualified Data.Text as T
+import qualified Database.Esqueleto as E
 import qualified Database.Persist.Postgresql as P
 import qualified Le.App
 import Le.Import
@@ -11,6 +14,7 @@ import Le.Model
 import qualified Le.Speed
 import Le.Util
 import qualified Safe
+import Text.InterpolatedString.Perl6 (q)
 
 -- | Used for named entities indexing
 computeSearchTerms :: Text -> (Text, Text, Text)
@@ -63,9 +67,8 @@ reindexProper = do
   ners <- Le.App.runDb $ P.selectList [NamedEntityProper P.==. Nothing] []
   let overallLen = length ners
   speed <- Le.Speed.newSpeed overallLen
-  -- app <- ask
-  -- pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0..] ners) $ \(i, ner) -> do
-  pooledForConcurrentlyN_ 1 (zip [0 ..] ners) $ \(i, ner) -> do
+  app <- ask
+  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0 ..] ners) $ \(i, ner) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner: " <> t
     Le.App.runDb $ do
@@ -87,11 +90,15 @@ reindexProper = do
                   |> fmap fst
                   |> fromMaybe (namedEntityEntity (ev ner))
           P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
-          P.repsert
-            (NamedPropersKey (namedEntityEntity (ev ner)))
-            ( NamedPropers
-                { namedPropersEntity = namedEntityEntity (ev ner),
-                  namedPropersProper = mostPopularEntity
-                }
-            )
+          E.rawExecute
+            [q|insert into named_propers (entity, proper) values (?, ?)
+               on conflict do nothing|]
+            [P.PersistText (namedEntityEntity (ev ner)), P.PersistText mostPopularEntity]
+          -- P.repsert
+          --   (NamedPropersKey (namedEntityEntity (ev ner)))
+          --   ( NamedPropers
+          --       { namedPropersEntity = namedEntityEntity (ev ner),
+          --         namedPropersProper = mostPopularEntity
+          --       }
+          --   )
           pure ()

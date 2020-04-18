@@ -165,7 +165,7 @@ spacyNerArticles = do
   speed <- Le.Speed.newSpeed (length articlePleases)
   pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articlePleases) $ \(i, articlePlease) -> do
     Le.Speed.withProgress i speed $ \t -> do
-      logInfo $ display $ "> Processing article: " <> t
+      logInfo $ display $ "> Processing ner article: " <> t
     res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseMaintext (ev articlePlease)))
     runDb $ do
       P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
@@ -187,16 +187,15 @@ spacyNerArticles = do
                 namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
                 namedEntityProper = Nothing
               }
-    Le.Search.reindexProper
+  Le.Search.reindexProper
 
 spacyPosArticles :: Le ()
 spacyPosArticles = do
   articleNps <- runDb $ P.selectList [ArticlePleaseSpacyPos P.==. Nothing] [P.Desc ArticlePleaseId]
   speed <- Le.Speed.newSpeed (length articleNps)
-  -- articleNps <- runDb $ P.selectList [ArticleNpSpacyPos P.==. Nothing] [P.Desc ArticleNpId, P.LimitTo 10]
   pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articleNps) $ \(i, articleNp) -> do
     Le.Speed.withProgress i speed $ \t -> do
-      logInfo $ display $ "> Processing article: " <> t
+      logInfo $ display $ "> Processing pos article: " <> t
     res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseMaintext (ev articleNp)))
     runDb $ do
       P.update (entityKey articleNp) [ArticlePleaseSpacyPos P.=. (Just res)]
