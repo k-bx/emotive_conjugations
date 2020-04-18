@@ -148,10 +148,13 @@ parseFilteredArticles = do
                   articlePleaseTitle = Le.Python.cnrTitle res,
                   articlePleaseTitlePage = Le.Python.cnrTitlePage res,
                   articlePleaseTitleRss = Le.Python.cnrTitleRss res,
-                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res,
-                  articlePleaseMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
-                  articlePleaseSpacyNer = Nothing,
-                  articlePleaseSpacyPos = Nothing
+                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res
+                }
+            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $
+              ArticlePleaseBig
+                { articlePleaseBigMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
+                  articlePleaseBigSpacyNer = Nothing,
+                  articlePleaseBigSpacyPos = Nothing
                 }
           Le.Speed.withProgress i speed $ \t -> do
             logInfo $ display $ "> Processing WARC: " <> t
@@ -161,20 +164,22 @@ parseFilteredArticles = do
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
-  articlePleases <- runDb $ P.selectList [ArticlePleaseSpacyNer P.==. Nothing] [P.Desc ArticlePleaseId]
-  speed <- Le.Speed.newSpeed (length articlePleases)
-  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articlePleases) $ \(i, articlePlease) -> do
+  articlePleaseBigs <- runDb $ P.selectList [ArticlePleaseBigSpacyNer P.==. Nothing] [P.Desc ArticlePleaseBigId]
+  speed <- Le.Speed.newSpeed (length articlePleaseBigs)
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articlePleaseBigs) $ \(i, articlePleaseBig) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner article: " <> t
-    res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseMaintext (ev articlePlease)))
+    res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseBigMaintext (ev articlePleaseBig)))
     runDb $ do
-      P.update (entityKey articlePlease) [ArticlePleaseSpacyNer P.=. (Just res)]
+      let articlePleaseId :: ArticlePleaseId
+          articlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePleaseBig))
+      P.update (entityKey articlePleaseBig) [ArticlePleaseBigSpacyNer P.=. (Just res)]
       forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
         when (cseLabel_ == "PERSON") $ do
           let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
           void $ P.insert $
             NamedEntity
-              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
+              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
                 namedEntityEntity = cseText,
                 namedEntityStart = cseStart,
                 namedEntityStartChar = cseStartChar,
@@ -191,11 +196,11 @@ spacyNerArticles = do
 
 spacyPosArticles :: Le ()
 spacyPosArticles = do
-  articleNps <- runDb $ P.selectList [ArticlePleaseSpacyPos P.==. Nothing] [P.Desc ArticlePleaseId]
-  speed <- Le.Speed.newSpeed (length articleNps)
-  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articleNps) $ \(i, articleNp) -> do
+  articleBigNps <- runDb $ P.selectList [ArticlePleaseBigSpacyPos P.==. Nothing] [P.Desc ArticlePleaseBigId]
+  speed <- Le.Speed.newSpeed (length articleBigNps)
+  pooledForConcurrentlyN_ Le.Config.numPythonWorkers (zip [1 ..] articleBigNps) $ \(i, articleBigNp) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing pos article: " <> t
-    res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseMaintext (ev articleNp)))
+    res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseBigMaintext (ev articleBigNp)))
     runDb $ do
-      P.update (entityKey articleNp) [ArticlePleaseSpacyPos P.=. (Just res)]
+      P.update (entityKey articleBigNp) [ArticlePleaseBigSpacyPos P.=. (Just res)]

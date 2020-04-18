@@ -2,15 +2,19 @@
 
 module Le.Migrate where
 
+import qualified Conduit as C
+import Conduit ((.|))
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Database.Esqueleto
+import qualified Database.Esqueleto as E
 import qualified Database.Persist.Postgresql as P
 import qualified Le.App
 import Le.AppUtils
 import Le.Import
 import Le.Model
 import qualified Le.Search
+import qualified Le.Speed
 import Text.InterpolatedString.Perl6 (q, qc)
 import qualified Prelude
 
@@ -68,11 +72,12 @@ migrateData app = do
   let version = migrationInfoVersion migrationInfo
   when (version <= 1) Le.Search.reindexNers -- 1 -> 2
   when (version <= 2) (runRIO app Le.Search.reindexProper) -- 2 -> 3
+  when (version <= 3) (pure ()) -- 3-> 4
   when (version < latestVersion) (setMigrationVersion latestVersion)
 
 -- Update this when you add more migrations
 latestVersion :: Int
-latestVersion = 3
+latestVersion = 4
 
 getMigrationInfo :: ReaderT P.SqlBackend IO MigrationInfo
 getMigrationInfo = do
@@ -93,3 +98,26 @@ cleanDbData = Le.App.run $ do
   -- Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticleNp])
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticlePlease])
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])
+
+migrate03 :: App -> ReaderT P.SqlBackend IO ()
+migrate03 app = do
+  pure ()
+--   runRIO app $ logInfo $ display $ ("> starting migrate03" :: Text)
+--   [Single lengthArticlePleases] <- E.rawSql [q|select count(*) from article_please|] []
+--   runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthArticlePleases)
+--   speed <- Le.Speed.newSpeed lengthArticlePleases
+--   articlesRes <- selectSourceRes ([] :: [P.Filter ArticlePlease]) []
+--   C.withAcquire articlesRes $ \src ->
+--     C.runConduit $
+--       (C.getZipSource ((,) <$> C.ZipSource (C.yieldMany [0 ..]) <*> C.ZipSource src))
+--         .| C.mapM_C (act speed)
+--   where
+--     act speed (i, articlePlease) = do
+--       Le.Speed.withProgress i speed $ \t -> do
+--         runRIO app $ logInfo $ display $ "> Processing article please: " <> t
+--       void $ P.insert $
+--         ArticlePleaseBig
+--           { articlePleaseBigMaintext = articlePleaseMaintext (ev articlePlease),
+--             articlePleaseBigSpacyNer = articlePleaseSpacyNer (ev articlePlease),
+--             articlePleaseBigSpacyPos = articlePleaseSpacyPos (ev articlePlease)
+--           }

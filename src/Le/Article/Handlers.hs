@@ -50,10 +50,10 @@ articlePleaseDetails articleNpId = sg $ do
       { arpId = articleNpId,
         arpAuthors = unpack (articlePleaseAuthors articlePlease),
         arpDatePublish = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
-        arpMaintext = articlePleaseMaintext articlePlease,
-        arpLanguage = Just (articlePleaseLanguage articlePlease),
-        arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),
-        arpSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseSpacyPos articlePlease)
+        -- arpMaintext = articlePleaseMaintext articlePlease,
+        arpLanguage = Just (articlePleaseLanguage articlePlease)
+        -- arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),
+        -- arpSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseSpacyPos articlePlease)
       }
 
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)

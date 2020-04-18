@@ -71,10 +71,10 @@ data ArticlePlease = ArticlePlease
   { arpId :: M.ArticlePleaseId,
     arpAuthors :: [Text],
     arpDatePublish :: Maybe IntZonedTime,
-    arpMaintext :: Text,
-    arpLanguage :: Maybe Text,
-    arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
-    arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+    -- arpMaintext :: Text,
+    arpLanguage :: Maybe Text
+    -- arpSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
+    -- arpSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
   }
   deriving (Show, Eq, Generic)
 

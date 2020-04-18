@@ -54,6 +54,7 @@ ArticlePlease
     titlePage Text Maybe
     titleRss Text Maybe
     sourceDomain Text Maybe
+ArticlePleaseBig
     maintext Text
     spacyNer Le.Python.CmdSpacyNerRes Maybe
     spacyPos Le.Python.CmdSpacyPosRes Maybe
