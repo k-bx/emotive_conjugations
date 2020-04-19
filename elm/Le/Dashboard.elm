@@ -58,6 +58,7 @@ type alias Model =
     , ners : List String
     , ner : String
     , highlightPos : Bool
+    , highlightAllNers : Bool
     , selectedToken : Maybe Api.CmdSpacyPosResEnt
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
     , tokenCardExpanded : Bool
@@ -79,6 +80,7 @@ init key ner active =
       , ners = [ ner ]
       , ner = ner
       , highlightPos = False
+      , highlightAllNers = False
       , selectedToken = Nothing
       , selectedNer = Nothing
       , tokenCardExpanded = False
@@ -363,6 +365,41 @@ mainContent model =
 
         articleDetails : Api.Article -> Html Msg
         articleDetails article =
+            let
+                articlePleaseBadges =
+                    case model.articlePlease of
+                        Nothing ->
+                            []
+
+                        Just articlePlease ->
+                            [ span [ class "badge badge-info" ]
+                                [ text <|
+                                    "date-download:"
+                                        ++ (articlePlease.date_download
+                                                |> Maybe.map (renderDateInfobox << Time.millisToPosix)
+                                                |> Maybe.withDefault "none"
+                                           )
+                                ]
+                            , text " "
+                            , span [ class "badge badge-info" ]
+                                [ text <|
+                                    "date-publish:"
+                                        ++ (articlePlease.date_publish
+                                                |> Maybe.map (renderDateInfobox << Time.millisToPosix)
+                                                |> Maybe.withDefault "none"
+                                           )
+                                ]
+                            , text " "
+                            , span [ class "badge badge-info" ]
+                                [ text <|
+                                    "date-modify:"
+                                        ++ (articlePlease.date_modify
+                                                |> Maybe.map (renderDateInfobox << Time.millisToPosix)
+                                                |> Maybe.withDefault "none"
+                                           )
+                                ]
+                            ]
+            in
             div []
                 [ div [ class "details-board__content__infobox" ]
                     [ div [ class "details-board__content__infobox__date" ]
@@ -373,13 +410,15 @@ mainContent model =
                             )
                         ]
                     , div [] [ strong [] [ text article.paper_name ] ]
-                    , div []
+                    , div [] <|
                         [ span [ class "badge badge-info" ]
                             [ text <| "id:" ++ String.fromInt article.id ]
                         , text " "
                         , span [ class "badge badge-info" ]
                             [ text <| "warc-id:" ++ Maybe.withDefault "<unknown>" article.warc_id ]
                         ]
+                    , div [] <|
+                        articlePleaseBadges
                     , div []
                         [ a
                             [ href article.url
@@ -396,6 +435,7 @@ mainContent model =
                                 [ Le.Article.renderContentNodes
                                     { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
                                     , highlightPos = model.highlightPos
+                                    , highlightAllNers = model.highlightAllNers
                                     , onClickToken = TokenClicked
                                     , onClickNer = NerClicked
                                     , selectedToken = Maybe.map .i model.selectedToken
@@ -742,6 +782,25 @@ mainContent model =
                         , label
                             [ class "switch-label mb-0"
                             , for "highlight-pos-checkbox"
+                            ]
+                            [ text "switch" ]
+                        ]
+                    ]
+                , div [ class "mt-2 d-flex flex-row justify-content-between" ]
+                    [ text "Highlight all NERs"
+                    , div [ class "switch" ]
+                        [ input
+                            [ class "switch-input"
+                            , id "highlight-all-ners-checkbox"
+                            , name "check"
+                            , type_ "checkbox"
+                            , checked model.highlightAllNers
+                            , onClick (UpdateModel { model | highlightAllNers = not model.highlightAllNers })
+                            ]
+                            []
+                        , label
+                            [ class "switch-label mb-0"
+                            , for "highlight-all-ners-checkbox"
                             ]
                             [ text "switch" ]
                         ]

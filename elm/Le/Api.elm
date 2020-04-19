@@ -187,16 +187,20 @@ jsonEncArticle  val =
 type alias ArticlePlease  =
    { id: ArticlePleaseId
    , authors: (List String)
+   , date_download: (Maybe IntZonedTime)
    , date_publish: (Maybe IntZonedTime)
+   , date_modify: (Maybe IntZonedTime)
    , language: (Maybe String)
    }
 
 jsonDecArticlePlease : Json.Decode.Decoder ( ArticlePlease )
 jsonDecArticlePlease =
-   Json.Decode.succeed (\pid pauthors pdate_publish planguage -> {id = pid, authors = pauthors, date_publish = pdate_publish, language = planguage})
+   Json.Decode.succeed (\pid pauthors pdate_download pdate_publish pdate_modify planguage -> {id = pid, authors = pauthors, date_download = pdate_download, date_publish = pdate_publish, date_modify = pdate_modify, language = planguage})
    |> required "id" (jsonDecArticlePleaseId)
    |> required "authors" (Json.Decode.list (Json.Decode.string))
+   |> fnullable "date_download" (jsonDecIntZonedTime)
    |> fnullable "date_publish" (jsonDecIntZonedTime)
+   |> fnullable "date_modify" (jsonDecIntZonedTime)
    |> fnullable "language" (Json.Decode.string)
 
 jsonEncArticlePlease : ArticlePlease -> Value
@@ -204,7 +208,9 @@ jsonEncArticlePlease  val =
    Json.Encode.object
    [ ("id", jsonEncArticlePleaseId val.id)
    , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
+   , ("date_download", (maybeEncode (jsonEncIntZonedTime)) val.date_download)
    , ("date_publish", (maybeEncode (jsonEncIntZonedTime)) val.date_publish)
+   , ("date_modify", (maybeEncode (jsonEncIntZonedTime)) val.date_modify)
    , ("language", (maybeEncode (Json.Encode.string)) val.language)
    ]
 

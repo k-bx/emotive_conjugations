@@ -71,7 +71,9 @@ deriveBoth (jsonOpts 3) ''Article
 data ArticlePlease = ArticlePlease
   { arpId :: M.ArticlePleaseId,
     arpAuthors :: [Text],
+    arpDateDownload :: Maybe IntZonedTime,
     arpDatePublish :: Maybe IntZonedTime,
+    arpDateModify :: Maybe IntZonedTime,
     arpLanguage :: Maybe Text
   }
   deriving (Show, Eq, Generic)

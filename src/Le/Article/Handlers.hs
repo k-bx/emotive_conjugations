@@ -51,7 +51,9 @@ articlePleaseDetails articleNpId = sg $ do
     AT.ArticlePlease
       { arpId = articleNpId,
         arpAuthors = unpack (articlePleaseAuthors articlePlease),
+        arpDateDownload = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDateDownload articlePlease,
         arpDatePublish = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
+        arpDateModify = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDateModify articlePlease,
         -- arpMaintext = articlePleaseMaintext articlePlease,
         arpLanguage = Just (articlePleaseLanguage articlePlease)
         -- arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),

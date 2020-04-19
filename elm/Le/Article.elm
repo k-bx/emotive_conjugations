@@ -206,6 +206,7 @@ renderContentNodes :
     { nersToHighlight : List String
     , selectedToken : Maybe Int -- tok.i
     , highlightPos : Bool
+    , highlightAllNers : Bool
     , nodes : List ContentNode
     , onClickToken : Api.CmdSpacyPosResEnt -> msg
     , onClickNer : Api.CmdSpacyNerResEnt -> msg
@@ -224,16 +225,27 @@ renderContentNodes ps =
                     p [] <| List.map renderNode nd.children
 
                 CNNer nd ->
+                    let
+                        selectedPersonHighlight =
+                            nd.ner.label_ == "PERSON" && List.member nd.ner.text ps.nersToHighlight
+                    in
                     span
                         [ class "content-ner"
                         , classList
                             [ ( "badge-highlighed-token badge-highlighed-token--ner"
-                              , nd.ner.label_ == "PERSON" && List.member nd.ner.text ps.nersToHighlight
+                              , selectedPersonHighlight || ps.highlightAllNers
                               )
                             ]
                         , onClick <| ps.onClickNer nd.ner
                         ]
-                        (List.map renderNode nd.children)
+                    <|
+                        List.map renderNode nd.children
+                            ++ (if ps.highlightAllNers then
+                                    [ text <| ":" ++ nd.ner.label_ ]
+
+                                else
+                                    []
+                               )
 
                 CNTok nd ->
                     let
