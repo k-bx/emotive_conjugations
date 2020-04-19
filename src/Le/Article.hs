@@ -25,12 +25,16 @@ newspaperNameFromHost t =
   let pairs :: [(Text, Text)]
       pairs =
         [ ("nytimes.com", "The New York Times"),
-          ("bbc.com", "BBC")
+          ("bbc.com", "BBC"),
+          ("www.bbc.co.uk", "BBC"),
+          ("foxnews.com", "Fox News Channel"),
+          ("washingtonpost.com", "The Washington Post"),
+          ("cnn.com", "CNN")
         ]
    in pairs
         |> map
           ( \(domain, name) ->
-              case t `T.isInfixOf` domain of
+              case t `T.isInfixOf` domain || (t `T.isInfixOf` ("www." <> domain)) of
                 False -> Nothing
                 True -> Just name
           )
