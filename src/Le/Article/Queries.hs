@@ -2,6 +2,7 @@
 
 module Le.Article.Queries where
 
+import qualified Data.List
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import Database.Esqueleto
@@ -75,18 +76,34 @@ order by "article_please"."date_publish" desc, "article_please"."id" desc
 limit {lim}
     |]
         []
-    person ->
+    person -> do
+      mProper <- rawSql [qc|select proper from named_propers where entity=?|] [PersistText person]
+      entities <- case mProper of
+        (Single proper : _) -> do
+          rawSql [qc|select entity from named_propers where proper = ?|] [PersistText proper]
+            & fmap (map unSingle)
+        _ -> pure [person]
+      let entitiesQuestions =
+            "("
+              <> ( T.concat
+                     ( Data.List.intersperse
+                         ","
+                         (map (const "?") entities)
+                     )
+                 )
+              <> ")"
+          entitiesAnswers = map PersistText entities
       rawSql
         [qc|
 select ??
 from "article_please"
 inner join named_entity ne on ne.article_please_id = "article_please".id
-where ne.entity = ?
+where ne.entity in {entitiesQuestions}
   and "article_please".title is not null
 group by ("article_please"."id")
 order by "article_please"."date_publish" desc, "article_please"."id" desc 
 limit {lim}
               |]
-        [PersistText person]
+        entitiesAnswers
   where
     lim = Le.Config.articlesLimit
