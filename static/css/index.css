@@ -10158,6 +10158,12 @@ main > .container {
   padding: 2rem;
   border-bottom: 1px solid #e5e5e5;
 }
+.page-dashboard .applemail .applemail__content .details-board__content__infobox .details-board__content__infobox__date {
+  float: right;
+  color: #7a808c;
+  font-size: 0.9rem;
+  line-height: 1.5rem;
+}
 .page-dashboard .applemail .applemail__content .details-board__content__article {
   padding: 2rem;
 }
@@ -10227,6 +10233,8 @@ main > .container {
 .page-dashboard .articles-nav .articles-nav__cell .articles-nav__cell__date {
   float: right;
   color: #7a808c;
+  font-size: 0.9rem;
+  line-height: 1.5rem;
 }
 .page-dashboard .articles-nav .articles-nav__cell .articles-nav__cell__secondary {
   color: #213059;

@@ -298,6 +298,13 @@ main > .container {
         min-height: 10rem;
         padding: 2rem;
         border-bottom: 1px solid #e5e5e5;
+
+        .details-board__content__infobox__date {
+          float: right;
+          color: #7a808c;
+          font-size: .9rem;
+          line-height: 1.5rem;
+        }
       }
       .details-board__content__article {
         padding: 2rem;
@@ -378,6 +385,8 @@ main > .container {
       .articles-nav__cell__date {
         float: right;
         color: #7a808c;
+        font-size: .9rem;
+        line-height: 1.5rem;
       }
 
       .articles-nav__cell__secondary {

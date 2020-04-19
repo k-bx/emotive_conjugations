@@ -41,12 +41,57 @@ renderDateTimeline x =
 
         year =
             Time.toYear Time.utc x
+
+        yearMinus2k =
+            year - 2000
+    in
+    renderMonthShort mon
+        ++ "/"
+        ++ intToStringTwoSigns day
+        ++ "/"
+        ++ String.fromInt yearMinus2k
+
+
+renderDateInfobox : Time.Posix -> String
+renderDateInfobox x =
+    let
+        mon =
+            Time.toMonth Time.utc x
+
+        day =
+            Time.toDay Time.utc x
+
+        year =
+            Time.toYear Time.utc x
+
+        hour24 =
+            Time.toHour Time.utc x
+
+        hour12 =
+            if hour24 >= 12 then
+                hour24 - 12
+
+            else
+                hour24
+
+        ampm =
+            if hour24 >= 12 then
+                "PM"
+
+            else
+                "AM"
     in
     renderMonthShort mon
         ++ " "
         ++ intToStringTwoSigns day
-        ++ " "
+        ++ ", "
         ++ String.fromInt year
+        ++ " "
+        ++ String.fromInt hour12
+        ++ ":"
+        ++ String.fromInt (Time.toMinute Time.utc x)
+        ++ " "
+        ++ ampm
 
 
 renderMonthShort : Time.Month -> String

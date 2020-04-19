@@ -365,7 +365,14 @@ mainContent model =
         articleDetails article =
             div []
                 [ div [ class "details-board__content__infobox" ]
-                    [ div [] [ strong [] [ text article.paper_name ] ]
+                    [ div [ class "details-board__content__infobox__date" ]
+                        [ text
+                            (article.date
+                                |> Maybe.map (renderDateInfobox << Time.millisToPosix)
+                                |> Maybe.withDefault "--"
+                            )
+                        ]
+                    , div [] [ strong [] [ text article.paper_name ] ]
                     , div []
                         [ span [ class "badge badge-info" ]
                             [ text <| "id:" ++ String.fromInt article.id ]
