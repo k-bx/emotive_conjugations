@@ -19,7 +19,7 @@ User
     email Text
     deriving Show
 Article
-    warcId Text 
+    warcId Text Maybe
     warcDate UTCTime
     url Text
     host Text

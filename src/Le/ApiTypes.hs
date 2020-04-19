@@ -47,7 +47,8 @@ data Article = Article
     arcPaperName :: Text,
     arcTitle :: Text,
     arcAuthors :: [Text],
-    arcLang :: Text
+    arcLang :: Text,
+    arcWarcId :: Maybe Text
   }
   deriving (Show, Eq, Generic)
 

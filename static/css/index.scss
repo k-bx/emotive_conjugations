@@ -288,9 +288,20 @@ main > .container {
     // }
     .applemail__content {
       flex-grow: 1;
-      padding: 2rem;
+      // padding: 2rem;
       height: 100%;
       overflow-y: scroll;
+
+      .details-board__content__infobox {
+        width: 100%;
+        // background: #e5e5e5;
+        min-height: 10rem;
+        padding: 2rem;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .details-board__content__article {
+        padding: 2rem;
+      }
     }
     .applemail__controlpanel {
       border-left: 1px solid #e5e5e5;

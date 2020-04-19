@@ -154,11 +154,12 @@ type alias Article  =
    , title: String
    , authors: (List String)
    , lang: String
+   , warc_id: (Maybe String)
    }
 
 jsonDecArticle : Json.Decode.Decoder ( Article )
 jsonDecArticle =
-   Json.Decode.succeed (\pid purl pdate ppaper_name ptitle pauthors plang -> {id = pid, url = purl, date = pdate, paper_name = ppaper_name, title = ptitle, authors = pauthors, lang = plang})
+   Json.Decode.succeed (\pid purl pdate ppaper_name ptitle pauthors plang pwarc_id -> {id = pid, url = purl, date = pdate, paper_name = ppaper_name, title = ptitle, authors = pauthors, lang = plang, warc_id = pwarc_id})
    |> required "id" (jsonDecArticleId)
    |> required "url" (Json.Decode.string)
    |> fnullable "date" (jsonDecIntZonedTime)
@@ -166,6 +167,7 @@ jsonDecArticle =
    |> required "title" (Json.Decode.string)
    |> required "authors" (Json.Decode.list (Json.Decode.string))
    |> required "lang" (Json.Decode.string)
+   |> fnullable "warc_id" (Json.Decode.string)
 
 jsonEncArticle : Article -> Value
 jsonEncArticle  val =
@@ -177,6 +179,7 @@ jsonEncArticle  val =
    , ("title", Json.Encode.string val.title)
    , ("authors", (Json.Encode.list Json.Encode.string) val.authors)
    , ("lang", Json.Encode.string val.lang)
+   , ("warc_id", (maybeEncode (Json.Encode.string)) val.warc_id)
    ]
 
 

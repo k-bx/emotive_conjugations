@@ -30,6 +30,7 @@ articlesShortHandler mPerson = sg $ do
 articleDetails :: ArticleId -> Le AT.Article
 articleDetails articleId = sg $ do
   let articlePleaseId = P.toSqlKey (P.fromSqlKey articleId)
+  article <- mustFindM $ runDb $ P.get articleId
   articlePlease <- mustFindM $ runDb $ P.get articlePleaseId
   pure $
     AT.Article
@@ -39,7 +40,8 @@ articleDetails articleId = sg $ do
         arcPaperName = newspaperNameFromHost (articlePleaseHost articlePlease),
         arcTitle = fromMaybe "<unknown>" (articlePleaseTitle articlePlease),
         arcAuthors = unpack (articlePleaseAuthors articlePlease),
-        arcLang = articlePleaseLanguage articlePlease
+        arcLang = articlePleaseLanguage articlePlease,
+        arcWarcId = articleWarcId article
       }
 
 articlePleaseDetails :: ArticlePleaseId -> Le AT.ArticlePlease

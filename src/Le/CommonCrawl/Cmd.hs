@@ -112,7 +112,7 @@ parseFilteredArticles = do
                       & S.toString
                       & Data.Time.Format.parseTimeM False Data.Time.Format.defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ"
                       & Safe.fromJustNote "Couldn't parse time"
-              mArticlePresent <- runDb $ P.selectFirst [ArticleWarcId P.==. warcRecId] []
+              mArticlePresent <- runDb $ P.selectFirst [ArticleWarcId P.==. Just warcRecId] []
               case mArticlePresent of
                 Just _ -> pure ()
                 Nothing -> runCmd speed i warcRecId host html uriText warcDt
@@ -124,7 +124,7 @@ parseFilteredArticles = do
             articleId <-
               P.insert $
                 Article
-                  { articleWarcId = warcRecId,
+                  { articleWarcId = Just warcRecId,
                     articleWarcDate = warcDt,
                     articleUrl = uriText,
                     articleHost = host

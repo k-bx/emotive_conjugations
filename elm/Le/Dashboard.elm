@@ -361,31 +361,51 @@ mainContent model =
                 Just article ->
                     articleDetails article
 
+        articleDetails : Api.Article -> Html Msg
         articleDetails article =
             div []
-                [ h2 [] [ text article.title ]
-                , div [ class "article" ] <|
-                    case ( model.articlePlease, model.articlePleaseBig ) of
-                        ( Just articlePlease, Just articlePleaseBig ) ->
-                            [ Le.Article.renderContentNodes
-                                { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
-                                , highlightPos = model.highlightPos
-                                , onClickToken = TokenClicked
-                                , onClickNer = NerClicked
-                                , selectedToken = Maybe.map .i model.selectedToken
-                                , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
-                                , depParent = Maybe.map .i mDepHeadToken
-                                , nodes =
-                                    Le.Article.computeContentNodes
-                                        { inputText = articlePleaseBig.maintext
-                                        , mSpacyNers = articlePleaseBig.spacy_ner_ents
-                                        , mSpacyPoss = articlePleaseBig.spacy_pos_ents
-                                        }
-                                }
+                [ div [ class "details-board__content__infobox" ]
+                    [ div [] [ strong [] [ text article.paper_name ] ]
+                    , div []
+                        [ span [ class "badge badge-info" ]
+                            [ text <| "id:" ++ String.fromInt article.id ]
+                        , text " "
+                        , span [ class "badge badge-info" ]
+                            [ text <| "warc-id:" ++ Maybe.withDefault "<unknown>" article.warc_id ]
+                        ]
+                    , div []
+                        [ a
+                            [ href article.url
+                            , target "_blank"
                             ]
+                            [ text <| String.left 300 article.url ]
+                        ]
+                    ]
+                , div [ class "details-board__content__article" ]
+                    [ h2 [] [ text article.title ]
+                    , div [ class "article" ] <|
+                        case ( model.articlePlease, model.articlePleaseBig ) of
+                            ( Just articlePlease, Just articlePleaseBig ) ->
+                                [ Le.Article.renderContentNodes
+                                    { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
+                                    , highlightPos = model.highlightPos
+                                    , onClickToken = TokenClicked
+                                    , onClickNer = NerClicked
+                                    , selectedToken = Maybe.map .i model.selectedToken
+                                    , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
+                                    , depParent = Maybe.map .i mDepHeadToken
+                                    , nodes =
+                                        Le.Article.computeContentNodes
+                                            { inputText = articlePleaseBig.maintext
+                                            , mSpacyNers = articlePleaseBig.spacy_ner_ents
+                                            , mSpacyPoss = articlePleaseBig.spacy_pos_ents
+                                            }
+                                    }
+                                ]
 
-                        _ ->
-                            [ div [] [] ]
+                            _ ->
+                                [ div [] [] ]
+                    ]
                 ]
 
         mDepHeadToken : Maybe Api.CmdSpacyPosResEnt
