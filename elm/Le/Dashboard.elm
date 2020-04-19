@@ -742,7 +742,12 @@ mainContent model =
                 , class "details-board fade-in"
                 ]
                 [ div [ class "text-center mb-4" ]
-                    [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ] [ text selectedNer.text ]
+                    [ span [ class "badge-highlighed-token badge-highlighed-token--ner" ] [ text selectedNer.text ] ]
+                , div [ class "details-board__row" ]
+                    [ div []
+                        [ text "label_: "
+                        , span [] [ text <| selectedNer.label_ ]
+                        ]
                     ]
                 ]
 
