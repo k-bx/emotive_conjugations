@@ -10,6 +10,7 @@ import Data.Warc
 import qualified Database.Persist.Postgresql as P
 import qualified Le.ApiTypes as AT
 import Le.App
+import Le.AppUtils
 import qualified Le.Article
 import Le.CommonCrawl
 import qualified Le.Config
@@ -40,19 +41,24 @@ downloadAndFilter = do
       System.Directory.doesFileExist (outPath warc) >>= \case
         False -> pure $ Just warc
         True -> pure Nothing
+  speed <- Le.Speed.newSpeed (length allWarcs)
   let cheapWorkersNum = length Le.Config.cheapWorkers
   logInfo $ display $
     "> About to process " <> tshow (length allWarcs) <> " warcs"
-  pooledForConcurrentlyN_ cheapWorkersNum (zip (Data.List.cycle Le.Config.cheapWorkers) allWarcs) $ \(baseUrl, warc) -> do
-    mgr <- asks appHttpManagerNoTimeout
-    let cliEnv = mkClientEnv mgr baseUrl
-    logInfo $ display $
-      "> Downloading from " <> S.toText (baseUrlHost baseUrl) <> ":" <> tshow (baseUrlPort baseUrl)
-        <> " file "
-        <> s3loc warc
-    bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc warc})
-    liftIO $ BL.writeFile (outPath warc) bs
-    pure ()
+  pooledForConcurrentlyN_ cheapWorkersNum (zip [1 ..] (zip (Data.List.cycle Le.Config.cheapWorkers) allWarcs)) $ \(i, (baseUrl, warc)) ->
+    logOnError $ do
+      logInfo $ display $
+        "> Downloading from " <> S.toText (baseUrlHost baseUrl) <> ":" <> tshow (baseUrlPort baseUrl)
+          <> " file "
+          <> s3loc warc
+      Le.Speed.withProgress i speed $ \t -> do
+        logInfo $ display $ "> Progress: " <> t
+      mgr <- asks appHttpManagerNoTimeout
+      let cliEnv = mkClientEnv mgr baseUrl
+      bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc warc})
+      logInfo $ display $ "> writing " <> (S.toText (outPath warc))
+      liftIO $ BL.writeFile (outPath warc) bs
+      pure ()
 
 testDownloadAndFilter :: Le ()
 testDownloadAndFilter = do

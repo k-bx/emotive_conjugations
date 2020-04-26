@@ -109,7 +109,7 @@ install_python:
 	sudo apt-get install libjpeg-dev zlib1g-dev libpng-dev
 	curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | $(python)
 	# this one is big, only do on desktop
-	python -m spacy download en_core_web_lg
+	$(python) -m spacy download en_core_web_lg
 
 .PHONY: tags
 tags:

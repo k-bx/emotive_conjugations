@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d92157ba36b23e6a2079e7e8d23d0690720be360b9f9e1fe8fb28a4e4a3c9ee0
+-- hash: 59a30f86453e5271b3bb97431f63f58f5b7d1d1303260565092ba51fc1267f30
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -97,6 +97,7 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , process
     , resource-pool
     , resourcet
     , rio

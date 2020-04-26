@@ -15,61 +15,60 @@ import qualified Le.Config
 import Le.Import
 import Le.Util
 import qualified Network.Wreq as W
-import qualified RIO.Process
+import qualified UnliftIO.Process
 
-data CmdParseArticleOpts
-  = CmdParseArticleOpts
-      { cpaHtml :: Text,
-        cpaUrl :: Text
-      }
+newtype PythonError = PythonError String
+  deriving (Show)
+
+instance Exception PythonError
+
+data CmdParseArticleOpts = CmdParseArticleOpts
+  { cpaHtml :: Text,
+    cpaUrl :: Text
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdParseArticleOpts
 
-data CmdParseArticleRes
-  = CmdParseArticleRes
-      { cprTitle :: Text,
-        cprAuthors :: [Text],
-        cprPubDate :: Maybe POSIXTime,
-        cprDescription :: Text,
-        cprText :: Text,
-        cprLanguage :: Text
-      }
+data CmdParseArticleRes = CmdParseArticleRes
+  { cprTitle :: Text,
+    cprAuthors :: [Text],
+    cprPubDate :: Maybe POSIXTime,
+    cprDescription :: Text,
+    cprText :: Text,
+    cprLanguage :: Text
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdParseArticleRes
 
-data CmdSpacyNerOpts
-  = CmdSpacyNerOpts
-      { csnText :: Text
-      }
+data CmdSpacyNerOpts = CmdSpacyNerOpts
+  { csnText :: Text
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyNerOpts
 
-data CmdSpacyNerResEnt
-  = CmdSpacyNerResEnt
-      { cseText :: Text,
-        cseStart :: Int,
-        cseStartChar :: Int,
-        cseEnd :: Int,
-        cseEndChar :: Int,
-        cseLabel_ :: Text
-      }
+data CmdSpacyNerResEnt = CmdSpacyNerResEnt
+  { cseText :: Text,
+    cseStart :: Int,
+    cseStartChar :: Int,
+    cseEnd :: Int,
+    cseEndChar :: Int,
+    cseLabel_ :: Text
+  }
   deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyNerResEnt
 
-data CmdSpacyNerRes
-  = CmdSpacyNerRes
-      { csrEnts :: [CmdSpacyNerResEnt]
-      }
+data CmdSpacyNerRes = CmdSpacyNerRes
+  { csrEnts :: [CmdSpacyNerResEnt]
+  }
   deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyNerRes
 
 instance P.PersistField CmdSpacyNerRes where
-
   toPersistValue = P.toPersistValueJSON
 
   fromPersistValue = P.fromPersistValueJSON
@@ -77,68 +76,64 @@ instance P.PersistField CmdSpacyNerRes where
 instance P.PersistFieldSql CmdSpacyNerRes where
   sqlType _ = P.SqlString
 
-data CmdSpacyPosOpts
-  = CmdSpacyPosOpts
-      { cspText :: Text
-      }
+data CmdSpacyPosOpts = CmdSpacyPosOpts
+  { cspText :: Text
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyPosOpts
 
-data CmdSpacyPosResEnt
-  = CmdSpacyPosResEnt
-      { creText :: Text,
-        creLemma_ :: Text,
-        crePos_ :: Text,
-        creTag_ :: Text,
-        creDep_ :: Text,
-        creShape_ :: Text,
-        creIsAlpha :: Bool,
-        creIsAscii :: Bool,
-        creIsDigit :: Bool,
-        creIsPunct :: Bool,
-        creIsLeftPunct :: Bool,
-        creIsRightPunct :: Bool,
-        creIsSpace :: Bool,
-        creIsBracket :: Bool,
-        creIsQuote :: Bool,
-        creIsCurrency :: Bool,
-        creLikeUrl :: Bool,
-        creLikeNum :: Bool,
-        creLikeMail :: Bool,
-        creIsOov :: Bool,
-        creIsStop :: Bool,
-        creHeadI :: Int,
-        creLeftEdgeI :: Int,
-        creRightEdgeI :: Int,
-        creI :: Int,
-        creEntType_ :: Text,
-        creEntIob_ :: Text,
-        creEntKbId :: Int,
-        creEntKbId_ :: Text,
-        creNorm_ :: Text,
-        creLang_ :: Text,
-        creProb :: Double,
-        creIdx :: Int,
-        creSentiment :: Double,
-        creLexId :: Int,
-        creRank :: Int,
-        creCluster :: Int
-      }
+data CmdSpacyPosResEnt = CmdSpacyPosResEnt
+  { creText :: Text,
+    creLemma_ :: Text,
+    crePos_ :: Text,
+    creTag_ :: Text,
+    creDep_ :: Text,
+    creShape_ :: Text,
+    creIsAlpha :: Bool,
+    creIsAscii :: Bool,
+    creIsDigit :: Bool,
+    creIsPunct :: Bool,
+    creIsLeftPunct :: Bool,
+    creIsRightPunct :: Bool,
+    creIsSpace :: Bool,
+    creIsBracket :: Bool,
+    creIsQuote :: Bool,
+    creIsCurrency :: Bool,
+    creLikeUrl :: Bool,
+    creLikeNum :: Bool,
+    creLikeMail :: Bool,
+    creIsOov :: Bool,
+    creIsStop :: Bool,
+    creHeadI :: Int,
+    creLeftEdgeI :: Int,
+    creRightEdgeI :: Int,
+    creI :: Int,
+    creEntType_ :: Text,
+    creEntIob_ :: Text,
+    creEntKbId :: Int,
+    creEntKbId_ :: Text,
+    creNorm_ :: Text,
+    creLang_ :: Text,
+    creProb :: Double,
+    creIdx :: Int,
+    creSentiment :: Double,
+    creLexId :: Int,
+    creRank :: Int,
+    creCluster :: Int
+  }
   deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyPosResEnt
 
-data CmdSpacyPosRes
-  = CmdSpacyPosRes
-      { cprTokens :: [CmdSpacyPosResEnt]
-      }
+data CmdSpacyPosRes = CmdSpacyPosRes
+  { cprTokens :: [CmdSpacyPosResEnt]
+  }
   deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''CmdSpacyPosRes
 
 instance P.PersistField CmdSpacyPosRes where
-
   toPersistValue = P.toPersistValueJSON
 
   fromPersistValue = P.fromPersistValueJSON
@@ -146,34 +141,32 @@ instance P.PersistField CmdSpacyPosRes where
 instance P.PersistFieldSql CmdSpacyPosRes where
   sqlType _ = P.SqlString
 
-data CmdParseNewsPleaseOpts
-  = CmdParseNewsPleaseOpts
-      { cnpHtml :: Text,
-        cnpUrl :: Text,
-        cnpDownloadDate :: POSIXTime
-      }
+data CmdParseNewsPleaseOpts = CmdParseNewsPleaseOpts
+  { cnpHtml :: Text,
+    cnpUrl :: Text,
+    cnpDownloadDate :: POSIXTime
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdParseNewsPleaseOpts
 
-data CmdParseNewsPleaseRes
-  = CmdParseNewsPleaseRes
-      { cnrAuthors :: [Text],
-        cnrDateDownload :: Maybe POSIXTime,
-        cnrDatePublish :: Maybe POSIXTime,
-        cnrDateModify :: Maybe POSIXTime,
-        cnrDescription :: Maybe Text,
-        cnrFilename :: Text,
-        cnrImageUrl :: Text,
-        cnrLanguage :: Maybe Text,
-        cnrLocalpath :: Maybe Text,
-        cnrTitle :: Maybe Text,
-        cnrTitlePage :: Maybe Text,
-        cnrTitleRss :: Maybe Text,
-        cnrSourceDomain :: Maybe Text,
-        cnrMaintext :: Maybe Text,
-        cnrUrl :: Text
-      }
+data CmdParseNewsPleaseRes = CmdParseNewsPleaseRes
+  { cnrAuthors :: [Text],
+    cnrDateDownload :: Maybe POSIXTime,
+    cnrDatePublish :: Maybe POSIXTime,
+    cnrDateModify :: Maybe POSIXTime,
+    cnrDescription :: Maybe Text,
+    cnrFilename :: Text,
+    cnrImageUrl :: Text,
+    cnrLanguage :: Maybe Text,
+    cnrLocalpath :: Maybe Text,
+    cnrTitle :: Maybe Text,
+    cnrTitlePage :: Maybe Text,
+    cnrTitleRss :: Maybe Text,
+    cnrSourceDomain :: Maybe Text,
+    cnrMaintext :: Maybe Text,
+    cnrUrl :: Text
+  }
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 3) ''CmdParseNewsPleaseRes
@@ -195,15 +188,32 @@ runPython c = do
   let sha = show (Crypto.Hash.hash (toBS cmdJson) :: Crypto.Hash.Digest Crypto.Hash.SHA256)
   let argsFp = tempDir <> "/conj-runpython-" <> sha
   liftIO $ BL.writeFile argsFp cmdJson
-  (out, err) <-
-    RIO.Process.proc
+  -- (out, err) <-
+  --   RIO.Process.proc
+  --     Le.Config.pythonPath
+  --     [ Le.Config.pythonScriptsDir <> "/main.py",
+  --       argsFp
+  --     ]
+  --     $ \pconf -> do
+  --       RIO.Process.readProcess_ pconf
+  (ex, out, err) <-
+    UnliftIO.Process.readProcessWithExitCode
       Le.Config.pythonPath
       [ Le.Config.pythonScriptsDir <> "/main.py",
         argsFp
       ]
-      $ \pconf -> do
-        RIO.Process.readProcess_ pconf
-  pure (out, err)
+      ""
+  case ex of
+    ExitFailure r ->
+      throwIO $
+        PythonError
+          ( "Error while running a python subprocess: "
+              <> show r
+              <> "; "
+              <> err
+          )
+    ExitSuccess -> do
+      pure (S.fromString out, S.fromString err)
 
 -- | Expect stdout to be a valid 'a' JSON
 runPythonParsing :: FromJSON a => Cmd -> Le a

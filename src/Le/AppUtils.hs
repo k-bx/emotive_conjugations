@@ -4,6 +4,7 @@ import qualified Data.String.Class as S
 import GHC.Stack
 import Le.Import
 import Servant
+import qualified UnliftIO
 
 -- | Safeguard. Good for GHC HasCallStack
 sg ::
@@ -49,3 +50,10 @@ mustFindMErr = (=<<) mustFindErr
 
 notFound :: AppM a
 notFound = throwM err404
+
+logOnError :: Le () -> Le ()
+logOnError act =
+  UnliftIO.catchAny act onErr
+  where
+    onErr e = do
+      logError $ display $ "> got error (continuing): " <> tshow e
