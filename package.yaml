@@ -35,7 +35,6 @@ dependencies:
 - esqueleto
 - fast-logger
 - fsnotify
-- interpolatedstring-perl6
 - http-client
 - http-media
 - http-types
@@ -43,6 +42,7 @@ dependencies:
 - monoidal-containers
 - monad-logger
 - newtype
+- neat-interpolation
 - network-uri
 - persistent
 - persistent-postgresql
@@ -52,6 +52,7 @@ dependencies:
 - pipes-zlib
 - pretty-simple
 - rio
+- raw-strings-qq
 - resourcet
 - resource-pool
 - safe
@@ -66,6 +67,7 @@ dependencies:
 - string-class
 - transformers
 - text
+- template-haskell
 - time
 - typed-process
 - tz

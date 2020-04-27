@@ -14,7 +14,6 @@ import Le.Model
 import qualified Le.Speed
 import Le.Util
 import qualified Safe
-import Text.InterpolatedString.Perl6 (q)
 
 -- | Used for named entities indexing
 computeSearchTerms :: Text -> (Text, Text, Text)

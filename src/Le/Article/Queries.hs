@@ -11,14 +11,14 @@ import qualified Le.Config
 import Le.Import hiding ((^.), isNothing, on)
 import Le.Model
 import Le.Util
-import Text.InterpolatedString.Perl6 (qc)
 
 queryPersonNamedEntities ::
   MonadIO m => Text -> Int -> ReaderT SqlBackend m [Text]
 queryPersonNamedEntities query page = do
   case map T.toLower (T.words query ++ ["", "", ""]) of
     (w1 : w2 : w3 : _) -> do
-      let q =
+      let offsetT = tshow @Int ((page - 1) * lim)
+      let qry =
             [qc|
       SELECT DISTINCT proper FROM "named_entity" ne
       WHERE label_ = 'PERSON'
@@ -26,8 +26,8 @@ queryPersonNamedEntities query page = do
              and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
              and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
             )
-      LIMIT {lim}
-      OFFSET {(page - 1) * lim}
+      LIMIT ${limT}
+      OFFSET ${offsetT}
           |]
       let qus =
             map
@@ -42,7 +42,7 @@ queryPersonNamedEntities query page = do
                 w3 <> "%",
                 w3 <> "%"
               ]
-      ents0 <- fmap (map unSingle) $ rawSql q qus
+      ents0 <- fmap (map unSingle) $ rawSql qry qus
       (namedPropersMap :: Map Text NamedPropers) <-
         P.selectList [NamedPropersEntity P.<-. ents0] []
           |> fmap (map (\e -> (unNamedPropersKey (entityKey e), ev e)))
@@ -60,6 +60,7 @@ queryPersonNamedEntities query page = do
     _ -> error "impossible!"
   where
     lim = Le.Config.entitiesPerPage
+    limT = tshow @Int lim
 
 queryPersonArticlesPlease ::
   MonadIO m => Maybe Text -> ReaderT SqlBackend m [Entity ArticlePlease]
@@ -98,12 +99,13 @@ limit {lim}
 select ??
 from "article_please"
 inner join named_entity ne on ne.article_please_id = "article_please".id
-where ne.entity in {entitiesQuestions}
+where ne.entity in ${entitiesQuestions}
   and "article_please".title is not null
 group by ("article_please"."id")
 order by "article_please"."date_publish" desc, "article_please"."id" desc 
-limit {lim}
+limit ${limT}
               |]
         entitiesAnswers
   where
     lim = Le.Config.articlesLimit
+    limT = tshow @Int lim

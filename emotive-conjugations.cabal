@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 59a30f86453e5271b3bb97431f63f58f5b7d1d1303260565092ba51fc1267f30
+-- hash: 1330cd185773743de85de3bf6c0fddd17bc9a25ccd6d0e52d8f15d314764247c
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -83,10 +83,10 @@ library
     , http-client
     , http-media
     , http-types
-    , interpolatedstring-perl6
     , lens
     , monad-logger
     , monoidal-containers
+    , neat-interpolation
     , network-uri
     , newtype
     , optparse-applicative
@@ -97,7 +97,7 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
-    , process
+    , raw-strings-qq
     , resource-pool
     , resourcet
     , rio
@@ -111,6 +111,7 @@ library
     , shake
     , split
     , string-class
+    , template-haskell
     , text
     , time
     , transformers
@@ -157,10 +158,10 @@ executable conj
     , http-client
     , http-media
     , http-types
-    , interpolatedstring-perl6
     , lens
     , monad-logger
     , monoidal-containers
+    , neat-interpolation
     , network-uri
     , newtype
     , optparse-applicative
@@ -172,6 +173,7 @@ executable conj
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , raw-strings-qq
     , resource-pool
     , resourcet
     , rio
@@ -185,6 +187,7 @@ executable conj
     , shake
     , split
     , string-class
+    , template-haskell
     , text
     , time
     , transformers
@@ -234,10 +237,10 @@ test-suite emotive-conjugations-test
     , http-client
     , http-media
     , http-types
-    , interpolatedstring-perl6
     , lens
     , monad-logger
     , monoidal-containers
+    , neat-interpolation
     , network-uri
     , newtype
     , persistent
@@ -247,6 +250,7 @@ test-suite emotive-conjugations-test
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , raw-strings-qq
     , resource-pool
     , resourcet
     , rio
@@ -260,6 +264,7 @@ test-suite emotive-conjugations-test
     , shake
     , split
     , string-class
+    , template-haskell
     , text
     , time
     , transformers

@@ -88,15 +88,18 @@ parseFilteredArticles = do
   pooledForConcurrentlyN_ (appNumCapabilities app) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
   where
     processWarc cfg speed (i, warcPath) = do
+      Le.Speed.withProgress i speed $ \t -> do
+        logInfo $ display $ "> Processing WARC: " <> t
       recs <- allWarcRecords (Le.Config.filteredDataDir cfg <> "/" <> warcPath)
       logInfo $ display $ "> warc path: " <> S.toText warcPath
       forM_ recs $ \(recHeader, recBs) -> do
-        let headersAndhtml = T.strip (S.toText recBs)
         -- logInfo $ "> headersAndhtml: " <> display (T.take 2000 headersAndhtml)
-        let (_headers, html0) = Le.Html.splitHeadersAndHtml headersAndhtml
+        let (_headers, html0) = Le.Html.splitHeadersAndHtml recBs
         let html = T.strip html0
-        -- logInfo $ "> html: " <> display (T.take 2000 html)
-        if html == ""
+        -- logInfo $ "> html: " <> display (T.take 50 html)
+        -- logInfo $ "> html length: " <> display (T.length html)
+        -- logInfo $ "> recBs: " <> display (T.take 2550 (S.toText recBs))
+        if T.length html == 0
           then pure ()
           else do
             let uriText =

@@ -15,7 +15,6 @@ import Le.Import
 import Le.Model
 import qualified Le.Search
 import qualified Le.Speed
-import Text.InterpolatedString.Perl6 (q, qc)
 import qualified Prelude
 
 runMigrations :: IO ()
@@ -61,7 +60,7 @@ where schemaname = 'public'
     [] -> do
       let cols = T.intercalate ", " fieldNames
       let query =
-            [qc|create index {indexName} on public.{tableName} using btree ({cols})|]
+            [qc|create index ${indexName} on public.${tableName} using btree (${cols})|]
       liftIO $ Prelude.putStrLn $ S.toString query
       rawExecute query []
     (_ :: [P.Single Text]) -> pure ()

@@ -9,6 +9,8 @@ module Le.Import
     fromBS,
     fromLBS,
     toLBS,
+    q,
+    qc,
   )
 where
 
@@ -38,11 +40,14 @@ import Data.Time.LocalTime as X
     zonedTimeZone,
   )
 import Database.Persist.Postgresql as X (Entity (..), entityKey, entityVal)
+import Language.Haskell.TH.Quote (QuasiQuoter)
 import Le.Aeson as X (FromJSON (..), ToJSON (..), jsonOpts)
 import Le.Types
+import NeatInterpolation as X (trimming, untrimming)
 import Network.URI as X (URI (..), URIAuth (..))
 import RIO
 import Safe as X (fromJustNote)
+import qualified Text.RawString.QQ
 
 ev :: Entity record -> record
 ev = entityVal
@@ -58,3 +63,9 @@ toLBS = S.toLazyByteString
 
 fromLBS :: S.ConvLazyByteString s => BL.ByteString -> s
 fromLBS = S.fromLazyByteString
+
+q :: QuasiQuoter
+q = Text.RawString.QQ.r
+
+qc :: QuasiQuoter
+qc = trimming

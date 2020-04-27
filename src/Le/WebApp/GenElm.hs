@@ -17,7 +17,6 @@ import Servant.API.Generic
 import Servant.Elm
 import Servant.Elm.Internal.Foreign
 import Servant.Foreign
-import Text.InterpolatedString.Perl6 (q)
 
 instance
   HasForeign LangElm EType a =>

@@ -46,6 +46,13 @@ packages:
       sha256: 1178a4b2464f76e1b873215f37f6c72168b5d1100822c60aef01f497202ae9ca
   original:
     hackage: deriving-aeson-0.2.2@sha256:6150cfdd6ae2083249ec387ec4bb808d99a6b730ce093b8920cd788e9e681c73,1210
+- completed:
+    hackage: neat-interpolation-0.5.1@sha256:19af6ecc2802c6e94655f91e74aa19dc1e02a73ed7b1292c0fa3f082daaf7124,2989
+    pantry-tree:
+      size: 566
+      sha256: c76046884e00551925c43abda1dc25585a9b90a353c7203a62852df285c0840c
+  original:
+    hackage: neat-interpolation-0.5.1
 snapshots:
 - completed:
     size: 491372
