@@ -70,7 +70,14 @@ update msg model =
 mainContent : Model -> Html Msg
 mainContent model =
     main_ [ class "main-content", attribute "role" "main" ]
-        [ text "content here" ]
+        [ div [ class "container" ]
+            [ div [ class "row" ]
+                [ div [ class "col-12" ]
+                    [ text "ui here"
+                    ]
+                ]
+            ]
+        ]
 
 
 view : ViewParams -> Model -> Html Msg

@@ -1,26 +1,90 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Le.WebApp where
 
 import Control.Monad.Trans.Except (ExceptT (..))
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.Pool
 import qualified Data.String.Class as S
+import qualified Database.Persist.Postgresql as P
 import GHC.Conc (numCapabilities)
 import GHC.Stack
 import qualified Le.App
+import qualified Le.Config
 import Le.Import
+import Le.Model
 import Le.Routes
 import qualified Network.Wai as Wai
+import qualified Network.Wai
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Network.Wai.Middleware.Gzip as Gzip
 import qualified Network.Wai.Middleware.Static as MStatic
 import Servant
 import Servant.API.Generic (ToServantApi)
+import Servant.Server.Experimental.Auth (AuthHandler, mkAuthHandler)
 import Servant.Server.Generic (genericServerT)
 import qualified System.Directory
+import qualified Web.Cookie as Cookie
 import qualified Prelude
 
--- genAuthServerContext ::
---   Pool P.SqlBackend ->
---   Context (AuthHandler Wai.Request (P.Entity User) ': '[])
--- genAuthServerContext db = (authHandler db) :. EmptyContext
+genAuthServerContext ::
+  Data.Pool.Pool P.SqlBackend ->
+  Context (AuthHandler Wai.Request (P.Entity User) ': '[])
+genAuthServerContext db = (authHandler db) :. EmptyContext
+
+lookupUserByToken ::
+  MonadIO m =>
+  UTCTime ->
+  LoginTokenVal ->
+  ReaderT P.SqlBackend m (Maybe (Entity User))
+lookupUserByToken t tokenVal = do
+  mToken <- P.getBy (LoginTokenQuery tokenVal)
+  case mToken of
+    Nothing -> return Nothing
+    Just tok ->
+      if addUTCTime Le.Config.tokenExpirationPeriod (loginTokenCreatedAt (entityVal tok))
+        > t
+        then P.getEntity (loginTokenUserId (entityVal tok))
+        else return Nothing
+
+lookupAccount ::
+  Network.Wai.Request ->
+  Data.Pool.Pool P.SqlBackend ->
+  LoginTokenVal ->
+  Servant.Handler (P.Entity User)
+lookupAccount req db tok = do
+  t <- liftIO $ getCurrentTime
+  mToken <- liftIO $ flip P.runSqlPool db $ lookupUserByToken t tok
+  case mToken of
+    Nothing ->
+      errorOutOrGotoLogin req "Invalid Token"
+    Just user -> return user
+
+authHandler :: Data.Pool.Pool P.SqlBackend -> AuthHandler Wai.Request (P.Entity User)
+authHandler db = mkAuthHandler handler
+  where
+    maybeToEither e = maybe (Left e) Right
+    handler req =
+      either (errorOutOrGotoLogin req) (lookupAccount req db . pack . S.toText) $ do
+        cookie <-
+          maybeToEither "Missing cookie header"
+            $ lookup "cookie"
+            $ Network.Wai.requestHeaders req
+        maybeToEither "Missing token in cookie"
+          $ lookup "u"
+          $ Cookie.parseCookies cookie
+
+errorOutOrGotoLogin :: Network.Wai.Request -> BL.ByteString -> Servant.Handler (Entity User)
+errorOutOrGotoLogin req msg = do
+  case lookup "Accept" (Network.Wai.requestHeaders req) of
+    Nothing -> throw401 msg
+    Just bs ->
+      case "text/html" `B.isInfixOf` bs of
+        True -> throwError $ err302 {errHeaders = [("Location", "/login")]}
+        False -> throw401 msg
+  where
+    throw401 msg' = throwError $ err401 {errBody = msg'}
 
 nt :: App -> RIO App a -> Servant.Handler a
 nt env action = Servant.Handler $ ExceptT $ try $ runRIO env action
@@ -61,12 +125,10 @@ run = do
                 staticPolicy
                 ( serveWithContext
                     (Proxy :: Proxy (ToServantApi API))
-                    -- (genAuthServerContext (appDb env))
-                    EmptyContext
+                    (genAuthServerContext (appDb app))
                     ( hoistServerWithContext
                         (Proxy :: Proxy (ToServantApi API))
-                        -- (Proxy :: Proxy '[AuthHandler Wai.Request (P.Entity User)])
-                        (Proxy :: Proxy '[])
+                        (Proxy :: Proxy '[AuthHandler Wai.Request (P.Entity User)])
                         (nt app)
                         (genericServerT server)
                     )

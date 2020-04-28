@@ -2,8 +2,7 @@ module Le.Config where
 
 import qualified Data.Time.Zones
 import qualified Data.Time.Zones.All
-import Le.Types
-import RIO
+import Le.Import
 import Servant.Client
 
 newsHosts :: [Text]
@@ -65,3 +64,6 @@ tzLabel = Data.Time.Zones.All.America__Chicago
 
 tz :: Data.Time.Zones.TZ
 tz = Data.Time.Zones.All.tzByLabel tzLabel
+
+tokenExpirationPeriod :: NominalDiffTime
+tokenExpirationPeriod = 60 * 60 * 24 * 60

@@ -105,3 +105,10 @@ data NamedEntityGroup = NamedEntityGroup
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''NamedEntityGroup
+
+data QueueAddForm = QueueAddForm
+  { qafUrl :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''QueueAddForm

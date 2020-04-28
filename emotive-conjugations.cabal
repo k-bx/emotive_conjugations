@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1330cd185773743de85de3bf6c0fddd17bc9a25ccd6d0e52d8f15d314764247c
+-- hash: 01768b1bd1aa342461427aeac46db33ae67dba4e5a2f59481082fffada8415cc
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -45,6 +45,7 @@ library
       Le.Migrate
       Le.Model
       Le.Python
+      Le.Queue.Handlers
       Le.Routes
       Le.Run
       Le.S3Loc
@@ -73,6 +74,7 @@ library
     , bytestring
     , conduit
     , containers
+    , cookie
     , cryptonite
     , dhall
     , directory
@@ -90,6 +92,7 @@ library
     , network-uri
     , newtype
     , optparse-applicative
+    , path-pieces
     , persistent
     , persistent-postgresql
     , persistent-template
@@ -147,6 +150,7 @@ executable conj
     , bytestring
     , conduit
     , containers
+    , cookie
     , cryptonite
     , dhall
     , directory
@@ -166,6 +170,7 @@ executable conj
     , newtype
     , optparse-applicative
     , optparse-simple
+    , path-pieces
     , persistent
     , persistent-postgresql
     , persistent-template
@@ -225,6 +230,7 @@ test-suite emotive-conjugations-test
     , bytestring
     , conduit
     , containers
+    , cookie
     , cryptonite
     , dhall
     , directory
@@ -243,6 +249,7 @@ test-suite emotive-conjugations-test
     , neat-interpolation
     , network-uri
     , newtype
+    , path-pieces
     , persistent
     , persistent-postgresql
     , persistent-template

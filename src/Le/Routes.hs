@@ -9,9 +9,11 @@ import Le.Article.Handlers
 import Le.Handlers
 import Le.Import
 import Le.Model
+import Le.Queue.Handlers
 import Network.HTTP.Media ((//), (/:))
 import Servant
 import Servant.API.Generic
+import Servant.Server.Experimental.Auth (AuthServerData)
 import Servant.Server.Generic
 
 data HTML
@@ -38,75 +40,86 @@ instance MimeUnrender GZip BL.ByteString where
   mimeUnrenderWithType _ "application/gzip" bs = Right bs
   mimeUnrenderWithType _ mt _bs = Left $ "Mime must be application/gzip, but it's: " ++ show mt
 
-data API route
-  = API
-      { __index :: route :- Get '[HTML] Text,
-        __dashboard :: route :- "dashboard" :> Get '[HTML] Text,
-        __queue :: route :- "queue" :> Get '[HTML] Text,
-        __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
-        __jsonApi :: route :- ToServantApi JsonAPI,
-        __downloadAndFilter ::
-          route
-            :- "api" :> "download-and-filter.json"
-              :> ReqBody '[JSON] AT.DownloadAndFilterForm
-              :> Post '[GZip] BL.ByteString,
-        __testDownloadAndFilter ::
-          route
-            :- "api" :> "test-download-and-filter.json"
-              :> Post '[GZip] BL.ByteString
-      }
+-- | We need to specify the data returned after authentication
+type instance
+  AuthServerData (AuthProtect "cookie-auth") =
+    Entity User
+
+data API route = API
+  { __index :: route :- Get '[HTML] Text,
+    __dashboard :: route :- "dashboard" :> Get '[HTML] Text,
+    __queue :: route :- "queue" :> Get '[HTML] Text,
+    __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
+    __jsonApi :: route :- ToServantApi JsonAPI,
+    __downloadAndFilter ::
+      route
+        :- "api" :> "download-and-filter.json"
+          :> ReqBody '[JSON] AT.DownloadAndFilterForm
+          :> Post '[GZip] BL.ByteString,
+    __testDownloadAndFilter ::
+      route
+        :- "api" :> "test-download-and-filter.json"
+          :> Post '[GZip] BL.ByteString
+  }
   deriving (Generic)
 
-data JsonAPI route
-  = JsonAPI
-      { _logErrorHandler ::
-          route
-            :- "api"
-            :> "log-error.json"
-            :> QueryParam "msg" Text
-            :> Get '[JSON] (),
-        _pingJson ::
-          route
-            :- "api" :> "ping.json" :> Get '[JSON] [Text],
-        _errorOut ::
-          route
-            :- "api" :> "error-out.json" :> Get '[JSON] [Text],
-        _articlesShortHandler ::
-          route
-            :- "api"
-              :> "articles-short.json"
-              :> QueryParam "person" Text
-              :> Get '[JSON] [AT.ArticleShort],
-        _articleDetails ::
-          route
-            :- "api" :> "article"
-              :> Capture "article-id" ArticleId
-              :> "article.json"
-              :> Get '[JSON] AT.Article,
-        _articlePleaseDetails ::
-          route
-            :- "api" :> "article"
-              :> Capture "article-please-id" ArticlePleaseId
-              :> "article-please.json"
-              :> Get '[JSON] AT.ArticlePlease,
-        _articlePleaseDetailsBig ::
-          route
-            :- "api" :> "article"
-              :> Capture "article-please-big-id" ArticlePleaseBigId
-              :> "article-please-big.json"
-              :> Get '[JSON] AT.ArticlePleaseBig,
-        _listNamedEntities ::
-          route
-            :- "api" :> "person-named-entities-list.json"
-              :> QueryParam "q" Text
-              :> QueryParam "page" Int
-              :> Get '[JSON] (AT.Paginated Text),
-        _namedEntityGroup ::
-          route
-            :- "api" :> "ner-group.json"
-              :> QueryParam "ner" Text
-              :> Get '[JSON] AT.NamedEntityGroup
-      }
+data JsonAPI route = JsonAPI
+  { _logErrorHandler ::
+      route
+        :- "api"
+        :> "log-error.json"
+        :> QueryParam "msg" Text
+        :> Get '[JSON] (),
+    _pingJson ::
+      route
+        :- "api" :> "ping.json" :> Get '[JSON] [Text],
+    _errorOut ::
+      route
+        :- "api" :> "error-out.json" :> Get '[JSON] [Text],
+    _articlesShortHandler ::
+      route
+        :- "api"
+          :> "articles-short.json"
+          :> QueryParam "person" Text
+          :> Get '[JSON] [AT.ArticleShort],
+    _articleDetails ::
+      route
+        :- "api" :> "article"
+          :> Capture "article-id" ArticleId
+          :> "article.json"
+          :> Get '[JSON] AT.Article,
+    _articlePleaseDetails ::
+      route
+        :- "api" :> "article"
+          :> Capture "article-please-id" ArticlePleaseId
+          :> "article-please.json"
+          :> Get '[JSON] AT.ArticlePlease,
+    _articlePleaseDetailsBig ::
+      route
+        :- "api" :> "article"
+          :> Capture "article-please-big-id" ArticlePleaseBigId
+          :> "article-please-big.json"
+          :> Get '[JSON] AT.ArticlePleaseBig,
+    _listNamedEntities ::
+      route
+        :- "api" :> "person-named-entities-list.json"
+          :> QueryParam "q" Text
+          :> QueryParam "page" Int
+          :> Get '[JSON] (AT.Paginated Text),
+    _namedEntityGroup ::
+      route
+        :- "api" :> "ner-group.json"
+          :> QueryParam "ner" Text
+          :> Get '[JSON] AT.NamedEntityGroup,
+    _queueAdd ::
+      route
+        :- AuthProtect "cookie-auth"
+        :> "api"
+        :> "queue"
+        :> "add.json"
+        :> ReqBody '[JSON] AT.QueueAddForm
+        :> Post '[JSON] ()
+  }
   deriving (Generic)
 
 server :: API (AsServerT (RIO App))
@@ -132,5 +145,6 @@ server =
           _articlePleaseDetailsBig = articlePleaseDetailsBig,
           _articlePleaseDetails = articlePleaseDetails,
           _listNamedEntities = listNamedEntities,
-          _namedEntityGroup = namedEntityGroup
+          _namedEntityGroup = namedEntityGroup,
+          _queueAdd = queueAdd
         }

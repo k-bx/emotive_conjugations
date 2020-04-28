@@ -28,6 +28,7 @@ dependencies:
 - bytestring
 - conduit
 - containers
+- cookie
 - cryptonite
 - directory
 - dhall
@@ -44,6 +45,7 @@ dependencies:
 - newtype
 - neat-interpolation
 - network-uri
+- path-pieces
 - persistent
 - persistent-postgresql
 - persistent-template

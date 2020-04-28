@@ -17,6 +17,14 @@ share
   [persistLowerCase|
 User
     email Text
+    UniqueEmail email
+    deriving Show
+LoginToken
+    tokenVal LoginTokenVal
+    userId UserId
+    LoginTokenQuery tokenVal
+    createdAt UTCTime
+    Primary tokenVal
     deriving Show
 Article
     warcId Text Maybe
