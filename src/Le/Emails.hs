@@ -3,6 +3,7 @@
 module Le.Emails where
 
 import qualified Data.String.Class as S
+import qualified Le.Config
 import Le.Import
 import qualified Mail.Hailgun as Hailgun
 import Servant
@@ -20,7 +21,7 @@ sendEmail title txt html emailTo = do
         Hailgun.hailgunMessage
           title
           (Hailgun.TextAndHTML (toBS txt) (toBS html))
-          "meetup.events.info@gmail.com"
+          (S.fromText Le.Config.projectEmail)
           ( Hailgun.MessageRecipients
               { recipientsTo = [S.fromText emailTo],
                 recipientsCC = [],
@@ -47,23 +48,23 @@ sendEmail title txt html emailTo = do
               <> fromString (Hailgun.hsrMessage sendRsp)
 
 signInCodeTitle :: Text
-signInCodeTitle = "Meetup Sign-In Link"
+signInCodeTitle = "Emotive Conjugations Sign-In Link"
 
 signInCodeTxt :: Text -> Text
 signInCodeTxt code =
   [qc|
-          Meowdy, partner
+Howdy, partner
 
 Your sign-in code is: ${code}
 
-All the best
+All best
 |]
 
 signInCodeHtml :: Text -> Text
 signInCodeHtml code =
-  [qc|Meowdy, partner<br><br>
+  [qc|Howdy, partner<br><br>
 
 Your sign-in code is: ${code}<br><br>
 
-All the best
+All best
 |]

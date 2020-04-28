@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8ddd67943f7efdd726af32d8ec9bc862fb1f0f512aa137fefa31bc719a2b991f
+-- hash: 96bd6ca597f35cb7c808adce6e8bb7fffb6a82f70e4571cccd0892e36f088217
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -107,7 +107,7 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
-    , random-strings
+    , random
     , raw-strings-qq
     , resource-pool
     , resourcet
@@ -190,7 +190,7 @@ executable conj
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
-    , random-strings
+    , random
     , raw-strings-qq
     , resource-pool
     , resourcet
@@ -274,7 +274,7 @@ test-suite emotive-conjugations-test
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
-    , random-strings
+    , random
     , raw-strings-qq
     , resource-pool
     , resourcet

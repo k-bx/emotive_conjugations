@@ -14,17 +14,15 @@ import qualified Le.Emails
 import Le.Import
 import Le.Model
 import Servant
-import qualified Test.RandomStrings as RandomStrings
+import qualified System.Random
 import qualified Web.Cookie as Cookie
 
 logInSendPasswordEndpoint :: AT.LogInSendPasswordForm -> AppM ()
 logInSendPasswordEndpoint AT.LogInSendPasswordForm {..} = do
   code <-
-    liftIO $
-      (S.toText . map Data.Char.toUpper)
-        <$> RandomStrings.randomString
-          (RandomStrings.onlyAlphaNum RandomStrings.randomASCII)
-          5
+    liftIO $ fmap (tshow @Int) $
+      System.Random.randomRIO
+        (100000, 999999)
   logInfo $
     "Generated code for email: " <> display lisEmail <> "; code: "
       <> display code

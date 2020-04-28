@@ -56,7 +56,7 @@ dependencies:
 - pipes-bytestring
 - pipes-zlib
 - pretty-simple
-- random-strings
+- random
 - rio
 - raw-strings-qq
 - resourcet

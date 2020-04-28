@@ -33,28 +33,28 @@ window.mainInit = null;
         }
 
         var app = Elm.Index.init({node: document.getElementById("app")});
-        /* app.ports.needLoginRedirect.subscribe(function(data) {
-         *     try {
-         *         let loc = window.location.href;
-         *         window.localStorage.setItem('afterSigninRedirectUrl', loc);
-         *         window.location.href = '/login';
-         *     } catch (error) {
-         *         reportError(error);
-         *     }
-         * });
-         * app.ports.redirectBackAfterLogin.subscribe(function(data) {
-         *     try {
-         *         let loc = window.localStorage.getItem('afterSigninRedirectUrl');
-         *         if (loc) {
-         *             window.localStorage.removeItem('afterSigninRedirectUrl');
-         *             window.location.href = loc;
-         *         } else {
-         *             window.location.href = '/dashboard';
-         *         }
-         *     } catch (error) {
-         *         reportError(error);
-         *     }
-         * }); */
+        app.ports.needLoginRedirect.subscribe(function(data) {
+            try {
+                let loc = window.location.href;
+                window.localStorage.setItem('afterSigninRedirectUrl', loc);
+                window.location.href = '/login';
+            } catch (error) {
+                reportError(error);
+            }
+        });
+        app.ports.redirectBackAfterLogin.subscribe(function(data) {
+            try {
+                let loc = window.localStorage.getItem('afterSigninRedirectUrl');
+                if (loc) {
+                    window.localStorage.removeItem('afterSigninRedirectUrl');
+                    window.location.href = loc;
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            } catch (error) {
+                reportError(error);
+            }
+        });
         app.ports.initTooltips.subscribe(function(data) {
             try {
                 console.log('> initTooltips', data);

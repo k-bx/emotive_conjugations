@@ -70,3 +70,6 @@ tokenExpirationPeriod = 60 * 60 * 24 * 60
 
 loginCodeExpirationPeriod :: NominalDiffTime
 loginCodeExpirationPeriod = 60 * 10
+
+projectEmail :: Text
+projectEmail = "emotive-conjugations@outlook.com"
