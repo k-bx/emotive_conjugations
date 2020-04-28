@@ -1,4 +1,4 @@
-module Le.Dashboard exposing (..)
+module Le.Pages.Dashboard exposing (..)
 
 import Browser.Navigation
 import Dict exposing (Dict)
@@ -7,6 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Le.Api as Api
 import Le.Article
+import Le.Block.Dashboard
 import Le.Block.Toast
 import Le.Components exposing (..)
 import Le.Config
@@ -249,72 +250,6 @@ update msg model =
             ( { model | nerGroup = Just nerGroup }
             , Cmd.none
             )
-
-
-navbarContent : Html Msg
-navbarContent =
-    header []
-        [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark" ]
-            [ a
-                [ class "navbar-brand"
-                , href <| Le.Routes.dashboard "" Nothing
-                ]
-                [ img
-                    [ src "/images/blue-tailed-bee-eater.svg"
-                    , class "logo mr-3"
-                    ]
-                    []
-                , text "Emotive Conjugations"
-                ]
-            , button [ attribute "aria-controls" "navbarCollapse", attribute "aria-expanded" "false", attribute "aria-label" "Toggle navigation", class "navbar-toggler", attribute "data-target" "#navbarCollapse", attribute "data-toggle" "collapse", type_ "button" ]
-                [ span [ class "navbar-toggler-icon" ]
-                    []
-                ]
-            , div [ class "collapse navbar-collapse", id "navbarCollapse" ]
-                [ ul [ class "navbar-nav mr-auto" ]
-                    [ li [ class "nav-item active" ]
-                        [ a
-                            [ class "nav-link"
-                            , href <| Le.Routes.dashboard "" Nothing
-                            ]
-                            [ text "Dashboard"
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ]
-
-
-searchPanel : Model -> Html Msg
-searchPanel model =
-    div [ class "search-panel" ]
-        [ div [ class "ml-2" ]
-            [ let
-                opts =
-                    SelectTwo.basicSelectOptions NerSelect
-                        (model.ners
-                            |> List.map (\ner -> ( ner, ner ))
-                        )
-              in
-              SelectTwo.Html.select2 SelectTwo
-                { defaults =
-                    SelectTwo.defaultsFromList [ NerSelect model.ner ] opts
-                , ajax = True
-                , delay = 300
-                , id_ = "select-ner"
-                , clearMsg = Nothing
-                , showSearch = True
-                , width = "300px"
-                , placeholder = "Select Named Entity"
-                , list = opts
-                , multiSelect = False
-                , disabled = False
-                , noResultsMessage = Just "No results"
-                , closeOnClear = False
-                }
-            ]
-        ]
 
 
 mainContent : Model -> Html Msg
@@ -838,17 +773,33 @@ mainContent model =
         ]
 
 
-footerContent : Html Msg
-footerContent =
-    footer [ class "footer mt-auto py-3" ]
-        [ div [ class "text-center" ]
-            [ span [ class "text-muted" ]
-                [ text "Made by "
-                , a [ href "https://k-bx.github.io", target "_blank" ] [ text "Konstantine Rybnikov" ]
-                , text " with help from "
-                , a [ href "https://theportal.wiki/", target "_blank" ] [ text "The Portal" ]
-                , text " community"
-                ]
+searchPanel : Model -> Html Msg
+searchPanel model =
+    div [ class "search-panel" ]
+        [ div [ class "ml-2" ]
+            [ let
+                opts =
+                    SelectTwo.basicSelectOptions NerSelect
+                        (model.ners
+                            |> List.map (\ner -> ( ner, ner ))
+                        )
+              in
+              SelectTwo.Html.select2 SelectTwo
+                { defaults =
+                    SelectTwo.defaultsFromList [ NerSelect model.ner ] opts
+                , ajax = True
+                , delay = 300
+                , id_ = "select-ner"
+                , clearMsg = Nothing
+                , showSearch = True
+                , width = "300px"
+                , placeholder = "Select Named Entity"
+                , list = opts
+                , multiSelect = False
+                , disabled = False
+                , noResultsMessage = Just "No results"
+                , closeOnClear = False
+                }
             ]
         ]
 
@@ -860,11 +811,10 @@ view vps model =
             [ class "h-100 gr__getbootstrap_com page-dashboard"
             , SelectTwo.Html.select2Close SelectTwo
             ]
-            [ div [ class "d-flex flex-column h-100" ]
-                [ navbarContent
-                , searchPanel model
-                , mainContent model
-                , footerContent
-                ]
+            [ Le.Block.Dashboard.view vps.routeName <|
+                div []
+                    [ searchPanel model
+                    , mainContent model
+                    ]
             , SelectTwo.Html.select2Dropdown SelectTwo Nothing model
             ]

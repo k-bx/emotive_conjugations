@@ -8,7 +8,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Le.Api as Api
-import Le.Dashboard as Dashboard
+import Le.Pages.Dashboard
+import Le.Pages.Queue
 import Le.Types exposing (..)
 import Le.Utils exposing (..)
 import Task
@@ -29,7 +30,8 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | ResizeHappened Int Int
-    | DashboardMsg Dashboard.Msg
+    | DashboardMsg Le.Pages.Dashboard.Msg
+    | QueueMsg Le.Pages.Queue.Msg
 
 
 type alias Model =
@@ -47,7 +49,7 @@ init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         ( dashboardInitModel, dashboardInitCmds ) =
-            Dashboard.init key "" Nothing
+            Le.Pages.Dashboard.init key "" Nothing
 
         m : Model
         m =
@@ -77,13 +79,30 @@ init flags url key =
 
 
 type PageModel
-    = DashboardModel Dashboard.Model
+    = DashboardModel Le.Pages.Dashboard.Model
+    | QueueModel Le.Pages.Queue.Model
     | PageNotFoundModel ()
 
 
 type Route
     = Dashboard String (Maybe Api.ArticleId)
+    | Queue
     | PageNotFound
+
+
+{-| Used in navbarContent to figure out which link is active
+-}
+routeName : Route -> String
+routeName r =
+    case r of
+        Dashboard _ _ ->
+            "dashboard"
+
+        Queue ->
+            "queue"
+
+        PageNotFound ->
+            "not-found"
 
 
 routeParser : Parser (Route -> a) a
@@ -93,6 +112,7 @@ routeParser =
         , P.map
             (\( mn, a ) -> Dashboard (Maybe.withDefault "" mn) a)
             (P.s "dashboard" <?> Q.map2 (\a b -> ( a, b )) (Q.string "ner") (Q.int "article-id"))
+        , P.map Queue <| P.s "queue"
         ]
 
 
@@ -132,7 +152,10 @@ initPageModel : Nav.Key -> Url.Url -> Route -> ( PageModel, Cmd Msg )
 initPageModel key url r =
     case r of
         Dashboard ner article ->
-            initSubpage (Dashboard.init key ner article) DashboardModel DashboardMsg
+            initSubpage (Le.Pages.Dashboard.init key ner article) DashboardModel DashboardMsg
+
+        Queue ->
+            initSubpage (Le.Pages.Queue.init key) QueueModel QueueMsg
 
         PageNotFound ->
             ( PageNotFoundModel (), Cmd.none )
@@ -142,6 +165,9 @@ sameTopRoute : Route -> Route -> Bool
 sameTopRoute r1 r2 =
     case ( r1, r2 ) of
         ( Dashboard _ _, Dashboard _ _ ) ->
+            True
+
+        ( Queue, Queue ) ->
             True
 
         _ ->
@@ -204,15 +230,16 @@ update msg model =
             ( model, Task.perform GotViewport Browser.Dom.getViewport )
 
         ( DashboardModel imodel, DashboardMsg imsg ) ->
-            subpage model imodel imsg (setpm DashboardModel) Dashboard.update DashboardMsg Dashboard
+            subpage model imodel imsg (setpm DashboardModel) Le.Pages.Dashboard.update DashboardMsg Dashboard
+
+        ( QueueModel imodel, QueueMsg imsg ) ->
+            subpage model imodel imsg (setpm QueueModel) Le.Pages.Queue.update QueueMsg Queue
 
         ( PageNotFoundModel imodel, _ ) ->
             ( { model | route = PageNotFound, pmodel = PageNotFoundModel () }, Cmd.none )
 
-
-
--- ( _, _ ) ->
---     ( model, Cmd.none )
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -233,14 +260,19 @@ mainContent model =
                 Just v ->
                     isMobile v
 
+        viewParams : ViewParams
         viewParams =
             { isMobile = isMob
             , now = model.now
+            , routeName = routeName model.route
             }
     in
     case ( model.route, model.pmodel ) of
         ( Dashboard ner article, DashboardModel pmodel ) ->
-            Html.map DashboardMsg (Dashboard.view viewParams pmodel)
+            Html.map DashboardMsg (Le.Pages.Dashboard.view viewParams pmodel)
+
+        ( Queue, QueueModel pmodel ) ->
+            Html.map QueueMsg (Le.Pages.Queue.view viewParams pmodel)
 
         ( _, _ ) ->
             pageNotFound

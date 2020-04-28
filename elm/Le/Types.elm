@@ -10,6 +10,7 @@ import Time
 type alias ViewParams =
     { isMobile : Bool
     , now : Maybe Time.Posix
+    , routeName : String
     }
 
 

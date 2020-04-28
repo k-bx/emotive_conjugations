@@ -42,6 +42,7 @@ data API route
   = API
       { __index :: route :- Get '[HTML] Text,
         __dashboard :: route :- "dashboard" :> Get '[HTML] Text,
+        __queue :: route :- "queue" :> Get '[HTML] Text,
         __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
         __jsonApi :: route :- ToServantApi JsonAPI,
         __downloadAndFilter ::
@@ -113,6 +114,7 @@ server =
   API
     { __index = throwM $ err302 {errHeaders = [("Location", "/dashboard")]},
       __dashboard = indexNoAuth,
+      __queue = indexNoAuth,
       __ping = ping,
       __jsonApi = toServant jsonApi,
       __downloadAndFilter = downloadAndFilter,

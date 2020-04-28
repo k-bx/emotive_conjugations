@@ -11,7 +11,7 @@ dashboard : String -> Maybe Api.ArticleId -> String
 dashboard ner mArticleId =
     case ( ner, mArticleId ) of
         ( "", Nothing ) ->
-            "/dashboard"
+            Url.Builder.absolute [ "dashboard" ] []
 
         ( _, Nothing ) ->
             Url.Builder.absolute
@@ -24,3 +24,8 @@ dashboard ner mArticleId =
                 [ Url.Builder.string "ner" ner
                 , Url.Builder.int "article-id" articleId
                 ]
+
+
+queue : String
+queue =
+    Url.Builder.absolute [ "queue" ] []
