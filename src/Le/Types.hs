@@ -2,8 +2,6 @@
 
 module Le.Types where
 
-import qualified Servant.API
-import qualified Web.PathPieces
 import Control.Monad.Logger (MonadLogger (..), toLogStr)
 import Control.Newtype
 import qualified Data.Aeson as J
@@ -15,7 +13,9 @@ import qualified Network.AWS
 import qualified Network.HTTP.Client
 import RIO
 import RIO.Process
+import qualified Servant.API
 import System.Log.FastLogger (fromLogStr)
+import qualified Web.PathPieces
 
 type AppM = RIO App
 
@@ -27,7 +27,14 @@ data Config = Config
     cfgMode :: Mode,
     cfgDataDir :: FilePath,
     cfgPsqlConnString :: Text,
-    cfgPythonWebapp :: Text
+    cfgPythonWebapp :: Text,
+    cfgMailgunDomain :: Text,
+    cfgMailgunApiKey :: Text
+    -- cfgFacebookAppId :: Text,
+    -- cfgFacebookAppSecret :: Text,
+    -- cfgFacebookAppToken :: Text,
+    -- cfgGoogleOauthClientId :: Text,
+    -- cfgGoogleOauthClientSecret :: Text
   }
   deriving (Generic)
 

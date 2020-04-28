@@ -1,5 +1,6 @@
 module Le.AppUtils where
 
+import qualified Data.Aeson as J
 import qualified Data.String.Class as S
 import GHC.Stack
 import Le.Import
@@ -57,3 +58,12 @@ logOnError act =
   where
     onErr e = do
       logError $ display $ "> got error (continuing): " <> tshow e
+
+formErrors :: [(Text, Text)] -> AppM a
+formErrors xs = throwM err400 {errBody = J.encode xs}
+
+withFormRes :: Validation [(Text, Text)] t -> (t -> AppM a) -> AppM a
+withFormRes res f =
+  case res of
+    Success v -> f v
+    Failure errs -> formErrors errs

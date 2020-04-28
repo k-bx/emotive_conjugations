@@ -8,6 +8,7 @@ import qualified Le.ApiTypes as AT
 import Le.Article.Handlers
 import Le.Handlers
 import Le.Import
+import Le.Login.Handlers
 import Le.Model
 import Le.Queue.Handlers
 import Network.HTTP.Media ((//), (/:))
@@ -15,6 +16,7 @@ import Servant
 import Servant.API.Generic
 import Servant.Server.Experimental.Auth (AuthServerData)
 import Servant.Server.Generic
+import Web.Cookie (SetCookie)
 
 data HTML
 
@@ -118,7 +120,24 @@ data JsonAPI route = JsonAPI
         :> "queue"
         :> "add.json"
         :> ReqBody '[JSON] AT.QueueAddForm
-        :> Post '[JSON] ()
+        :> Post '[JSON] (),
+    _logInSendPassword ::
+      route
+        :- "api"
+        :> "log-in-send-password"
+        :> ReqBody '[JSON] AT.LogInSendPasswordForm
+        :> Post '[JSON] (),
+    _logInSendCode ::
+      route
+        :- "api"
+        :> "log-in"
+        :> ReqBody '[JSON] AT.LogInSendCodeForm
+        :> Post '[JSON] (Headers '[Header "Set-Cookie" SetCookie] AT.AccountInfo),
+    _logOut ::
+      route
+        :- "api"
+        :> "log-out"
+        :> Get '[JSON] (Headers '[Header "Set-Cookie" SetCookie] ())
   }
   deriving (Generic)
 
@@ -146,5 +165,8 @@ server =
           _articlePleaseDetails = articlePleaseDetails,
           _listNamedEntities = listNamedEntities,
           _namedEntityGroup = namedEntityGroup,
-          _queueAdd = queueAdd
+          _queueAdd = queueAdd,
+          _logInSendPassword = logInSendPasswordEndpoint,
+          _logInSendCode = logInSendCodeEndpoint,
+          _logOut = logOut
         }

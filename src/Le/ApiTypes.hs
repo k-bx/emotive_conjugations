@@ -112,3 +112,26 @@ data QueueAddForm = QueueAddForm
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''QueueAddForm
+
+data AccountInfo = AccountInfo
+  { accId :: M.UserId,
+    accEmail :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''AccountInfo
+
+data LogInSendPasswordForm = LogInSendPasswordForm
+  { lisEmail :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''LogInSendPasswordForm
+
+data LogInSendCodeForm = LogInSendCodeForm
+  { licEmail :: Text,
+    licCode :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''LogInSendCodeForm

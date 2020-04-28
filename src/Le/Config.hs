@@ -67,3 +67,6 @@ tz = Data.Time.Zones.All.tzByLabel tzLabel
 
 tokenExpirationPeriod :: NominalDiffTime
 tokenExpirationPeriod = 60 * 60 * 24 * 60
+
+loginCodeExpirationPeriod :: NominalDiffTime
+loginCodeExpirationPeriod = 60 * 10

@@ -455,6 +455,63 @@ jsonEncQueueAddForm  val =
    ]
 
 
+
+type alias AccountInfo  =
+   { id: UserId
+   , email: String
+   }
+
+jsonDecAccountInfo : Json.Decode.Decoder ( AccountInfo )
+jsonDecAccountInfo =
+   Json.Decode.succeed (\pid pemail -> {id = pid, email = pemail})
+   |> required "id" (jsonDecUserId)
+   |> required "email" (Json.Decode.string)
+
+jsonEncAccountInfo : AccountInfo -> Value
+jsonEncAccountInfo  val =
+   Json.Encode.object
+   [ ("id", jsonEncUserId val.id)
+   , ("email", Json.Encode.string val.email)
+   ]
+
+
+
+type alias LogInSendPasswordForm  =
+   { email: String
+   }
+
+jsonDecLogInSendPasswordForm : Json.Decode.Decoder ( LogInSendPasswordForm )
+jsonDecLogInSendPasswordForm =
+   Json.Decode.succeed (\pemail -> {email = pemail})
+   |> required "email" (Json.Decode.string)
+
+jsonEncLogInSendPasswordForm : LogInSendPasswordForm -> Value
+jsonEncLogInSendPasswordForm  val =
+   Json.Encode.object
+   [ ("email", Json.Encode.string val.email)
+   ]
+
+
+
+type alias LogInSendCodeForm  =
+   { email: String
+   , code: String
+   }
+
+jsonDecLogInSendCodeForm : Json.Decode.Decoder ( LogInSendCodeForm )
+jsonDecLogInSendCodeForm =
+   Json.Decode.succeed (\pemail pcode -> {email = pemail, code = pcode})
+   |> required "email" (Json.Decode.string)
+   |> required "code" (Json.Decode.string)
+
+jsonEncLogInSendCodeForm : LogInSendCodeForm -> Value
+jsonEncLogInSendCodeForm  val =
+   Json.Encode.object
+   [ ("email", Json.Encode.string val.email)
+   , ("code", Json.Encode.string val.code)
+   ]
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -473,6 +530,9 @@ jsonEncArticlePleaseId = Json.Encode.int
 type alias ArticlePleaseBigId = Int
 jsonDecArticlePleaseBigId = Json.Decode.int
 jsonEncArticlePleaseBigId = Json.Encode.int
+type alias UserId = Int
+jsonDecUserId = Json.Decode.int
+jsonEncUserId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -814,6 +874,105 @@ postApiQueueAddjson body toMsg =
                     params
             , body =
                 Http.jsonBody (jsonEncQueueAddForm body)
+            , expect =
+                Http.expectString 
+                     (\x -> case x of
+                     Err e -> toMsg (Err {httpError=e,formErrors=Dict.empty,errors=[]})
+                     Ok _ -> toMsg (Ok ()))
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+postApiLoginsendpassword : LogInSendPasswordForm -> (Result Error  (())  -> msg) -> Cmd msg
+postApiLoginsendpassword body toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "POST"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "log-in-send-password"
+                    ]
+                    params
+            , body =
+                Http.jsonBody (jsonEncLogInSendPasswordForm body)
+            , expect =
+                Http.expectString 
+                     (\x -> case x of
+                     Err e -> toMsg (Err {httpError=e,formErrors=Dict.empty,errors=[]})
+                     Ok _ -> toMsg (Ok ()))
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+postApiLogin : LogInSendCodeForm -> (Result Error  (AccountInfo)  -> msg) -> Cmd msg
+postApiLogin body toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "POST"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "log-in"
+                    ]
+                    params
+            , body =
+                Http.jsonBody (jsonEncLogInSendCodeForm body)
+            , expect =
+                leExpectJson toMsg jsonDecAccountInfo
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+getApiLogout : (Result Error  (())  -> msg) -> Cmd msg
+getApiLogout toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "log-out"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
             , expect =
                 Http.expectString 
                      (\x -> case x of

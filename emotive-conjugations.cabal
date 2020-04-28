@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 01768b1bd1aa342461427aeac46db33ae67dba4e5a2f59481082fffada8415cc
+-- hash: d52641bd5d8a53baba5092a586a3eb78d27f73bea273186fe9252c64ab0096bc
 
 name:           emotive-conjugations
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Data.Either.ValidationT
       Data.Time.Additional
       Le.Aeson
       Le.ApiTypes
@@ -38,10 +39,12 @@ library
       Le.CommonCrawl
       Le.CommonCrawl.Cmd
       Le.Config
+      Le.Emails
       Le.Files
       Le.Handlers
       Le.Html
       Le.Import
+      Le.Login.Handlers
       Le.Migrate
       Le.Model
       Le.Python
@@ -71,6 +74,7 @@ library
     , amazonka-core
     , amazonka-s3
     , base
+    , binary
     , bytestring
     , conduit
     , containers
@@ -78,10 +82,12 @@ library
     , cryptonite
     , dhall
     , directory
+    , either
     , elm-bridge
     , esqueleto
     , fast-logger
     , fsnotify
+    , hailgun
     , http-client
     , http-media
     , http-types
@@ -100,6 +106,7 @@ library
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , random-strings
     , raw-strings-qq
     , resource-pool
     , resourcet
@@ -123,6 +130,7 @@ library
     , tzdata
     , unliftio
     , uri-encode
+    , uuid
     , wai
     , wai-app-static
     , wai-extra
@@ -147,6 +155,7 @@ executable conj
     , amazonka-core
     , amazonka-s3
     , base
+    , binary
     , bytestring
     , conduit
     , containers
@@ -154,11 +163,13 @@ executable conj
     , cryptonite
     , dhall
     , directory
+    , either
     , elm-bridge
     , emotive-conjugations
     , esqueleto
     , fast-logger
     , fsnotify
+    , hailgun
     , http-client
     , http-media
     , http-types
@@ -178,6 +189,7 @@ executable conj
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , random-strings
     , raw-strings-qq
     , resource-pool
     , resourcet
@@ -201,6 +213,7 @@ executable conj
     , tzdata
     , unliftio
     , uri-encode
+    , uuid
     , wai
     , wai-app-static
     , wai-extra
@@ -227,6 +240,7 @@ test-suite emotive-conjugations-test
     , amazonka-core
     , amazonka-s3
     , base
+    , binary
     , bytestring
     , conduit
     , containers
@@ -234,11 +248,13 @@ test-suite emotive-conjugations-test
     , cryptonite
     , dhall
     , directory
+    , either
     , elm-bridge
     , emotive-conjugations
     , esqueleto
     , fast-logger
     , fsnotify
+    , hailgun
     , hspec
     , http-client
     , http-media
@@ -257,6 +273,7 @@ test-suite emotive-conjugations-test
     , pipes-bytestring
     , pipes-zlib
     , pretty-simple
+    , random-strings
     , raw-strings-qq
     , resource-pool
     , resourcet
@@ -280,6 +297,7 @@ test-suite emotive-conjugations-test
     , tzdata
     , unliftio
     , uri-encode
+    , uuid
     , wai
     , wai-app-static
     , wai-extra

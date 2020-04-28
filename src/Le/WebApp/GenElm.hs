@@ -37,7 +37,10 @@ moduleDefs =
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyPosResEnt),
     DefineElm (Proxy :: Proxy (AT.Paginated Text)),
-    DefineElm (Proxy :: Proxy AT.QueueAddForm)
+    DefineElm (Proxy :: Proxy AT.QueueAddForm),
+    DefineElm (Proxy :: Proxy AT.AccountInfo),
+    DefineElm (Proxy :: Proxy AT.LogInSendPasswordForm),
+    DefineElm (Proxy :: Proxy AT.LogInSendCodeForm)
   ]
 
 replacements :: [(Text, Text)]
@@ -64,7 +67,8 @@ intAliases =
       "Milliseconds",
       "ArticleId",
       "ArticlePleaseId",
-      "ArticlePleaseBigId"
+      "ArticlePleaseBigId",
+      "UserId"
     ]
 
 stringAliases :: [String]
