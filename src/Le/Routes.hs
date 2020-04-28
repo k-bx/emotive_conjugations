@@ -51,7 +51,7 @@ type instance
 data API route = API
   { __index :: route :- Get '[HTML] Text,
     __dashboard :: route :- "dashboard" :> Get '[HTML] Text,
-    __queue :: route :- "queue" :> Get '[HTML] Text,
+    __queue :: route :- AuthProtect "cookie-auth" :> "queue" :> Get '[HTML] Text,
     __login :: route :- "login" :> Get '[HTML] Text,
     __ping :: route :- "api" :> "ping" :> Get '[PlainText] Text,
     __jsonApi :: route :- ToServantApi JsonAPI,
@@ -171,7 +171,7 @@ server =
   API
     { __index = throwM $ err302 {errHeaders = [("Location", "/dashboard")]},
       __dashboard = indexNoAuth,
-      __queue = indexNoAuth,
+      __queue = index,
       __login = indexNoAuth,
       __ping = ping,
       __jsonApi = toServant jsonApi,
