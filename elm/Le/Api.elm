@@ -438,6 +438,23 @@ jsonEncPaginated localEncoder_item val =
    ]
 
 
+
+type alias QueueAddForm  =
+   { url: String
+   }
+
+jsonDecQueueAddForm : Json.Decode.Decoder ( QueueAddForm )
+jsonDecQueueAddForm =
+   Json.Decode.succeed (\purl -> {url = purl})
+   |> required "url" (Json.Decode.string)
+
+jsonEncQueueAddForm : QueueAddForm -> Value
+jsonEncQueueAddForm  val =
+   Json.Encode.object
+   [ ("url", Json.Encode.string val.url)
+   ]
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -767,6 +784,41 @@ getApiNergroupjson query_ner toMsg =
                 Http.emptyBody
             , expect =
                 leExpectJson toMsg jsonDecNamedEntityGroup
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+postApiQueueAddjson : QueueAddForm -> (Result Error  (())  -> msg) -> Cmd msg
+postApiQueueAddjson body toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "POST"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "queue"
+                    , "add.json"
+                    ]
+                    params
+            , body =
+                Http.jsonBody (jsonEncQueueAddForm body)
+            , expect =
+                Http.expectString 
+                     (\x -> case x of
+                     Err e -> toMsg (Err {httpError=e,formErrors=Dict.empty,errors=[]})
+                     Ok _ -> toMsg (Ok ()))
             , timeout =
                 Nothing
             , tracker =

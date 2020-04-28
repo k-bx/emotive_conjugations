@@ -22,7 +22,6 @@ instance
   HasForeign LangElm EType a =>
   HasForeign LangElm EType (AuthProtect "cookie-auth" :> a)
   where
-
   type Foreign EType (AuthProtect "cookie-auth" :> a) = Foreign EType a
 
   foreignFor l ft _api req = foreignFor l ft (Proxy :: Proxy a) req
@@ -37,7 +36,8 @@ moduleDefs =
     DefineElm (Proxy :: Proxy AT.NamedEntityGroup),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyPosResEnt),
-    DefineElm (Proxy :: Proxy (AT.Paginated Text))
+    DefineElm (Proxy :: Proxy (AT.Paginated Text)),
+    DefineElm (Proxy :: Proxy AT.QueueAddForm)
   ]
 
 replacements :: [(Text, Text)]
