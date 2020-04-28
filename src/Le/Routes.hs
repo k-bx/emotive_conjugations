@@ -9,6 +9,7 @@ import Le.Article.Handlers
 import Le.Handlers
 import Le.Import
 import Le.Login.Handlers
+import Le.Login.Social
 import Le.Model
 import Le.Queue.Handlers
 import Network.HTTP.Media ((//), (/:))
@@ -62,7 +63,25 @@ data API route = API
     __testDownloadAndFilter ::
       route
         :- "api" :> "test-download-and-filter.json"
-          :> Post '[GZip] BL.ByteString
+          :> Post '[GZip] BL.ByteString,
+    __fbLoginCallback ::
+      route
+        :- "api"
+        :> "fb-login-callback"
+        :> QueryParam "error_code" Text
+        :> QueryParam "error_message" Text
+        :> QueryParam "code" Text
+        :> QueryParam "state" Text
+        :> Get '[HTML] (Headers '[Header "Set-Cookie" SetCookie] Text),
+    __googleLoginCallback ::
+      route
+        :- "api"
+        :> "google-login-callback"
+        :> QueryParam "state" Text
+        :> QueryParam "code" Text
+        :> QueryParam "scope" Text
+        :> QueryParam "error" Text
+        :> Get '[HTML] (Headers '[Header "Set-Cookie" SetCookie] Text)
   }
   deriving (Generic)
 
@@ -152,7 +171,9 @@ server =
       __ping = ping,
       __jsonApi = toServant jsonApi,
       __downloadAndFilter = downloadAndFilter,
-      __testDownloadAndFilter = testDownloadAndFilter
+      __testDownloadAndFilter = testDownloadAndFilter,
+      __fbLoginCallback = fbLoginCallbackEndpoint,
+      __googleLoginCallback = googleLoginCallback
     }
   where
     jsonApi :: JsonAPI (AsServerT (RIO App))

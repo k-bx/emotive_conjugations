@@ -134,7 +134,7 @@ view vp model =
                                     [ type_ "email"
                                     , class "form-control big-text-input"
                                     , isInvalidCls "email" model.formErrors
-                                    , placeholder "Enter email"
+                                    , placeholder "enter email"
                                     , value model.email
                                     , onInput <| \x -> UpdateModel { model | email = x }
                                     , attribute "autocomplete" "email"
@@ -148,10 +148,10 @@ view vp model =
                                         [ class "btn btn-light ml-2 send-me-code"
                                         , onClick SendCodePressed
                                         ]
-                                        [ text "Send Me Code" ]
+                                        [ text "send me code" ]
                                    ]
                         , div [ class "social-login d-flex flex-row justify-content-center" ]
-                            [ div [class "mr-4"]
+                            [ div [ class "mr-4" ]
                                 [ a [ href "https://www.facebook.com/v3.2/dialog/oauth?client_id=492171828232643&redirect_uri=https%3A%2F%2Fmeetup.events%2Fapi%2Ffb-login-callback&state=csrf&scope=email,public_profile" ]
                                     [ text "Sign in via Facebook" ]
                                 ]

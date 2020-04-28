@@ -29,12 +29,12 @@ data Config = Config
     cfgPsqlConnString :: Text,
     cfgPythonWebapp :: Text,
     cfgMailgunDomain :: Text,
-    cfgMailgunApiKey :: Text
-    -- cfgFacebookAppId :: Text,
-    -- cfgFacebookAppSecret :: Text,
-    -- cfgFacebookAppToken :: Text,
-    -- cfgGoogleOauthClientId :: Text,
-    -- cfgGoogleOauthClientSecret :: Text
+    cfgMailgunApiKey :: Text,
+    cfgFacebookAppId :: Text,
+    cfgFacebookAppSecret :: Text,
+    cfgFacebookAppToken :: Text,
+    cfgGoogleOauthClientId :: Text,
+    cfgGoogleOauthClientSecret :: Text
   }
   deriving (Generic)
 
