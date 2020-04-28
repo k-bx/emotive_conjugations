@@ -14,7 +14,7 @@ dev:
 	$(MAKE) elm-dev
 	$(MAKE) sass
 	$(MAKE) hs-post
-	cp -r ./ssl $(DIST)/
+	# cp -r ./ssl $(DIST)/
 
 .PHONY: prod
 prod:

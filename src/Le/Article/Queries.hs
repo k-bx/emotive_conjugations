@@ -74,7 +74,7 @@ from "article_please"
 where "article_please"."date_publish" is not null
   and "article_please".title is not null
 order by "article_please"."date_publish" desc, "article_please"."id" desc 
-limit {lim}
+limit ${limT}
     |]
         []
     person -> do
