@@ -10265,10 +10265,17 @@ main > .container {
   background-position: 50% 20%;
 }
 .page-login .login-form {
-  background-color: #fff;
+  background-color: #ffffffcc;
 }
 .page-login .big-text-input {
   font-size: 1.4rem;
+}
+.page-login .send-me-code {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+.page-login .social-login a {
+  color: #888;
 }
 
 /*# sourceMappingURL=index.css.map */

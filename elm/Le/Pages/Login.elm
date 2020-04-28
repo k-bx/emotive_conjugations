@@ -20,7 +20,7 @@ type Msg
     | EmailKeyDown Int
     | CodeKeyDown Int
     | EnterEmail
-    | EnterCode
+    | SendCodePressed
     | EmailSent (Result Api.Error ())
     | GotLoginResponse (Result Api.Error Api.AccountInfo)
 
@@ -97,7 +97,7 @@ update msg model =
         EnterEmail ->
             emailEnterPressed model
 
-        EnterCode ->
+        SendCodePressed ->
             codeEnterPressed
 
         EmailSent (Err e) ->
@@ -127,22 +127,40 @@ view vp model =
         [ div [ class "d-flex flex-row justify-content-center w-100" ]
             [ div [ class "login-bird d-flex flex-column justify-content-center" ]
                 [ div [ class "login-form d-flex flex-row justify-content-center p-4" ] <|
-                    [ div [] <|
-                        [ label [] <|
-                            [ input
-                                [ type_ "email"
-                                , class "form-control big-text-input"
-                                , isInvalidCls "email" model.formErrors
-                                , placeholder "Enter email"
-                                , value model.email
-                                , onInput <| \x -> UpdateModel { model | email = x }
-                                , attribute "autocomplete" "email"
-                                , on "keydown" (J.map EmailKeyDown keyCode)
+                    [ div []
+                        [ div [ class "d-flex flex-row justify-content-center" ] <|
+                            [ label [] <|
+                                [ input
+                                    [ type_ "email"
+                                    , class "form-control big-text-input"
+                                    , isInvalidCls "email" model.formErrors
+                                    , placeholder "Enter email"
+                                    , value model.email
+                                    , onInput <| \x -> UpdateModel { model | email = x }
+                                    , attribute "autocomplete" "email"
+                                    , on "keydown" (J.map EmailKeyDown keyCode)
+                                    ]
+                                    []
                                 ]
-                                []
+                            ]
+                                ++ fieldError "email" model.formErrors
+                                ++ [ span
+                                        [ class "btn btn-light ml-2 send-me-code"
+                                        , onClick SendCodePressed
+                                        ]
+                                        [ text "Send Me Code" ]
+                                   ]
+                        , div [ class "social-login d-flex flex-row justify-content-center" ]
+                            [ div [class "mr-4"]
+                                [ a [ href "https://www.facebook.com/v3.2/dialog/oauth?client_id=492171828232643&redirect_uri=https%3A%2F%2Fmeetup.events%2Fapi%2Ffb-login-callback&state=csrf&scope=email,public_profile" ]
+                                    [ text "Sign in via Facebook" ]
+                                ]
+                            , div []
+                                [ a [ href "https://accounts.google.com/o/oauth2/v2/auth?scope=email%20profile&response_type=code&state=csrf&redirect_uri=https%3A%2F%2Fmeetup.events%2Fapi%2Fgoogle-login-callback&client_id=364430847946-d8kr2la1k524vhksvd7qb8pee0qm0ibr.apps.googleusercontent.com" ]
+                                    [ text "Sign in via Google" ]
+                                ]
                             ]
                         ]
-                            ++ fieldError "email" model.formErrors
                     ]
                 ]
             ]

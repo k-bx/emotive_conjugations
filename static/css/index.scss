@@ -424,9 +424,18 @@ main > .container {
     background-position: 50% 20%;
   }
   .login-form {
-    background-color: #fff;
+    background-color: #ffffffcc;
   }
   .big-text-input {
     font-size: 1.4rem;
+  }
+  .send-me-code {
+    font-size: 1.4rem;
+    margin-bottom: .5rem;
+  }
+  .social-login {
+    a {
+      color: #888;
+    }
   }
 }
