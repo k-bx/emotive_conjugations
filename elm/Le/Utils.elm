@@ -5,6 +5,7 @@ import Browser.Navigation
 import Calendar
 import Clock
 import DateTime
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -151,3 +152,21 @@ boolYesNo x =
 
         False ->
             "No"
+
+
+isInvalidCls fld formErrors =
+    case Dict.get fld formErrors of
+        Just e ->
+            classList [ ( "is-invalid", True ) ]
+
+        Nothing ->
+            classList [ ( "is-invalid", False ) ]
+
+
+fieldError fld formErrors =
+    case Dict.get fld formErrors of
+        Just e ->
+            [ div [ class "invalid-feedback" ] [ text e ] ]
+
+        Nothing ->
+            []

@@ -10253,4 +10253,22 @@ main > .container {
   color: #fff;
 }
 
+.page-login {
+  background-image: linear-gradient(#17a2b833, #fd884f33);
+}
+.page-login .login-bird {
+  height: 40rem;
+  width: 40rem;
+  background-image: url("/images/blue-tailed-bee-eater.svg");
+  background-size: 20rem;
+  background-repeat: no-repeat;
+  background-position: 50% 20%;
+}
+.page-login .login-form {
+  background-color: #fff;
+}
+.page-login .big-text-input {
+  font-size: 1.4rem;
+}
+
 /*# sourceMappingURL=index.css.map */

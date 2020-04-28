@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Le.Api as Api
 import Le.Pages.Dashboard
+import Le.Pages.Login
 import Le.Pages.Queue
 import Le.Types exposing (..)
 import Le.Utils exposing (..)
@@ -32,6 +33,7 @@ type Msg
     | ResizeHappened Int Int
     | DashboardMsg Le.Pages.Dashboard.Msg
     | QueueMsg Le.Pages.Queue.Msg
+    | LoginMsg Le.Pages.Login.Msg
 
 
 type alias Model =
@@ -81,12 +83,14 @@ init flags url key =
 type PageModel
     = DashboardModel Le.Pages.Dashboard.Model
     | QueueModel Le.Pages.Queue.Model
+    | LoginModel Le.Pages.Login.Model
     | PageNotFoundModel ()
 
 
 type Route
     = Dashboard String (Maybe Api.ArticleId)
     | Queue
+    | Login
     | PageNotFound
 
 
@@ -101,6 +105,9 @@ routeName r =
         Queue ->
             "queue"
 
+        Login ->
+            "login"
+
         PageNotFound ->
             "not-found"
 
@@ -113,6 +120,7 @@ routeParser =
             (\( mn, a ) -> Dashboard (Maybe.withDefault "" mn) a)
             (P.s "dashboard" <?> Q.map2 (\a b -> ( a, b )) (Q.string "ner") (Q.int "article-id"))
         , P.map Queue <| P.s "queue"
+        , P.map Login <| P.s "login"
         ]
 
 
@@ -157,6 +165,9 @@ initPageModel key url r =
         Queue ->
             initSubpage (Le.Pages.Queue.init key) QueueModel QueueMsg
 
+        Login ->
+            initSubpage (Le.Pages.Login.init key) LoginModel LoginMsg
+
         PageNotFound ->
             ( PageNotFoundModel (), Cmd.none )
 
@@ -168,6 +179,9 @@ sameTopRoute r1 r2 =
             True
 
         ( Queue, Queue ) ->
+            True
+
+        ( Login, Login ) ->
             True
 
         _ ->
@@ -235,6 +249,9 @@ update msg model =
         ( QueueModel imodel, QueueMsg imsg ) ->
             subpage model imodel imsg (setpm QueueModel) Le.Pages.Queue.update QueueMsg Queue
 
+        ( LoginModel imodel, LoginMsg imsg ) ->
+            subpage model imodel imsg (setpm LoginModel) Le.Pages.Login.update LoginMsg Login
+
         ( PageNotFoundModel imodel, _ ) ->
             ( { model | route = PageNotFound, pmodel = PageNotFoundModel () }, Cmd.none )
 
@@ -273,6 +290,9 @@ mainContent model =
 
         ( Queue, QueueModel pmodel ) ->
             Html.map QueueMsg (Le.Pages.Queue.view viewParams pmodel)
+
+        ( Login, LoginModel pmodel ) ->
+            Html.map LoginMsg (Le.Pages.Login.view viewParams pmodel)
 
         ( _, _ ) ->
             pageNotFound

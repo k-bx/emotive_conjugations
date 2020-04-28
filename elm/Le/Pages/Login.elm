@@ -1,16 +1,22 @@
 module Le.Pages.Login exposing (..)
 
+import Browser.Navigation
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as J
 import Le.Api as Api
 import Le.Block.Toast
+import Le.Lib exposing (..)
+import Le.Types exposing (..)
+import Le.Utils exposing (..)
 
 
 type Msg
     = NoOp
     | ToastMsg Le.Block.Toast.Msg
+    | UpdateModel Model
     | EmailKeyDown Int
     | CodeKeyDown Int
     | EnterEmail
@@ -26,29 +32,33 @@ type alias Model =
     , code : String
     , oneTimePassword : String
     , accInfo : Maybe Api.AccountInfo
+    , showCodeInput : Bool
     }
 
 
-init : Model
-init =
-    { toasts = Le.Block.Toast.init
-    , formErrors = Dict.fromList []
-    , email = ""
-    , code = ""
-    , oneTimePassword = ""
-    , accInfo = Nothing
-    }
+init : Browser.Navigation.Key -> ( Model, Cmd Msg )
+init key =
+    ( { toasts = Le.Block.Toast.init
+      , formErrors = Dict.fromList []
+      , email = ""
+      , code = ""
+      , oneTimePassword = ""
+      , accInfo = Nothing
+      , showCodeInput = False
+      }
+    , Cmd.none
+    )
+
+
+emailEnterPressed model =
+    ( model, Api.postApiLoginsendpassword { email = model.email } EmailSent )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        emailEnterPressed =
-            ( Api.postApiLoginsendpassword { email = model.email } EmailSent
-            )
-
         codeEnterPressed =
-            ( incLoading model
+            ( model
             , Api.postApiLogin
                 { email = model.email
                 , code = model.code
@@ -67,9 +77,12 @@ update msg model =
             in
             ( { model | toasts = im }, Cmd.map ToastMsg icmds )
 
+        UpdateModel m2 ->
+            ( m2, Cmd.none )
+
         EmailKeyDown key ->
             if key == 13 then
-                emailEnterPressed
+                emailEnterPressed model
 
             else
                 ( model, Cmd.none )
@@ -82,69 +95,55 @@ update msg model =
                 ( model, Cmd.none )
 
         EnterEmail ->
-            emailEnterPressed
-
-        EmailChange v ->
-            ( { model | email = v }, Cmd.none )
-
-        CodeChange v ->
-            ( { model | code = v }, Cmd.none )
+            emailEnterPressed model
 
         EnterCode ->
             codeEnterPressed
 
         EmailSent (Err e) ->
-            ( { model | loading = model.loading - 1 }
-            , Le.Block.Toast.addError ToastMsg "Error while sending one-time code, please try again"
-            )
+            handleHttpError ToastMsg e model
 
         EmailSent (Ok ()) ->
-            ( handleHttpSuccess { model | showCodeInput = True }
+            ( { model | showCodeInput = True }
             , Le.Block.Toast.addInfo ToastMsg "Email sent successfully. Please check your inbox"
             )
 
         GotLoginResponse (Err e) ->
-            ( { model | loading = model.loading - 1 }
-            , Le.Block.Toast.addError ToastMsg "Error while trying to log in"
-            )
+            handleHttpError ToastMsg e model
 
         GotLoginResponse (Ok accInfo) ->
             let
                 m2 =
-                    fillAccInfo accInfo model
+                    { model | accInfo = Just accInfo }
             in
-            ( handleHttpSuccess { m2 | showCodeInput = False }
+            ( { m2 | showCodeInput = False }
             , Cmd.none
             )
 
-        GotAccountInfo (Err e) ->
-            handleHttpErrorNoRedirect ToastMsg e model
 
-        GotAccountInfo (Ok accInfo) ->
-            ( handleHttpSuccess { model | accInfo = Just accInfo }
-            , Cmd.none
-            )
-
-        FullNameChange v ->
-            ( { model | fullName = v }, Cmd.none )
-
-        PhoneNumberChange v ->
-            ( { model | phoneNumber = v }, Cmd.none )
-
-        SaveProfileDetails ->
-            ( incLoading model
-            , Api.postApiAccountUpdatejson
-                { full_name = model.fullName
-                , phone_number = model.phoneNumber
-                }
-                UpdateAccountDone
-            )
-
-        UpdateAccountDone (Err e) ->
-            handleHttpErrorNoRedirect ToastMsg e model
-
-        UpdateAccountDone (Ok accInfo) ->
-            -- handled by parent update
-            ( handleHttpSuccess { model | accInfo = Just accInfo }
-            , Cmd.none
-            )
+view : ViewParams -> Model -> Html Msg
+view vp model =
+    div [ class "page-login h-100 d-flex flex-column justify-content-center" ]
+        [ div [ class "d-flex flex-row justify-content-center w-100" ]
+            [ div [ class "login-bird d-flex flex-column justify-content-center" ]
+                [ div [ class "login-form d-flex flex-row justify-content-center p-4" ] <|
+                    [ div [] <|
+                        [ label [] <|
+                            [ input
+                                [ type_ "email"
+                                , class "form-control big-text-input"
+                                , isInvalidCls "email" model.formErrors
+                                , placeholder "Enter email"
+                                , value model.email
+                                , onInput <| \x -> UpdateModel { model | email = x }
+                                , attribute "autocomplete" "email"
+                                , on "keydown" (J.map EmailKeyDown keyCode)
+                                ]
+                                []
+                            ]
+                        ]
+                            ++ fieldError "email" model.formErrors
+                    ]
+                ]
+            ]
+        ]
