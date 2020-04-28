@@ -31,12 +31,16 @@ type Msg
     = NoOp
     | ToastMsg Le.Block.Toast.Msg
     | UpdateModel Model
+    | GotAccount (Result Api.Error Api.AccountInfo)
+    | DashboardMsg Le.Block.Dashboard.Msg
 
 
 type alias Model =
     { formErrors : Dict String String
     , toasts : Le.Block.Toast.Model
     , key : Browser.Navigation.Key
+    , accInfo : Maybe Api.AccountInfo
+    , dashboard : Le.Block.Dashboard.Model
     }
 
 
@@ -45,8 +49,10 @@ init key =
     ( { formErrors = Dict.empty
       , toasts = Le.Block.Toast.init
       , key = key
+      , accInfo = Nothing
+      , dashboard = Le.Block.Dashboard.init
       }
-    , Cmd.none
+    , Api.getApiAccountinfojson GotAccount
     )
 
 
@@ -65,6 +71,21 @@ update msg model =
                     Le.Block.Toast.update imsg model.toasts
             in
             ( { model | toasts = im }, Cmd.map ToastMsg icmds )
+
+        DashboardMsg imsg ->
+            let
+                ( im2, icmds ) =
+                    Le.Block.Dashboard.update imsg model.dashboard
+            in
+            ( { model | dashboard = im2 }, Cmd.map DashboardMsg icmds )
+
+        GotAccount (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotAccount (Ok accInfo) ->
+            ( { model | accInfo = Just accInfo }
+            , Cmd.none
+            )
 
 
 mainContent : Model -> Html Msg
@@ -88,7 +109,7 @@ view vps model =
 
             -- , SelectTwo.Html.select2Close SelectTwo
             ]
-            [ Le.Block.Dashboard.view vps.routeName <|
+            [ Le.Block.Dashboard.view DashboardMsg vps.routeName model.accInfo <|
                 div []
                     [ mainContent model
                     ]

@@ -9890,6 +9890,10 @@ main > .container {
   color: #444444;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .toasts {
   position: relative;
   z-index: 100;

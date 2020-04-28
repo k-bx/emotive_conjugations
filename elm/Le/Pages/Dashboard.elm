@@ -31,6 +31,8 @@ type Msg
     = NoOp
     | ToastMsg Le.Block.Toast.Msg
     | UpdateModel Model
+    | DashboardMsg Le.Block.Dashboard.Msg
+    | GotAccount (Result Api.Error Api.AccountInfo)
     | GotArticles (Result Api.Error (List Api.ArticleShort))
     | CellClicked Api.ArticleId
     | GotArticle (Result Api.Error Api.Article)
@@ -50,6 +52,8 @@ type alias Model =
     { formErrors : Dict String String
     , toasts : Le.Block.Toast.Model
     , key : Browser.Navigation.Key
+    , accInfo : Maybe Api.AccountInfo
+    , dashboard : Le.Block.Dashboard.Model
     , articles : Maybe (List Api.ArticleShort)
     , active : Maybe Api.ArticleId
     , articleFull : Maybe Api.Article
@@ -72,6 +76,8 @@ init key ner active =
     ( { formErrors = Dict.empty
       , toasts = Le.Block.Toast.init
       , key = key
+      , accInfo = Nothing
+      , dashboard = Le.Block.Dashboard.init
       , articles = Nothing
       , active = active
       , articleFull = Nothing
@@ -88,7 +94,8 @@ init key ner active =
       , nerGroup = Nothing
       }
     , Cmd.batch <|
-        [ Api.getApiArticlesshortjson (Just ner) GotArticles
+        [ Api.getApiAccountinfojson GotAccount
+        , Api.getApiArticlesshortjson (Just ner) GotArticles
         , Api.getApiNergroupjson (Just ner) GotNerGroup
         ]
             ++ (case active of
@@ -116,6 +123,21 @@ update msg model =
                     Le.Block.Toast.update imsg model.toasts
             in
             ( { model | toasts = im }, Cmd.map ToastMsg icmds )
+
+        DashboardMsg imsg ->
+            let
+                ( im2, icmds ) =
+                    Le.Block.Dashboard.update imsg model.dashboard
+            in
+            ( { model | dashboard = im2 }, Cmd.map DashboardMsg icmds )
+
+        GotAccount (Err e) ->
+            handleHttpErrorNoRedirect ToastMsg e model
+
+        GotAccount (Ok accInfo) ->
+            ( { model | accInfo = Just accInfo }
+            , Cmd.none
+            )
 
         GotArticles (Err e) ->
             handleHttpError ToastMsg e model
@@ -811,7 +833,7 @@ view vps model =
             [ class "h-100 gr__getbootstrap_com page-dashboard"
             , SelectTwo.Html.select2Close SelectTwo
             ]
-            [ Le.Block.Dashboard.view vps.routeName <|
+            [ Le.Block.Dashboard.view DashboardMsg vps.routeName model.accInfo <|
                 div []
                     [ searchPanel model
                     , mainContent model

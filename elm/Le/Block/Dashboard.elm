@@ -1,19 +1,41 @@
 module Le.Block.Dashboard exposing (..)
 
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Le.Api as Api
 import Le.Routes
 
 
 type Msg
     = NoOp
+    | LogoutPressed
+
+
+type alias Model =
+    ()
+
+
+init : Model
+init =
+    ()
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
+        LogoutPressed ->
+            ( model, Nav.load Le.Routes.logout )
 
 
 {-| See `Index.routeName`
 -}
-navbarContent : String -> Html msg
-navbarContent routeName =
+navbarContent : (Msg -> msg) -> String -> Maybe Api.AccountInfo -> Html msg
+navbarContent toMsg routeName mAccInfo =
     header []
         [ nav [ class "navbar navbar-expand-md navbar-dark bg-dark" ]
             [ a
@@ -56,6 +78,27 @@ navbarContent routeName =
                             ]
                         ]
                     ]
+                , ul [ class "navbar-nav ml-auto" ] <|
+                    case mAccInfo of
+                        Nothing ->
+                            [ li [ class "nav-item" ]
+                                [ a
+                                    [ class "nav-link"
+                                    , href Le.Routes.login
+                                    ]
+                                    [ text "Login" ]
+                                ]
+                            ]
+
+                        Just accInfo ->
+                            [ li [ class "nav-item" ]
+                                [ span
+                                    [ class "nav-link cursor-pointer"
+                                    , onClick <| toMsg LogoutPressed
+                                    ]
+                                    [ text <| accInfo.email ++ " (logout)" ]
+                                ]
+                            ]
                 ]
             ]
         ]
@@ -76,10 +119,10 @@ footerContent =
         ]
 
 
-view : String -> Html msg -> Html msg
-view routeName mainContent =
+view : (Msg -> msg) -> String -> Maybe Api.AccountInfo -> Html msg -> Html msg
+view toMsg routeName mAccInfo mainContent =
     div [ class "d-flex flex-column h-100" ]
-        [ navbarContent routeName
+        [ navbarContent toMsg routeName mAccInfo
         , mainContent
         , footerContent
         ]

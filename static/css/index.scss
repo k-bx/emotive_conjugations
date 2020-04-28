@@ -15,6 +15,10 @@ main > .container {
     }
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .toasts {
     position: relative;
     z-index: 100;

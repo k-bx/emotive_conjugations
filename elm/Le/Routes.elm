@@ -7,6 +7,10 @@ import Time
 import Url.Builder
 
 
+index =
+    Url.Builder.absolute [ "" ] []
+
+
 dashboard : String -> Maybe Api.ArticleId -> String
 dashboard ner mArticleId =
     case ( ner, mArticleId ) of
@@ -29,3 +33,13 @@ dashboard ner mArticleId =
 queue : String
 queue =
     Url.Builder.absolute [ "queue" ] []
+
+
+login : String
+login =
+    Url.Builder.absolute [ "login" ] []
+
+
+logout : String
+logout =
+    Url.Builder.absolute [ "api", "log-out" ] []

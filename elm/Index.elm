@@ -11,6 +11,7 @@ import Le.Api as Api
 import Le.Pages.Dashboard
 import Le.Pages.Login
 import Le.Pages.Queue
+import Le.Routes
 import Le.Types exposing (..)
 import Le.Utils exposing (..)
 import Task
@@ -121,6 +122,7 @@ routeParser =
             (P.s "dashboard" <?> Q.map2 (\a b -> ( a, b )) (Q.string "ner") (Q.int "article-id"))
         , P.map Queue <| P.s "queue"
         , P.map Login <| P.s "login"
+        , P.map Login <| P.s "api" </> P.s "log-out"
         ]
 
 
