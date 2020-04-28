@@ -157,7 +157,12 @@ data JsonAPI route = JsonAPI
       route
         :- "api"
         :> "log-out"
-        :> Get '[JSON] (Headers '[Header "Set-Cookie" SetCookie] ())
+        :> Get '[JSON] (Headers '[Header "Set-Cookie" SetCookie] ()),
+    _accountInfo ::
+      route :- AuthProtect "cookie-auth"
+        :> "api"
+        :> "account-info.json"
+        :> Get '[JSON] AT.AccountInfo
   }
   deriving (Generic)
 
@@ -191,5 +196,6 @@ server =
           _queueAdd = queueAdd,
           _logInSendPassword = logInSendPasswordEndpoint,
           _logInSendCode = logInSendCodeEndpoint,
-          _logOut = logOut
+          _logOut = logOut,
+          _accountInfo = accountInfo
         }

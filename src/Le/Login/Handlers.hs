@@ -86,30 +86,29 @@ logInSendCodeEndpoint AT.LogInSendCodeForm {..} = do
 
 logOut ::
   HasCallStack => AppM (Headers '[Header "Set-Cookie" Cookie.SetCookie] ())
-logOut =
-  sg $ do
-    t <- liftIO getCurrentTime
-    let back = addUTCTime (-1000000) t
-    let cookie =
-          ( Cookie.defaultSetCookie
-              { Cookie.setCookieName = "u",
-                Cookie.setCookieValue = "",
-                Cookie.setCookieExpires = Just back,
-                Cookie.setCookiePath = Just "/"
-              }
-          )
-    throwM $
-      err302
-        { errHeaders =
-            [ ( "Set-Cookie",
-                S.toStrictByteString
-                  ( Data.Binary.Builder.toLazyByteString
-                      (Cookie.renderSetCookie cookie)
-                  )
-              ),
-              ("Location", "/")
-            ]
-        }
+logOut = sg $ do
+  t <- liftIO getCurrentTime
+  let back = addUTCTime (-1000000) t
+  let cookie =
+        ( Cookie.defaultSetCookie
+            { Cookie.setCookieName = "u",
+              Cookie.setCookieValue = "",
+              Cookie.setCookieExpires = Just back,
+              Cookie.setCookiePath = Just "/"
+            }
+        )
+  throwM $
+    err302
+      { errHeaders =
+          [ ( "Set-Cookie",
+              S.toStrictByteString
+                ( Data.Binary.Builder.toLazyByteString
+                    (Cookie.renderSetCookie cookie)
+                )
+            ),
+            ("Location", "/")
+          ]
+      }
 
 renderAccountInfo :: Entity User -> AppM AT.AccountInfo
 renderAccountInfo user = do
@@ -134,3 +133,7 @@ blGetOrCreateByEmail t email = do
             }
       P.getJustEntity userKey
     Just user -> pure user
+
+accountInfo :: P.Entity User -> AppM AT.AccountInfo
+accountInfo user = sg $ do
+  renderAccountInfo user

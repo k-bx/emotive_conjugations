@@ -65,15 +65,18 @@ authHandler :: Data.Pool.Pool P.SqlBackend -> AuthHandler Wai.Request (P.Entity 
 authHandler db = mkAuthHandler handler
   where
     maybeToEither e = maybe (Left e) Right
-    handler req =
-      either (errorOutOrGotoLogin req) (lookupAccount req db . pack . S.toText) $ do
-        cookie <-
-          maybeToEither "Missing cookie header"
-            $ lookup "cookie"
-            $ Network.Wai.requestHeaders req
-        maybeToEither "Missing token in cookie"
-          $ lookup "u"
-          $ Cookie.parseCookies cookie
+    handler req = do
+      let eCookie =
+            maybeToEither "Missing cookie header"
+              $ lookup "cookie"
+              $ Network.Wai.requestHeaders req
+      case eCookie of
+        Left e -> errorOutOrGotoLogin req e
+        Right cookie -> do
+          case lookup "u" (Cookie.parseCookies cookie) of
+            Nothing -> errorOutOrGotoLogin req "Missing token in cookie"
+            Just u -> do
+              lookupAccount req db (pack (S.toText u))
 
 errorOutOrGotoLogin :: Network.Wai.Request -> BL.ByteString -> Servant.Handler (Entity User)
 errorOutOrGotoLogin req msg = do

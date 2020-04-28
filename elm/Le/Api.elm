@@ -984,3 +984,34 @@ getApiLogout toMsg =
                 Nothing
             }
 
+
+
+getApiAccountinfojson : (Result Error  (AccountInfo)  -> msg) -> Cmd msg
+getApiAccountinfojson toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "GET"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "account-info.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg jsonDecAccountInfo
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
