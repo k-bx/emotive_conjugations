@@ -4,6 +4,7 @@ module Le.ApiTypes where
 
 import qualified Data.Aeson as J
 import Elm.Derive
+import Le.ApiTypes.Modeled
 import Le.Import
 import qualified Le.Model as M
 import qualified Le.Python
@@ -112,6 +113,17 @@ data QueueAddForm = QueueAddForm
   deriving (Show, Eq, Generic)
 
 deriveBoth (jsonOpts 3) ''QueueAddForm
+
+data QueueItem = QueueItem
+  { quiId :: M.QueueId,
+    quiUserId :: M.UserId,
+    quiStatus :: QueueItemStatus,
+    quiCreatedAt :: IntZonedTime,
+    quiUpdatedAt :: IntZonedTime
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''QueueItem
 
 data AccountInfo = AccountInfo
   { accId :: M.UserId,

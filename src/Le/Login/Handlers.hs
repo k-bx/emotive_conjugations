@@ -1,7 +1,6 @@
 module Le.Login.Handlers where
 
 import qualified Data.Binary.Builder
-import qualified Data.Char
 import qualified Data.String.Class as S
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID4

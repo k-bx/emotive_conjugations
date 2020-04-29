@@ -9,6 +9,7 @@ import qualified Data.Text as T
 import Elm.Module
 import Elm.TyRep (ETCon (..))
 import qualified Le.ApiTypes as AT
+import qualified Le.ApiTypes.Modeled as AT
 import Le.Import
 import qualified Le.Python
 import Le.Routes
@@ -40,7 +41,9 @@ moduleDefs =
     DefineElm (Proxy :: Proxy AT.QueueAddForm),
     DefineElm (Proxy :: Proxy AT.AccountInfo),
     DefineElm (Proxy :: Proxy AT.LogInSendPasswordForm),
-    DefineElm (Proxy :: Proxy AT.LogInSendCodeForm)
+    DefineElm (Proxy :: Proxy AT.LogInSendCodeForm),
+    DefineElm (Proxy :: Proxy AT.QueueItem),
+    DefineElm (Proxy :: Proxy AT.QueueItemStatus)
   ]
 
 replacements :: [(Text, Text)]
@@ -68,7 +71,8 @@ intAliases =
       "ArticleId",
       "ArticlePleaseId",
       "ArticlePleaseBigId",
-      "UserId"
+      "UserId",
+      "QueueId"
     ]
 
 stringAliases :: [String]

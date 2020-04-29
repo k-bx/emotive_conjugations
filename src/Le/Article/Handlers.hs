@@ -10,6 +10,7 @@ import Le.Config
 import Le.Import
 import Le.Model
 import qualified Le.Python
+import Le.Time
 import Le.Util
 
 articlesShortHandler ::
@@ -22,7 +23,7 @@ articlesShortHandler mPerson = sg $ do
     pure $
       AT.ArticleShort
         { artId = P.toSqlKey (P.fromSqlKey (entityKey articlePlease)),
-          artDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> mdate,
+          artDate = renderTime <$> mdate,
           artPaperName = newspaperNameFromHost (articlePleaseHost (ev articlePlease)),
           artTitleShort = fromMaybe "<unknown>" (articlePleaseTitle (ev articlePlease))
         }
@@ -36,7 +37,7 @@ articleDetails articleId = sg $ do
     AT.Article
       { arcId = articleId,
         arcUrl = articlePleaseUrl articlePlease,
-        arcDate = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
+        arcDate = renderTime <$> articlePleaseDatePublish articlePlease,
         arcPaperName = newspaperNameFromHost (articlePleaseHost articlePlease),
         arcTitle = fromMaybe "<unknown>" (articlePleaseTitle articlePlease),
         arcAuthors = unpack (articlePleaseAuthors articlePlease),
@@ -51,9 +52,9 @@ articlePleaseDetails articleNpId = sg $ do
     AT.ArticlePlease
       { arpId = articleNpId,
         arpAuthors = unpack (articlePleaseAuthors articlePlease),
-        arpDateDownload = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDateDownload articlePlease,
-        arpDatePublish = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDatePublish articlePlease,
-        arpDateModify = zonedTimeToMilliseconds . utcToZonedTime' tz <$> articlePleaseDateModify articlePlease,
+        arpDateDownload = renderTime <$> articlePleaseDateDownload articlePlease,
+        arpDatePublish = renderTime <$> articlePleaseDatePublish articlePlease,
+        arpDateModify = renderTime <$> articlePleaseDateModify articlePlease,
         -- arpMaintext = articlePleaseMaintext articlePlease,
         arpLanguage = Just (articlePleaseLanguage articlePlease)
         -- arpSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseSpacyNer articlePlease),

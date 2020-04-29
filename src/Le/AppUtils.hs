@@ -2,9 +2,11 @@ module Le.AppUtils where
 
 import qualified Data.Aeson as J
 import qualified Data.String.Class as S
+import qualified Database.Persist.Postgresql as P
 import GHC.Stack
 import Le.Import
 import Servant
+import qualified Le.Config
 import qualified UnliftIO
 
 -- | Safeguard. Good for GHC HasCallStack
@@ -67,3 +69,17 @@ withFormRes res f =
   case res of
     Success v -> f v
     Failure errs -> formErrors errs
+
+-- | Useful for P.PersistField instances that reuse aeson for encoding/decoding of ADTs as strings
+toPersistValueJSONText :: (ToJSON a, Show a) => a -> P.PersistValue
+toPersistValueJSONText x =
+  case J.toJSON x of
+    (J.String s) -> P.PersistText s
+    _ -> error $ "Couldn't encode as string: " <> show x
+
+fromPersistValueJSONText :: (FromJSON a) => P.PersistValue -> Either Text a
+fromPersistValueJSONText x = do
+  v <- P.fromPersistValue x
+  case v of
+    P.PersistText t -> mapLeft S.toText (J.eitherDecode (S.fromText t))
+    _ -> Left $ "Expected persist value as text: " <> tshow x

@@ -141,6 +141,12 @@ data JsonAPI route = JsonAPI
         :> "add.json"
         :> ReqBody '[JSON] AT.QueueAddForm
         :> Post '[JSON] (),
+    _queueList ::
+      route
+        :- AuthProtect "cookie-auth"
+        :> "api"
+        :> "queue.json"
+        :> Post '[JSON] [AT.QueueItem],
     _logInSendPassword ::
       route
         :- "api"
@@ -194,6 +200,7 @@ server =
           _listNamedEntities = listNamedEntities,
           _namedEntityGroup = namedEntityGroup,
           _queueAdd = queueAdd,
+          _queueList = queueList,
           _logInSendPassword = logInSendPasswordEndpoint,
           _logInSendCode = logInSendCodeEndpoint,
           _logOut = logOut,

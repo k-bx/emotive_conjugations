@@ -512,6 +512,60 @@ jsonEncLogInSendCodeForm  val =
    ]
 
 
+
+type alias QueueItem  =
+   { id: QueueId
+   , user_id: UserId
+   , status: QueueItemStatus
+   , created_at: IntZonedTime
+   , updated_at: IntZonedTime
+   }
+
+jsonDecQueueItem : Json.Decode.Decoder ( QueueItem )
+jsonDecQueueItem =
+   Json.Decode.succeed (\pid puser_id pstatus pcreated_at pupdated_at -> {id = pid, user_id = puser_id, status = pstatus, created_at = pcreated_at, updated_at = pupdated_at})
+   |> required "id" (jsonDecQueueId)
+   |> required "user_id" (jsonDecUserId)
+   |> required "status" (jsonDecQueueItemStatus)
+   |> required "created_at" (jsonDecIntZonedTime)
+   |> required "updated_at" (jsonDecIntZonedTime)
+
+jsonEncQueueItem : QueueItem -> Value
+jsonEncQueueItem  val =
+   Json.Encode.object
+   [ ("id", jsonEncQueueId val.id)
+   , ("user_id", jsonEncUserId val.user_id)
+   , ("status", jsonEncQueueItemStatus val.status)
+   , ("created_at", jsonEncIntZonedTime val.created_at)
+   , ("updated_at", jsonEncIntZonedTime val.updated_at)
+   ]
+
+
+
+type QueueItemStatus  =
+    QueueItemStatusQueued 
+    | QueueItemStatusDownloading 
+    | QueueItemStatusExtracting 
+    | QueueItemStatusNer 
+    | QueueItemStatusPos 
+    | QueueItemStatusDone 
+
+jsonDecQueueItemStatus : Json.Decode.Decoder ( QueueItemStatus )
+jsonDecQueueItemStatus = 
+    let jsonDecDictQueueItemStatus = Dict.fromList [("queued", QueueItemStatusQueued), ("downloading", QueueItemStatusDownloading), ("extracting", QueueItemStatusExtracting), ("ner", QueueItemStatusNer), ("pos", QueueItemStatusPos), ("done", QueueItemStatusDone)]
+    in  decodeSumUnaries "QueueItemStatus" jsonDecDictQueueItemStatus
+
+jsonEncQueueItemStatus : QueueItemStatus -> Value
+jsonEncQueueItemStatus  val =
+    case val of
+        QueueItemStatusQueued -> Json.Encode.string "queued"
+        QueueItemStatusDownloading -> Json.Encode.string "downloading"
+        QueueItemStatusExtracting -> Json.Encode.string "extracting"
+        QueueItemStatusNer -> Json.Encode.string "ner"
+        QueueItemStatusPos -> Json.Encode.string "pos"
+        QueueItemStatusDone -> Json.Encode.string "done"
+
+
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int
 jsonEncIntUTCTime = Json.Encode.int
@@ -533,6 +587,9 @@ jsonEncArticlePleaseBigId = Json.Encode.int
 type alias UserId = Int
 jsonDecUserId = Json.Decode.int
 jsonEncUserId = Json.Encode.int
+type alias QueueId = Int
+jsonDecQueueId = Json.Decode.int
+jsonEncQueueId = Json.Encode.int
 type alias DayString = String
 jsonDecDayString = Json.Decode.string
 jsonEncDayString = Json.Encode.string
@@ -879,6 +936,37 @@ postApiQueueAddjson body toMsg =
                      (\x -> case x of
                      Err e -> toMsg (Err {httpError=e,formErrors=Dict.empty,errors=[]})
                      Ok _ -> toMsg (Ok ()))
+            , timeout =
+                Nothing
+            , tracker =
+                Nothing
+            }
+
+
+
+postApiQueuejson : (Result Error  ((List QueueItem))  -> msg) -> Cmd msg
+postApiQueuejson toMsg =
+    let
+        params =
+            List.filterMap identity
+            (List.concat
+                [])
+    in
+        Http.request
+            { method =
+                "POST"
+            , headers =
+                []
+            , url =
+                Url.Builder.crossOrigin ""
+                    [ "api"
+                    , "queue.json"
+                    ]
+                    params
+            , body =
+                Http.emptyBody
+            , expect =
+                leExpectJson toMsg (Json.Decode.list (jsonDecQueueItem))
             , timeout =
                 Nothing
             , tracker =

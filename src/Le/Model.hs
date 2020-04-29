@@ -6,10 +6,11 @@
 module Le.Model where
 
 import Data.Text as Text
-import qualified Le.Python
 import Database.Persist.Postgresql
 import Database.Persist.TH
+import qualified Le.ApiTypes.Modeled as AT
 import Le.Import
+import qualified Le.Python
 
 -- | See Note [Indexes and Migrations]
 share
@@ -95,6 +96,12 @@ NamedPropers
     proper Text
     Primary entity
     -- UniqueNamedPropersEntity entity
+Queue
+    userId UserId
+    url Text
+    status AT.QueueItemStatus
+    createdAt UTCTime
+    updatedAt UTCTime
 --
 -- Migration data. Singleton object
 --
