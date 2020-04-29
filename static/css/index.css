@@ -10282,4 +10282,15 @@ main > .container {
   color: #888;
 }
 
+.page-queue .big-text-input {
+  font-size: 1.4rem;
+}
+.page-queue .big-button {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+.page-queue .queue__add__input {
+  width: 30rem;
+}
+
 /*# sourceMappingURL=index.css.map */

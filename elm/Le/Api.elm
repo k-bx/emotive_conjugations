@@ -944,8 +944,8 @@ postApiQueueAddjson body toMsg =
 
 
 
-postApiQueuejson : (Result Error  ((List QueueItem))  -> msg) -> Cmd msg
-postApiQueuejson toMsg =
+getApiQueuejson : (Result Error  ((List QueueItem))  -> msg) -> Cmd msg
+getApiQueuejson toMsg =
     let
         params =
             List.filterMap identity
@@ -954,7 +954,7 @@ postApiQueuejson toMsg =
     in
         Http.request
             { method =
-                "POST"
+                "GET"
             , headers =
                 []
             , url =

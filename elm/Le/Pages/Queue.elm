@@ -33,6 +33,9 @@ type Msg
     | UpdateModel Model
     | GotAccount (Result Api.Error Api.AccountInfo)
     | DashboardMsg Le.Block.Dashboard.Msg
+    | GotQueue (Result Api.Error (List Api.QueueItem))
+    | AddUrlPressed
+    | QueueItemAdded (Result Api.Error ())
 
 
 type alias Model =
@@ -41,6 +44,8 @@ type alias Model =
     , key : Browser.Navigation.Key
     , accInfo : Maybe Api.AccountInfo
     , dashboard : Le.Block.Dashboard.Model
+    , queue : Maybe (List Api.QueueItem)
+    , url : String
     }
 
 
@@ -51,8 +56,13 @@ init key =
       , key = key
       , accInfo = Nothing
       , dashboard = Le.Block.Dashboard.init
+      , queue = Nothing
+      , url = ""
       }
-    , Api.getApiAccountinfojson GotAccount
+    , Cmd.batch
+        [ Api.getApiAccountinfojson GotAccount
+        , Api.getApiQueuejson GotQueue
+        ]
     )
 
 
@@ -87,14 +97,79 @@ update msg model =
             , Cmd.none
             )
 
+        GotQueue (Err e) ->
+            handleHttpError ToastMsg e model
+
+        GotQueue (Ok queue) ->
+            ( { model | queue = Just queue }
+            , Cmd.none
+            )
+
+        AddUrlPressed ->
+            let
+                form : Api.QueueAddForm
+                form =
+                    { url = model.url }
+            in
+            ( model
+            , Api.postApiQueueAddjson form QueueItemAdded
+            )
+
+        QueueItemAdded (Err e) ->
+            handleHttpError ToastMsg e model
+
+        QueueItemAdded (Ok ()) ->
+            ( model
+            , Api.getApiQueuejson GotQueue
+            )
+
 
 mainContent : Model -> Html Msg
 mainContent model =
+    let
+        queueBlock =
+            div [ class "queue" ]
+                [ div [ class "queue__add d-flex flex-row justify-content-center" ]
+                    [ label [] <|
+                        [ input
+                            [ type_ "text"
+                            , class "form-control big-text-input queue__add__input"
+                            , isInvalidCls "url" model.formErrors
+                            , placeholder "https://www.nytimes.com/2020/04/29/us/politics/coronavirus-trump-justice-department.html"
+                            , value model.url
+                            , onInput <| \x -> UpdateModel { model | url = x }
+                            ]
+                            []
+                        ]
+                            ++ fieldError "url" model.formErrors
+                    , span
+                        [ class "btn btn-light big-button ml-2"
+                        , onClick AddUrlPressed
+                        ]
+                        [ text "add url" ]
+                    ]
+                , div [ class "queue__items" ] <|
+                    case model.queue of
+                        Nothing ->
+                            [ loadingSpinner ]
+
+                        Just queue ->
+                            renderQueue queue
+                ]
+
+        renderQueue queue =
+            List.map renderQueueItem queue
+
+        renderQueueItem queueItem =
+            div [ class "queue-item" ]
+                [ text <| String.fromInt queueItem.id
+                ]
+    in
     main_ [ class "main-content", attribute "role" "main" ]
         [ div [ class "container" ]
             [ div [ class "row" ]
                 [ div [ class "col-12" ]
-                    [ text "ui here"
+                    [ queueBlock
                     ]
                 ]
             ]

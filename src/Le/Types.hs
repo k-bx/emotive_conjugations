@@ -11,6 +11,7 @@ import qualified Database.Persist.Postgresql as P
 import qualified Dhall
 import qualified Network.AWS
 import qualified Network.HTTP.Client
+import qualified Network.URI
 import RIO
 import RIO.Process
 import qualified Servant.API
@@ -111,3 +112,23 @@ newtype LoginTokenVal
     )
 
 instance Newtype LoginTokenVal Text
+
+newtype PersistentAbsoluteURI
+  = PersistentAbsoluteURI Network.URI.URI
+  deriving (Show, Eq)
+
+instance Newtype PersistentAbsoluteURI Network.URI.URI
+
+instance P.PersistField PersistentAbsoluteURI where
+  toPersistValue x = P.toPersistValue (tshow (unpack x))
+
+  fromPersistValue v = do
+    t <- P.fromPersistValue v
+    let mUri = Network.URI.parseAbsoluteURI t
+    maybe
+      (Left ("Failed to parse an absolute URI: " <> (S.toText t)))
+      (return . pack)
+      mUri
+
+instance P.PersistFieldSql PersistentAbsoluteURI where
+  sqlType _ = P.SqlString

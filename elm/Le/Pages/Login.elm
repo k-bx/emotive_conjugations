@@ -190,6 +190,7 @@ view vps model =
                             , class "form-control big-text-input"
                             , isInvalidCls "code" model.formErrors
                             , placeholder "enter code"
+                            , attribute "autocomplete" "one-time-code"
                             , value model.code
                             , onInput <| \x -> UpdateModel { model | code = x }
                             , on "keydown" (J.map CodeKeyDown keyCode)

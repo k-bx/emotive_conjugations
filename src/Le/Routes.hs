@@ -146,7 +146,7 @@ data JsonAPI route = JsonAPI
         :- AuthProtect "cookie-auth"
         :> "api"
         :> "queue.json"
-        :> Post '[JSON] [AT.QueueItem],
+        :> Get '[JSON] [AT.QueueItem],
     _logInSendPassword ::
       route
         :- "api"

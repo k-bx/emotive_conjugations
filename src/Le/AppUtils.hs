@@ -6,7 +6,6 @@ import qualified Database.Persist.Postgresql as P
 import GHC.Stack
 import Le.Import
 import Servant
-import qualified Le.Config
 import qualified UnliftIO
 
 -- | Safeguard. Good for GHC HasCallStack
@@ -81,5 +80,7 @@ fromPersistValueJSONText :: (FromJSON a) => P.PersistValue -> Either Text a
 fromPersistValueJSONText x = do
   v <- P.fromPersistValue x
   case v of
-    P.PersistText t -> mapLeft S.toText (J.eitherDecode (S.fromText t))
+    P.PersistText t -> case J.fromJSON (J.String (S.fromText t)) of
+      J.Error e -> Left (S.toText e)
+      J.Success a -> Right a
     _ -> Left $ "Expected persist value as text: " <> tshow x
