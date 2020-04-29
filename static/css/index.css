@@ -10293,7 +10293,11 @@ main > .container {
   width: 30rem;
 }
 .page-queue .queue-item {
-  border: 1px solid #ced4da;
+  border: 1px solid #ced4da44;
+}
+.page-queue .queue-item .queue-item__date {
+  color: #7a808c;
+  margin-bottom: 1rem;
 }
 .page-queue .queue-item .queue-item__status-cell {
   min-width: 15rem;

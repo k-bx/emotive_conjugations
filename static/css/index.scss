@@ -456,7 +456,12 @@ main > .container {
     width: 30rem;
   }
   .queue-item {
-    border: 1px solid #ced4da;
+    border: 1px solid #ced4da44;
+
+    .queue-item__date {
+      color: #7a808c;
+      margin-bottom: 1rem;
+    }
     
     .queue-item__status-cell {
       min-width: 15rem;

@@ -180,18 +180,16 @@ mainContent model =
                         [ text <| "status:" ++ Api.stringEncQueueItemStatus queueItem.status
                         ]
             in
-            div [ class "queue-item d-flex flex-row justify-content-between mb-2" ]
+            div [ class "queue-item d-flex flex-row justify-content-between mb-2 shadow-sm" ]
                 [ div [ class "queue-item__status-cell flex-grow-0 p-2" ]
-                    [ div []
+                    [ div [ class "queue-item__date" ]
+                        [ text <| renderDateInfobox (Time.millisToPosix queueItem.created_at)
+                        ]
+                    , div []
                         [ span [ class "badge badge-info" ]
                             [ text <| "id:" ++ String.fromInt queueItem.id
                             ]
                         , span [ class "ml-1" ] [ statusBadge ]
-                        ]
-                    , div []
-                        [ span [ class "badge badge-info" ]
-                            [ text <| "created-at:" ++ (renderDateInfobox << Time.millisToPosix) queueItem.created_at
-                            ]
                         ]
                     ]
                 , div [ class "queue-item__details-cell flex-grow-1 p-2" ]
