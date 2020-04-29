@@ -180,7 +180,7 @@ mainContent model =
                         [ text <| "status:" ++ Api.stringEncQueueItemStatus queueItem.status
                         ]
             in
-            div [ class "queue-item d-flex flex-row justify-content-between" ]
+            div [ class "queue-item d-flex flex-row justify-content-between mb-2" ]
                 [ div [ class "queue-item__status-cell flex-grow-0 p-2" ]
                     [ div []
                         [ span [ class "badge badge-info" ]
