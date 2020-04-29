@@ -516,6 +516,8 @@ jsonEncLogInSendCodeForm  val =
 type alias QueueItem  =
    { id: QueueId
    , user_id: UserId
+   , url: String
+   , errored: Bool
    , status: QueueItemStatus
    , created_at: IntZonedTime
    , updated_at: IntZonedTime
@@ -523,9 +525,11 @@ type alias QueueItem  =
 
 jsonDecQueueItem : Json.Decode.Decoder ( QueueItem )
 jsonDecQueueItem =
-   Json.Decode.succeed (\pid puser_id pstatus pcreated_at pupdated_at -> {id = pid, user_id = puser_id, status = pstatus, created_at = pcreated_at, updated_at = pupdated_at})
+   Json.Decode.succeed (\pid puser_id purl perrored pstatus pcreated_at pupdated_at -> {id = pid, user_id = puser_id, url = purl, errored = perrored, status = pstatus, created_at = pcreated_at, updated_at = pupdated_at})
    |> required "id" (jsonDecQueueId)
    |> required "user_id" (jsonDecUserId)
+   |> required "url" (Json.Decode.string)
+   |> required "errored" (Json.Decode.bool)
    |> required "status" (jsonDecQueueItemStatus)
    |> required "created_at" (jsonDecIntZonedTime)
    |> required "updated_at" (jsonDecIntZonedTime)
@@ -535,6 +539,8 @@ jsonEncQueueItem  val =
    Json.Encode.object
    [ ("id", jsonEncQueueId val.id)
    , ("user_id", jsonEncUserId val.user_id)
+   , ("url", Json.Encode.string val.url)
+   , ("errored", Json.Encode.bool val.errored)
    , ("status", jsonEncQueueItemStatus val.status)
    , ("created_at", jsonEncIntZonedTime val.created_at)
    , ("updated_at", jsonEncIntZonedTime val.updated_at)
@@ -565,6 +571,27 @@ jsonEncQueueItemStatus  val =
         QueueItemStatusPos -> Json.Encode.string "pos"
         QueueItemStatusDone -> Json.Encode.string "done"
 
+
+stringEncQueueItemStatus : QueueItemStatus -> String
+stringEncQueueItemStatus  val =
+    case val of
+        QueueItemStatusQueued  -> "queued"
+        QueueItemStatusDownloading  -> "downloading"
+        QueueItemStatusExtracting  -> "extracting"
+        QueueItemStatusNer  -> "ner"
+        QueueItemStatusPos  -> "pos"
+        QueueItemStatusDone  -> "done"
+
+stringDecQueueItemStatus : String -> Maybe QueueItemStatus
+stringDecQueueItemStatus s =
+    case s of
+        "queued" -> Just QueueItemStatusQueued
+        "downloading" -> Just QueueItemStatusDownloading
+        "extracting" -> Just QueueItemStatusExtracting
+        "ner" -> Just QueueItemStatusNer
+        "pos" -> Just QueueItemStatusPos
+        "done" -> Just QueueItemStatusDone
+        _ -> Nothing
 
 type alias IntUTCTime = Int
 jsonDecIntUTCTime = Json.Decode.int

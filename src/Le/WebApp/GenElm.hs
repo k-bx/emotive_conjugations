@@ -6,6 +6,7 @@ module Le.WebApp.GenElm where
 
 import qualified Data.String.Class as S
 import qualified Data.Text as T
+import qualified Elm.Json
 import Elm.Module
 import Elm.TyRep (ETCon (..))
 import qualified Le.ApiTypes as AT
@@ -17,6 +18,7 @@ import Servant
 import Servant.API.Generic
 import Servant.Elm
 import Servant.Elm.Internal.Foreign
+import qualified Elm.TyRep
 import Servant.Foreign
 
 instance
@@ -87,6 +89,12 @@ stringAliases =
 
 floatAliases :: [String]
 floatAliases = mkFloatAliases ["Scientific"]
+
+gadtEncDecs :: [String]
+gadtEncDecs =
+  [ Elm.Json.stringSerForSimpleAdt (Elm.TyRep.compileElmDef (Proxy :: Proxy AT.QueueItemStatus)),
+    Elm.Json.stringParserForSimpleAdt (Elm.TyRep.compileElmDef (Proxy :: Proxy AT.QueueItemStatus))
+  ]
 
 elmHeader :: String
 elmHeader =
@@ -213,6 +221,7 @@ generateElmNew = do
   S.putStrLn elmHeader
   let defs = makeModuleContent moduleDefs
   S.putStrLn defs
+  forM_ gadtEncDecs S.putStrLn
   forM_ intAliases $ \t -> do S.putStrLn t
   forM_ stringAliases $ \t -> do S.putStrLn t
   forM_ floatAliases $ \t -> do S.putStrLn t

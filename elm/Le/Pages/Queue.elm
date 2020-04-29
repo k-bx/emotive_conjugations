@@ -129,7 +129,7 @@ mainContent model =
     let
         queueBlock =
             div [ class "queue" ]
-                [ div [ class "queue__add d-flex flex-row justify-content-center" ]
+                [ div [ class "queue__add d-flex flex-row justify-content-center mb-4" ]
                     [ label [] <|
                         [ input
                             [ type_ "text"
@@ -161,8 +161,46 @@ mainContent model =
             List.map renderQueueItem queue
 
         renderQueueItem queueItem =
-            div [ class "queue-item" ]
-                [ text <| String.fromInt queueItem.id
+            let
+                statusBadgeClass =
+                    if queueItem.errored then
+                        "badge-error"
+
+                    else if queueItem.status == Api.QueueItemStatusDone then
+                        "badge-success"
+
+                    else
+                        "badge-info"
+
+                statusBadge =
+                    span
+                        [ class "badge"
+                        , class statusBadgeClass
+                        ]
+                        [ text <| "status:" ++ Api.stringEncQueueItemStatus queueItem.status
+                        ]
+            in
+            div [ class "queue-item d-flex flex-row justify-content-between" ]
+                [ div [ class "queue-item__status-cell flex-grow-0 p-2" ]
+                    [ div []
+                        [ span [ class "badge badge-info" ]
+                            [ text <| "id:" ++ String.fromInt queueItem.id
+                            ]
+                        , span [ class "ml-1" ] [ statusBadge ]
+                        ]
+                    , div []
+                        [ span [ class "badge badge-info" ]
+                            [ text <| "created-at:" ++ (renderDateInfobox << Time.millisToPosix) queueItem.created_at
+                            ]
+                        ]
+                    ]
+                , div [ class "queue-item__details-cell flex-grow-1 p-2" ]
+                    [ a
+                        [ target "_blank"
+                        , href queueItem.url
+                        ]
+                        [ text queueItem.url ]
+                    ]
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]

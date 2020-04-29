@@ -88,9 +88,9 @@ renderDateInfobox x =
         ++ ", "
         ++ String.fromInt year
         ++ " "
-        ++ String.fromInt hour12
+        ++ intToStringTwoSigns hour12
         ++ ":"
-        ++ String.fromInt (Time.toMinute Time.utc x)
+        ++ intToStringTwoSigns (Time.toMinute Time.utc x)
         ++ " "
         ++ ampm
 

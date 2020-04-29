@@ -17,6 +17,7 @@ queueAdd user AT.QueueAddForm {..} = sg $ do
       Queue
         { queueUserId = entityKey user,
           queueUrl = qafUrl,
+          queueErrored = Just False,
           queueStatus = AT.QueueItemStatusQueued,
           queueCreatedAt = t,
           queueUpdatedAt = t
@@ -35,6 +36,8 @@ queueList _user = sg $ do
       AT.QueueItem
         { quiId = entityKey queueItem,
           quiUserId = queueUserId (ev queueItem),
+          quiUrl = queueUrl (ev queueItem),
+          quiErrored = fromMaybe False (queueErrored (ev queueItem)),
           quiStatus = queueStatus (ev queueItem),
           quiCreatedAt = renderTime (queueCreatedAt (ev queueItem)),
           quiUpdatedAt = renderTime (queueUpdatedAt (ev queueItem))

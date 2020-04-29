@@ -60,6 +60,27 @@ packages:
       sha256: 25eb9f8dc32328cfbb89a2bbd2a4153c6eec9b46b1ed301d38f94f8374e59be5
   original:
     hackage: hailgun-0.5.1@sha256:a8a302776850e780b08467c986ea7e5e7fdf46a25abae735ffc8802dbd32e105,3770
+- completed:
+    cabal-file:
+      size: 2458
+      sha256: 7eddd8f82a7765bbc65f5146ad3a4e00eb63ec9380ce3511d6c87144d1726bf1
+    name: elm-bridge
+    version: 0.6.0
+    git: https://github.com/agrafix/elm-bridge
+    pantry-tree:
+      size: 1248
+      sha256: 3dd98477fa9831824b59a556b9cd0303777848c7c131ecb84e1c8282ffd492da
+    commit: 0856922e8c2deabb1fecbfac9fe9eeee0c091913
+  original:
+    git: https://github.com/agrafix/elm-bridge
+    commit: 0856922e8c2deabb1fecbfac9fe9eeee0c091913
+- completed:
+    hackage: servant-elm-0.7.2@sha256:27e45a456ad56ba59502549a59ce66f7229a17bbce72c413cbf8615ed074d754,4579
+    pantry-tree:
+      size: 2081
+      sha256: 4b10f1da950fea1a0bcaf74a9e68dc0a1c0136e8c09a136b9c3f6c89e09ad21a
+  original:
+    hackage: servant-elm-0.7.2
 snapshots:
 - completed:
     size: 491372

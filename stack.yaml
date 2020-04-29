@@ -13,4 +13,8 @@ extra-deps:
 - deriving-aeson-0.2.2@sha256:6150cfdd6ae2083249ec387ec4bb808d99a6b730ce093b8920cd788e9e681c73,1210
 - neat-interpolation-0.5.1
 - hailgun-0.5.1@sha256:a8a302776850e780b08467c986ea7e5e7fdf46a25abae735ffc8802dbd32e105,3770
+# see https://github.com/agrafix/elm-bridge/pull/47
+- git: https://github.com/agrafix/elm-bridge
+  commit: 0856922e8c2deabb1fecbfac9fe9eeee0c091913
+- servant-elm-0.7.2
 allow-newer: true

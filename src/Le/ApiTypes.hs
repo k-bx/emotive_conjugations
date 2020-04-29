@@ -117,6 +117,8 @@ deriveBoth (jsonOpts 3) ''QueueAddForm
 data QueueItem = QueueItem
   { quiId :: M.QueueId,
     quiUserId :: M.UserId,
+    quiUrl :: Text,
+    quiErrored :: Bool,
     quiStatus :: QueueItemStatus,
     quiCreatedAt :: IntZonedTime,
     quiUpdatedAt :: IntZonedTime

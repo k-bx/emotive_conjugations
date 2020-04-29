@@ -10292,5 +10292,11 @@ main > .container {
 .page-queue .queue__add__input {
   width: 30rem;
 }
+.page-queue .queue-item {
+  border: 1px solid #ced4da;
+}
+.page-queue .queue-item .queue-item__status-cell {
+  min-width: 15rem;
+}
 
 /*# sourceMappingURL=index.css.map */

@@ -455,4 +455,11 @@ main > .container {
   .queue__add__input {
     width: 30rem;
   }
+  .queue-item {
+    border: 1px solid #ced4da;
+    
+    .queue-item__status-cell {
+      min-width: 15rem;
+    }
+  }
 }

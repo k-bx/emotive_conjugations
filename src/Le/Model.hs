@@ -99,6 +99,7 @@ NamedPropers
 Queue
     userId UserId
     url Text
+    errored Bool Maybe
     status AT.QueueItemStatus
     createdAt UTCTime
     updatedAt UTCTime
