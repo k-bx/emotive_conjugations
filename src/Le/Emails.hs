@@ -3,7 +3,7 @@
 module Le.Emails where
 
 import qualified Data.String.Class as S
-import qualified Le.Config
+import Le.Config
 import Le.Import
 import qualified Mail.Hailgun as Hailgun
 import Servant

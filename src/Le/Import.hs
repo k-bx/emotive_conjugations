@@ -2,7 +2,6 @@
 
 module Le.Import
   ( module RIO,
-    module Le.Types,
     module X,
     ev,
     toBS,
@@ -49,7 +48,8 @@ import Data.Time.LocalTime as X
 import Database.Persist.Postgresql as X (Entity (..), entityKey, entityVal)
 import Language.Haskell.TH.Quote (QuasiQuoter)
 import Le.Aeson as X (FromJSON (..), ToJSON (..), jsonOpts)
-import Le.Types
+import Le.Config as X
+import Le.Types as X
 import NeatInterpolation as X (trimming, untrimming)
 import Network.URI as X (URI (..), URIAuth (..))
 import RIO
