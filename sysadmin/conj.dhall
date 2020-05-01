@@ -4,5 +4,5 @@ in  defConfig.def
        , cfgMode = defConfig.Mode.Worker
        , cfgDataDir = "/home/ubuntu/conj_data"
        , cfgPsqlConnString =
-           "host=localhost port=5432 user=postgres dbname=conj_worker password=password"
+           "host=localhost port=5432 user=postgres dbname=conj password=password"
        }
