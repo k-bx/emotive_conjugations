@@ -54,7 +54,8 @@ hs-post:
 	rm -f $(DIST)/conj
 	cp $(CONJ) $(DIST)/
 	mkdir -p $(DIST)/sysadmin
-	cp -r sysadmin/aws_credentials $(DIST)/sysadmin/
+	rm -rf $(DIST)/sysadmin
+	cp -r sysadmin/ $(DIST)/
 
 #
 # elm
@@ -96,6 +97,10 @@ min := $(DIST)/app.min.js
 .PHONY: elm-optimize
 elm-optimize:
 	./optimise.sh
+
+.PHONY: install_deps
+install_deps:
+	npm install -g uglify-js
 
 .PHONY: install_venv
 install_python:

@@ -27,6 +27,8 @@ data Config = Config
     cfgMode :: Mode,
     cfgDataDir :: FilePath,
     cfgPsqlConnString :: Text,
+    -- | Connection from beefy worker to remote db with the queue in it
+    cfgRemotePsqlConnString :: Text,
     cfgPythonWebapp :: Text,
     cfgMailgunDomain :: Text,
     cfgMailgunApiKey :: Text,

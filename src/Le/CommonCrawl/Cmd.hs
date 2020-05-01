@@ -32,10 +32,10 @@ downloadAndFilter :: Le ()
 downloadAndFilter = do
   allWarcs0 <- Le.CommonCrawl.listNewsWarcs
   cfg <- asks appConfig
-  let filteredDataDir = Le.Config.filteredDataDir cfg
+  let filteredData = Le.Config.filteredDataDir cfg
   let s3loc warc = "s3://" <> AWS.toText Le.CommonCrawl.newsBucket <> "/" <> (warc ^. S3.oKey . S3._ObjectKey)
   let outPath warc =
-        filteredDataDir <> "/" <> S.toString (Network.URI.Encode.encodeText (s3loc warc))
+        filteredData <> "/" <> S.toString (Network.URI.Encode.encodeText (s3loc warc))
   allWarcs <- fmap catMaybes $ forM allWarcs0 $ \warc -> do
     liftIO $
       System.Directory.doesFileExist (outPath warc) >>= \case
