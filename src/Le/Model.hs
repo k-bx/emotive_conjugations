@@ -102,6 +102,7 @@ Queue
     url Text
     errored Bool Maybe
     status AT.QueueItemStatus
+    articleId ArticleId Maybe
     createdAt UTCTime
     updatedAt UTCTime
 --

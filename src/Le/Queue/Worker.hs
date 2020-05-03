@@ -46,6 +46,7 @@ main = forever $ do
           mArticleId <- lift $ Le.Article.BL.repsertReceivedParseNewsPleaseRes (queueUrl (ev queueItem)) Nothing Nothing i speed res1
           P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusNer]
           articleId <- mustFindE mArticleId
+          P.update queueItemId [QueueArticleId P.=. Just articleId]
           case Le.Python.cnrMaintext res1 of
             Nothing -> do
               P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusDone]

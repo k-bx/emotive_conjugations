@@ -19,6 +19,7 @@ queueAdd user AT.QueueAddForm {..} = sg $ do
           queueUrl = qafUrl,
           queueErrored = Just False,
           queueStatus = AT.QueueItemStatusQueued,
+          queueArticleId = Nothing,
           queueCreatedAt = t,
           queueUpdatedAt = t
         }
@@ -39,6 +40,7 @@ queueList _user = sg $ do
           quiUrl = queueUrl (ev queueItem),
           quiErrored = fromMaybe False (queueErrored (ev queueItem)),
           quiStatus = queueStatus (ev queueItem),
+          quiArticleId = queueArticleId (ev queueItem),
           quiCreatedAt = renderTime (queueCreatedAt (ev queueItem)),
           quiUpdatedAt = renderTime (queueUpdatedAt (ev queueItem))
         }

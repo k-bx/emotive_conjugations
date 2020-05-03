@@ -120,6 +120,7 @@ data QueueItem = QueueItem
     quiUrl :: Text,
     quiErrored :: Bool,
     quiStatus :: QueueItemStatus,
+    quiArticleId :: Maybe M.ArticleId,
     quiCreatedAt :: IntZonedTime,
     quiUpdatedAt :: IntZonedTime
   }
