@@ -2,8 +2,6 @@
 
 module Le.Migrate where
 
-import qualified Conduit as C
-import Conduit ((.|))
 import qualified Data.String.Class as S
 import qualified Data.Text as T
 import Database.Esqueleto
@@ -107,10 +105,7 @@ migrate03 app = pure ()
       runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthArticlePleases)
       speed <- Le.Speed.newSpeed lengthArticlePleases
       articlesRes <- selectSourceRes ([] :: [P.Filter ArticlePlease]) []
-      C.withAcquire articlesRes $ \src ->
-        C.runConduit $
-          (C.getZipSource ((,) <$> C.ZipSource (C.yieldMany [0 ..]) <*> C.ZipSource src))
-            .| C.mapM_C (act speed)
+      Le.App.forCondResEnum articlesRes (act speed)
       where
         act :: Le.Speed.Speed -> (Int, Entity ArticlePlease) -> ReaderT P.SqlBackend IO ()
         act speed (i, _articlePlease) = do

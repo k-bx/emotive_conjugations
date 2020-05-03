@@ -59,7 +59,8 @@ data Env = Env
     envHttpManagerPython :: Network.HTTP.Client.Manager,
     envDataDir :: FilePath,
     envNumCapabilities :: Int,
-    envDb :: Pool P.SqlBackend
+    envDb :: Pool P.SqlBackend,
+    envDbRemote :: Pool P.SqlBackend
   }
 
 instance HasLogFunc Env where
