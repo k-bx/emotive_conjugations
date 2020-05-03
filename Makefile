@@ -141,10 +141,11 @@ setup:
 
 .PHONY: setup-webapp-python
 setup-webapp-python:
-	sudo cp ./sysadmin/conj-webapp-python.service /etc/systemd/system/
-	sudo systemctl daemon-reload
-	# sudo systemctl enable conj-webapp-python.service
-	sudo systemctl restart conj-webapp-python
+	cd sysadmin && ./setup-webapp-python.sh
+
+.PHONY: setup-queue-worker
+setup-queue-worker:
+	cd sysadmin && ./setup-queue-worker.sh
 
 .PHONY: launch-ssh-tunnels
 launch-ssh-tunnels:

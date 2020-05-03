@@ -36,6 +36,7 @@ type Msg
     | GotQueue (Result Api.Error (List Api.QueueItem))
     | AddUrlPressed
     | QueueItemAdded (Result Api.Error ())
+    | SleptToRefresh ()
 
 
 type alias Model =
@@ -62,6 +63,7 @@ init key =
     , Cmd.batch
         [ Api.getApiAccountinfojson GotAccount
         , Api.getApiQueuejson GotQueue
+        , Task.perform SleptToRefresh (Process.sleep 5000)
         ]
     )
 
@@ -121,6 +123,14 @@ update msg model =
         QueueItemAdded (Ok ()) ->
             ( model
             , Api.getApiQueuejson GotQueue
+            )
+
+        SleptToRefresh () ->
+            ( model
+            , Cmd.batch
+                [ Api.getApiQueuejson GotQueue
+                , Task.perform SleptToRefresh (Process.sleep 5000)
+                ]
             )
 
 

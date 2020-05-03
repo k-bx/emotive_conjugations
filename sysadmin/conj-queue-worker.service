@@ -1,0 +1,13 @@
+[Unit]
+Description=conj-queue-worker
+
+[Service]
+ExecStart=/home/kb/.local/bin/conj queue-worker
+Restart=always
+User=kb
+Group=kb
+RestartSec=5s
+WorkingDirectory=/home/kb/workspace/emotive_conjugations
+
+[Install]
+WantedBy=multi-user.target

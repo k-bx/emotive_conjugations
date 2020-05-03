@@ -1,5 +1,6 @@
 module Data.Time.Additional where
 
+import Control.Concurrent (threadDelay)
 import qualified Data.Fixed
 import Data.Time
 import qualified Data.Time.Clock as Time
@@ -26,3 +27,10 @@ zonedTimeToMilliseconds (ZonedTime localTime _tz) =
 utcToZonedTime' :: Data.Time.Zones.TZ -> UTCTime -> ZonedTime
 utcToZonedTime' tz t =
   utcToZonedTime (Data.Time.Zones.timeZoneForUTCTime tz t) t
+
+-- | Format taken by threadDelay and friends
+nominalDiffToMicroSeconds :: Integral a => NominalDiffTime -> a
+nominalDiffToMicroSeconds x = truncate ((realToFrac x :: Double) * 1000000)
+
+threadDelaySecs :: NominalDiffTime -> IO ()
+threadDelaySecs n = threadDelay (nominalDiffToMicroSeconds n)
