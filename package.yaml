@@ -1,10 +1,10 @@
 name:                emotive-conjugations
 version:             0.1.0.2
 github:              githubuser/emotive-conjugations
-license:             BSD3
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2020 Author name here
+license:             AllRightsReserved
+author:              Konstantine Rybnikov
+maintainer:          k-bx@k-bx.com
+copyright:           2020 Konstantine Rybnikov
 
 extra-source-files:
 - README.md
