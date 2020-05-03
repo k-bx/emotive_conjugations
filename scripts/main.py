@@ -60,7 +60,7 @@ def main():
                 "url": article.url,
             }
             print(json.dumps(res))
-        elif args['tag'] == 'cmd_download_url':
+        elif args['tag'] == 'cmd_download_url_news_please':
             url = args['contents']['url']
 
             article = newsplease.NewsPlease.from_url(url)
@@ -82,6 +82,8 @@ def main():
                 "url": article.url,
             }
             print(json.dumps(res))
+        else:
+            print('> ERROR. unknown command: ', args['tag'], file=sys.stderr)
 
 
 if __name__ == '__main__':

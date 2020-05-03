@@ -50,11 +50,11 @@ withApp f = do
 
 readConfig :: IO Config
 readConfig = do
-  confPath <- System.Environment.getEnv Le.Config.confEnvVarName >>= \case
-    "" -> do
+  confPath <- System.Environment.lookupEnv Le.Config.confEnvVarName >>= \case
+    Nothing -> do
       h <- System.Directory.getHomeDirectory
       pure $ h <> "/conj.dhall"
-    p -> pure p
+    Just p -> pure p
 
   Dhall.input Dhall.auto (S.toText confPath)
 

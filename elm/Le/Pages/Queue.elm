@@ -164,7 +164,7 @@ mainContent model =
             let
                 statusBadgeClass =
                     if queueItem.errored then
-                        "badge-error"
+                        "badge-danger"
 
                     else if queueItem.status == Api.QueueItemStatusDone then
                         "badge-success"
@@ -177,7 +177,12 @@ mainContent model =
                         [ class "badge"
                         , class statusBadgeClass
                         ]
-                        [ text <| "status:" ++ Api.stringEncQueueItemStatus queueItem.status
+                        [ case queueItem.errored of
+                            True ->
+                                text <| "errored"
+
+                            False ->
+                                text <| "status:" ++ Api.stringEncQueueItemStatus queueItem.status
                         ]
             in
             div [ class "queue-item d-flex flex-row justify-content-between mb-2 shadow-sm" ]
