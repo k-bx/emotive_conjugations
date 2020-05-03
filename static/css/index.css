@@ -10129,6 +10129,10 @@ main > .container {
   cursor: pointer;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+.page-dashboard .search-and-main {
+  height: 100%;
+  overflow-y: auto;
+}
 .page-dashboard .search-panel {
   min-height: 3rem;
   background: linear-gradient(to bottom, #e2e2e4, #d2d2d4);
@@ -10140,6 +10144,7 @@ main > .container {
 .page-dashboard .main-content {
   flex-grow: 1;
   overflow-y: auto;
+  height: calc(100% - 3rem);
 }
 .page-dashboard .applemail {
   display: flex;

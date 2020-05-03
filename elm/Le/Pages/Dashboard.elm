@@ -834,7 +834,7 @@ view vps model =
             , SelectTwo.Html.select2Close SelectTwo
             ]
             [ Le.Block.Dashboard.view DashboardMsg vps.routeName model.accInfo <|
-                div []
+                div [class "search-and-main"]
                     [ searchPanel model
                     , mainContent model
                     ]

@@ -262,6 +262,11 @@ main > .container {
     }
   }
 
+  .search-and-main {
+    height: 100%;
+    overflow-y: auto;
+  }
+
   .search-panel {
     min-height: 3rem;
     background: linear-gradient(to bottom, #e2e2e4, #d2d2d4);
@@ -275,6 +280,7 @@ main > .container {
   .main-content {
     flex-grow: 1;
     overflow-y: auto;
+    height: calc(100% - 3rem);
   }
 
   .applemail {
