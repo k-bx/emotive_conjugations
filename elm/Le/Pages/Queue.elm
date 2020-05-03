@@ -207,13 +207,32 @@ mainContent model =
                         , span [ class "ml-1" ] [ statusBadge ]
                         ]
                     ]
-                , div [ class "queue-item__details-cell flex-grow-1 p-2" ]
-                    [ a
-                        [ target "_blank"
-                        , href queueItem.url
+                , div [ class "queue-item__details-cell flex-grow-1 p-2" ] <|
+                    [ div []
+                        [ a
+                            [ target "_blank"
+                            , href queueItem.url
+                            ]
+                            [ text queueItem.url ]
                         ]
-                        [ text queueItem.url ]
                     ]
+                        ++ (case queueItem.article_id of
+                                Nothing ->
+                                    []
+
+                                Just articleId ->
+                                    [ div [ class "mt-2 mb-2" ]
+                                        [ a
+                                            [ class "btn btn-secondary btn-sm"
+                                            , href <| Le.Routes.dashboard "" (Just articleId)
+                                            , target "_blank"
+                                            ]
+                                            [ text "open the result "
+                                            , i [ class "fal fa-external-link" ] []
+                                            ]
+                                        ]
+                                    ]
+                           )
                 ]
     in
     main_ [ class "main-content", attribute "role" "main" ]

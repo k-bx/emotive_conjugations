@@ -519,18 +519,20 @@ type alias QueueItem  =
    , url: String
    , errored: Bool
    , status: QueueItemStatus
+   , article_id: (Maybe ArticleId)
    , created_at: IntZonedTime
    , updated_at: IntZonedTime
    }
 
 jsonDecQueueItem : Json.Decode.Decoder ( QueueItem )
 jsonDecQueueItem =
-   Json.Decode.succeed (\pid puser_id purl perrored pstatus pcreated_at pupdated_at -> {id = pid, user_id = puser_id, url = purl, errored = perrored, status = pstatus, created_at = pcreated_at, updated_at = pupdated_at})
+   Json.Decode.succeed (\pid puser_id purl perrored pstatus particle_id pcreated_at pupdated_at -> {id = pid, user_id = puser_id, url = purl, errored = perrored, status = pstatus, article_id = particle_id, created_at = pcreated_at, updated_at = pupdated_at})
    |> required "id" (jsonDecQueueId)
    |> required "user_id" (jsonDecUserId)
    |> required "url" (Json.Decode.string)
    |> required "errored" (Json.Decode.bool)
    |> required "status" (jsonDecQueueItemStatus)
+   |> fnullable "article_id" (jsonDecArticleId)
    |> required "created_at" (jsonDecIntZonedTime)
    |> required "updated_at" (jsonDecIntZonedTime)
 
@@ -542,6 +544,7 @@ jsonEncQueueItem  val =
    , ("url", Json.Encode.string val.url)
    , ("errored", Json.Encode.bool val.errored)
    , ("status", jsonEncQueueItemStatus val.status)
+   , ("article_id", (maybeEncode (jsonEncArticleId)) val.article_id)
    , ("created_at", jsonEncIntZonedTime val.created_at)
    , ("updated_at", jsonEncIntZonedTime val.updated_at)
    ]

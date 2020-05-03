@@ -147,6 +147,11 @@ setup-webapp-python:
 setup-queue-worker:
 	cd sysadmin && ./setup-queue-worker.sh
 
+.PHONY: deploy-queue-worker
+deploy-queue-worker:
+	$(STACK) install
+	cd sysadmin && ./deploy-queue-worker.sh
+
 .PHONY: launch-ssh-tunnels
 launch-ssh-tunnels:
 	par "ssh -N -L 6667:batonbooks:6666 batonbooks" "ssh -N -L 6668:meetup:6666 meetup"
