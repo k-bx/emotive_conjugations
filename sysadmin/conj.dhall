@@ -1,8 +1,0 @@
-let defConfig = /home/ubuntu/conj/sysadmin/default.dhall
-in  defConfig.def
-    // { cfgHttpPort = Some 6666
-       , cfgMode = defConfig.Mode.Worker
-       , cfgDataDir = "/home/ubuntu/conj_data"
-       , cfgPsqlConnString =
-           "host=localhost port=5432 user=postgres dbname=conj password=password"
-       }

@@ -10,6 +10,7 @@ import qualified Data.UUID.V4 as UUID4
 import qualified Database.Persist.Postgresql as P
 import Le.App
 import Le.AppUtils
+import qualified Le.Config
 import Le.Import
 import qualified Le.Login.Handlers
 import Le.Model
@@ -111,7 +112,7 @@ fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
         let opts1 =
               opts & W.param "client_id" .~ [cfgFacebookAppId cfg]
                 & W.param "redirect_uri"
-                  .~ ["https://meetup.events/api/fb-login-callback"]
+                  .~ [Le.Config.fbLoginCallbackAddr]
                 & W.param "client_secret" .~ [cfgFacebookAppSecret cfg]
                 & W.param "code" .~ [code]
         res1 <-
@@ -181,7 +182,7 @@ fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
                           (Cookie.renderSetCookie cookie)
                       )
                   ),
-                  ("Location", "https://meetup.events/account")
+                  ("Location", "/")
                 ]
             }
   where
@@ -258,7 +259,7 @@ googleLoginCallback _mState mCode _mScope mError =
                 "client_id" W.:= cfgGoogleOauthClientId cfg,
                 "client_secret" W.:= cfgGoogleOauthClientSecret cfg,
                 "redirect_uri"
-                  W.:= ("https://meetup.events/api/google-login-callback" :: Text),
+                  W.:= Le.Config.googleLoginCallbackAddr,
                 "grant_type" W.:= ("authorization_code" :: Text)
               ]
         logInfo
@@ -315,7 +316,7 @@ googleLoginCallback _mState mCode _mScope mError =
                           (Cookie.renderSetCookie cookie)
                       )
                   ),
-                  ("Location", "https://meetup.events/account")
+                  ("Location", "/")
                 ]
             }
   where

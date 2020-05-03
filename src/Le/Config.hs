@@ -141,3 +141,9 @@ loginCodeExpirationPeriod = 60 * 10
 
 projectEmail :: Text
 projectEmail = "emotive-conjugations@outlook.com"
+
+fbLoginCallbackAddr :: Text
+fbLoginCallbackAddr = "https://meetup.events/api/fb-login-callback"
+
+googleLoginCallbackAddr :: Text
+googleLoginCallbackAddr = "https://meetup.events/api/google-login-callback"

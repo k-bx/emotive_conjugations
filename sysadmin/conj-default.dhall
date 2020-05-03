@@ -1,3 +1,6 @@
+{- Contains default config without secrets. should be symlinked near the "secret" dhall files for typechecking to work
+-}
+
 let Mode = < Master | Worker >
 
 in  { Mode = Mode
