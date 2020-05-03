@@ -17,9 +17,9 @@ import RIO.Process
 import Servant.Client
 import System.Log.FastLogger (fromLogStr)
 
-type AppM = RIO App
+type AppM = RIO Env
 
-type Le = RIO App
+type Le = RIO Env
 
 -- | Command line arguments
 data Config = Config
@@ -47,26 +47,26 @@ data Mode = Master | Worker
 
 instance Dhall.FromDhall Mode
 
-data App = App
-  { appLogFunc :: !LogFunc,
-    appProcessContext :: !ProcessContext,
-    appConfig :: !Config,
-    appAwsEnv :: Network.AWS.Env,
-    appTempDir :: FilePath,
-    appHttpManager :: Network.HTTP.Client.Manager,
-    appHttpManagerNoTimeout :: Network.HTTP.Client.Manager,
+data Env = Env
+  { envLogFunc :: !LogFunc,
+    envProcessContext :: !ProcessContext,
+    envConfig :: !Config,
+    envAwsEnv :: Network.AWS.Env,
+    envTempDir :: FilePath,
+    envHttpManager :: Network.HTTP.Client.Manager,
+    envHttpManagerNoTimeout :: Network.HTTP.Client.Manager,
     -- | local python flask worker (scripts/webserver.py)
-    appHttpManagerPython :: Network.HTTP.Client.Manager,
-    appDataDir :: FilePath,
-    appNumCapabilities :: Int,
-    appDb :: Pool P.SqlBackend
+    envHttpManagerPython :: Network.HTTP.Client.Manager,
+    envDataDir :: FilePath,
+    envNumCapabilities :: Int,
+    envDb :: Pool P.SqlBackend
   }
 
-instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
+instance HasLogFunc Env where
+  logFuncL = lens envLogFunc (\x y -> x {envLogFunc = y})
 
-instance HasProcessContext App where
-  processContextL = lens appProcessContext (\x y -> x {appProcessContext = y})
+instance HasProcessContext Env where
+  processContextL = lens envProcessContext (\x y -> x {envProcessContext = y})
 
 -- | 'P.withPostgresqlPool' needs this.
 instance MonadLogger IO where

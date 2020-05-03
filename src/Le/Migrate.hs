@@ -21,13 +21,13 @@ runMigrations :: IO ()
 runMigrations = do
   Le.App.withApp $ \app -> do
     runNoLoggingT
-      $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString (appConfig app))) 1
+      $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString (envConfig app))) 1
       $ \mpool -> do
         liftIO $ flip P.runSqlPool mpool $ P.runMigration migrateAll
         liftIO $ flip P.runSqlPool mpool $ ensureIndexes
     runNoLoggingT
       $ P.withPostgresqlPool
-        (S.fromText (cfgPsqlConnString (appConfig app)))
+        (S.fromText (cfgPsqlConnString (envConfig app)))
         1
       $ \mpool -> do
         liftIO $ flip P.runSqlPool mpool $ migrateData app
@@ -65,7 +65,7 @@ where schemaname = 'public'
       rawExecute query []
     (_ :: [P.Single Text]) -> pure ()
 
-migrateData :: App -> ReaderT P.SqlBackend IO ()
+migrateData :: Env -> ReaderT P.SqlBackend IO ()
 migrateData app = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
@@ -98,7 +98,7 @@ cleanDbData = Le.App.run $ do
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticlePlease])
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])
 
-migrate03 :: App -> ReaderT P.SqlBackend IO ()
+migrate03 :: Env -> ReaderT P.SqlBackend IO ()
 migrate03 app = pure ()
   where
     _legacy = do

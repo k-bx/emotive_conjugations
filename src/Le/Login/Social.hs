@@ -112,14 +112,14 @@ fbLoginCallbackEndpoint ::
   AppM (Headers '[Header "Set-Cookie" Cookie.SetCookie] Text)
 fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
   sg $ do
-    cfg <- asks appConfig
+    cfg <- asks envConfig
     case mErrorMessage of
       Just errorMsg ->
         error $
           "Got error from Facebook: " <> S.toString errorMsg <> ". Code: "
             <> show mErrorCode
       Nothing -> do
-        mgr <- asks appHttpManager
+        mgr <- asks envHttpManager
         let opts = W.defaults & W.manager .~ Right mgr
         code <- mustBeJust "Facebook callback code is empty" mCode
         let opts1 =
@@ -252,13 +252,13 @@ googleLoginCallback ::
   AppM (Headers '[Header "Set-Cookie" Cookie.SetCookie] Text)
 googleLoginCallback _mState mCode _mScope mError =
   sg $ do
-    cfg <- asks appConfig
+    cfg <- asks envConfig
     case mError of
       Just errorMsg -> do
         error $ "Got error from Google: " <> S.toString errorMsg
       Nothing -> do
         code <- mustBeJust "Got empty code callback from google" mCode
-        mgr <- asks appHttpManager
+        mgr <- asks envHttpManager
         let opts = W.defaults & W.manager .~ Right mgr
         res <-
           liftIO $

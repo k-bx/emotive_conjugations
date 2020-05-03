@@ -172,7 +172,7 @@ data JsonAPI route = JsonAPI
   }
   deriving (Generic)
 
-server :: API (AsServerT (RIO App))
+server :: API (AsServerT (RIO Env))
 server =
   API
     { __index = throwM $ err302 {errHeaders = [("Location", "/dashboard")]},
@@ -187,7 +187,7 @@ server =
       __googleLoginCallback = googleLoginCallback
     }
   where
-    jsonApi :: JsonAPI (AsServerT (RIO App))
+    jsonApi :: JsonAPI (AsServerT (RIO Env))
     jsonApi =
       JsonAPI
         { _logErrorHandler = logErrorHandler,

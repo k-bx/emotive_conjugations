@@ -22,7 +22,7 @@ import qualified Pipes.ByteString
 import qualified Pipes.GZip
 import qualified System.Directory
 
-extractExampleWarc :: RIO App ()
+extractExampleWarc :: Le ()
 extractExampleWarc = do
   h <- liftIO $ System.Directory.getHomeDirectory
   void $ extractWarc (h <> "/tmp/") "s3://commoncrawl/crawl-data/CC-NEWS/2018/07/CC-NEWS-20180712154111-00005.warc.gz"
@@ -91,7 +91,7 @@ iterFunc ::
   Handle ->
   IORef (MH.MonoidalHashMap Text (Sum Int)) ->
   Record IO b ->
-  RIO App b
+  Le b
 iterFunc hOut domains record@Record {..} = do
   case recHeaderIsHttp recHeader of
     False -> skip
@@ -130,7 +130,7 @@ listNewsWarcsCmd = do
 
 listNewsWarcs :: Le [S3.Object]
 listNewsWarcs = do
-  awsEnv <- asks appAwsEnv
+  awsEnv <- asks envAwsEnv
   runResourceT $ AWS.runAWS awsEnv $ do
     rsp <-
       AWS.send $
@@ -158,7 +158,7 @@ iterGetAll ::
   -- | needs to be reversed later
   IORef [(RecordHeader, ByteString)] ->
   Record IO b ->
-  RIO App b
+  Le b
 iterGetAll ref Record {..} = do
   bss <- newIORef []
   r <- liftIO $ P.runEffect $ P.for recContent $ \x -> do

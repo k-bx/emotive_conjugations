@@ -89,7 +89,7 @@ errorOutOrGotoLogin req msg = do
   where
     throw401 msg' = throwError $ err401 {errBody = msg'}
 
-nt :: App -> RIO App a -> Servant.Handler a
+nt :: Env -> RIO Env a -> Servant.Handler a
 nt env action = Servant.Handler $ ExceptT $ try $ runRIO env action
 
 onExceptionAct :: HasCallStack => Maybe Wai.Request -> SomeException -> IO ()
@@ -112,8 +112,8 @@ run ver = do
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir
-  Le.App.withApp $ \app -> do
-    let cfg = appConfig app
+  Le.App.withApp $ \env -> do
+    let cfg = envConfig env
     cacheContainer <- liftIO $ MStatic.initCaching MStatic.PublicStaticCaching
     let staticOptions =
           MStatic.defaultOptions {MStatic.cacheContainer = cacheContainer}
@@ -128,11 +128,11 @@ run ver = do
                 staticPolicy
                 ( serveWithContext
                     (Proxy :: Proxy (ToServantApi API))
-                    (genAuthServerContext (appDb app))
+                    (genAuthServerContext (envDb env))
                     ( hoistServerWithContext
                         (Proxy :: Proxy (ToServantApi API))
                         (Proxy :: Proxy '[AuthHandler Wai.Request (P.Entity User)])
-                        (nt app)
+                        (nt env)
                         (genericServerT server)
                     )
                 )

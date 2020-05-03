@@ -183,7 +183,7 @@ deriveBoth (jsonOpts 0) ''Cmd
 
 runPython :: Cmd -> Le (BL.ByteString, BL.ByteString)
 runPython c = do
-  tempDir <- asks appTempDir
+  tempDir <- asks envTempDir
   let cmdJson = J.encode c
   let sha = show (Crypto.Hash.hash (toBS cmdJson) :: Crypto.Hash.Digest Crypto.Hash.SHA256)
   let argsFp = tempDir <> "/conj-runpython-" <> sha
@@ -234,8 +234,8 @@ runPythonParsing c = do
 
 runPythonWeb :: FromJSON a => Cmd -> Le a
 runPythonWeb c = do
-  mgr <- asks appHttpManagerPython
-  cfg <- asks appConfig
+  mgr <- asks envHttpManagerPython
+  cfg <- asks envConfig
   let opts =
         W.defaults
           & W.manager .~ Right mgr

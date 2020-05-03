@@ -36,16 +36,16 @@ errorOut = sg $ do pure $ error "Something bad happened"
 downloadAndFilter ::
   HasCallStack =>
   AT.DownloadAndFilterForm ->
-  RIO App BL.ByteString
+  Le BL.ByteString
 downloadAndFilter AT.DownloadAndFilterForm {..} = sg $ do
   logInfo $ "> downloadAndFilter"
-  tempDir <- asks appTempDir
+  tempDir <- asks envTempDir
   outPath <- Le.CommonCrawl.extractWarc tempDir (eitherErr (Le.S3Loc.parseS3Url dafWarcFile))
   liftIO $ BL.readFile outPath
 
 testDownloadAndFilter ::
   HasCallStack =>
-  RIO App BL.ByteString
+  Le BL.ByteString
 testDownloadAndFilter = sg $ do
   logInfo $ "> testDownloadAndFilter"
   h <- liftIO $ System.Directory.getHomeDirectory
@@ -54,7 +54,7 @@ testDownloadAndFilter = sg $ do
 
 testDownloadAndFilter2 ::
   HasCallStack =>
-  RIO App (Servant.Types.SourceT.SourceT IO ByteString)
+  Le (Servant.Types.SourceT.SourceT IO ByteString)
 testDownloadAndFilter2 = do
   logInfo $ "> testDownloadAndFilter"
   liftIO $ Prelude.putStrLn $ "> testDownloadAndFilter2"

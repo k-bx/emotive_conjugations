@@ -7,7 +7,7 @@ import Le.Routes
 import Servant.Client
 import Servant.Client.Generic
 
-api :: Proxy (API (AsClientT (RIO App)))
+api :: Proxy (API (AsClientT (RIO Env)))
 api = Proxy
 
 cliRoutes :: ClientEnv -> API (AsClientT Le)

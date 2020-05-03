@@ -11,7 +11,7 @@ import qualified Network.HTTP.Client.TLS
 import qualified RIO.Process
 import qualified System.Directory
 
-withApp :: (App -> IO a) -> IO a
+withApp :: (Env -> IO a) -> IO a
 withApp f = do
   cfg <- liftIO readConfig
   lo <-
@@ -28,22 +28,22 @@ withApp f = do
     runNoLoggingT $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5 $
       \pool -> liftIO $ do
         withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
-          let app =
-                App
-                  { appLogFunc = lf,
-                    appProcessContext = pc,
-                    appConfig = cfg,
-                    appAwsEnv = awsEnv,
-                    appTempDir = tempDirPath,
-                    appHttpManager = httpManager,
-                    appHttpManagerNoTimeout = httpManagerNoTimeout,
-                    appHttpManagerPython = httpManagerPython,
-                    appDataDir = dataDir,
-                    appNumCapabilities = numCapabilities,
-                    appDb = pool
+          let env =
+                Env
+                  { envLogFunc = lf,
+                    envProcessContext = pc,
+                    envConfig = cfg,
+                    envAwsEnv = awsEnv,
+                    envTempDir = tempDirPath,
+                    envHttpManager = httpManager,
+                    envHttpManagerNoTimeout = httpManagerNoTimeout,
+                    envHttpManagerPython = httpManagerPython,
+                    envDataDir = dataDir,
+                    envNumCapabilities = numCapabilities,
+                    envDb = pool
                   }
-          runRIO app $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
-          f app
+          runRIO env $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
+          f env
 
 readConfig :: IO Config
 readConfig = do
@@ -52,13 +52,13 @@ readConfig = do
 
 aws :: AWS.AWS a -> Le a
 aws action = do
-  App {appAwsEnv} <- ask
-  AWS.runResourceT $ AWS.runAWS appAwsEnv action
+  Env {envAwsEnv} <- ask
+  AWS.runResourceT $ AWS.runAWS envAwsEnv action
 
-run :: RIO App a -> IO a
+run :: Le a -> IO a
 run act = withApp $ \env -> runRIO env act
 
 runDb :: ReaderT P.SqlBackend IO b -> Le b
 runDb f = do
   env <- ask
-  liftIO $ flip P.runSqlPool (appDb env) $ f
+  liftIO $ flip P.runSqlPool (envDb env) $ f

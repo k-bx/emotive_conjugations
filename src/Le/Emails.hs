@@ -13,8 +13,8 @@ sendEmail title txt html emailTo = do
   env <- ask
   let ctx =
         Hailgun.HailgunContext
-          { hailgunDomain = S.toString (cfgMailgunDomain (appConfig env)),
-            hailgunApiKey = S.toString (cfgMailgunApiKey (appConfig env)),
+          { hailgunDomain = S.toString (cfgMailgunDomain (envConfig env)),
+            hailgunApiKey = S.toString (cfgMailgunApiKey (envConfig env)),
             hailgunProxy = Nothing
           }
   let hailgunMsg =

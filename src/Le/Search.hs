@@ -67,7 +67,7 @@ reindexProper = do
   let overallLen = length ners
   speed <- Le.Speed.newSpeed overallLen
   app <- ask
-  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [0 ..] ners) $ \(i, ner) -> do
+  pooledForConcurrentlyN_ (envNumCapabilities app) (zip [0 ..] ners) $ \(i, ner) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner: " <> t
     Le.App.runDb $ do

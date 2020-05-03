@@ -31,7 +31,7 @@ import qualified System.Directory
 downloadAndFilter :: Le ()
 downloadAndFilter = do
   allWarcs0 <- Le.CommonCrawl.listNewsWarcs
-  cfg <- asks appConfig
+  cfg <- asks envConfig
   let filteredData = Le.Config.filteredDataDir cfg
   let s3loc warc = "s3://" <> AWS.toText Le.CommonCrawl.newsBucket <> "/" <> (warc ^. S3.oKey . S3._ObjectKey)
   let outPath warc =
@@ -53,7 +53,7 @@ downloadAndFilter = do
           <> s3loc warc
       Le.Speed.withProgress i speed $ \t -> do
         logInfo $ display $ "> Progress: " <> t
-      mgr <- asks appHttpManagerNoTimeout
+      mgr <- asks envHttpManagerNoTimeout
       let cliEnv = mkClientEnv mgr baseUrl
       bs <- Le.WebClient.cliDownloadAndFilter cliEnv (AT.DownloadAndFilterForm {dafWarcFile = s3loc warc})
       logInfo $ display $ "> writing " <> (S.toText (outPath warc))
@@ -62,7 +62,7 @@ downloadAndFilter = do
 
 testDownloadAndFilter :: Le ()
 testDownloadAndFilter = do
-  dataDir <- asks appDataDir
+  dataDir <- asks envDataDir
   let baseUrl =
         BaseUrl
           { baseUrlScheme = Http,
@@ -71,7 +71,7 @@ testDownloadAndFilter = do
             baseUrlPath = ""
           }
   -- let baseUrl = Data.List.head Le.Config.cheapWorkers
-  mgr <- asks appHttpManagerNoTimeout
+  mgr <- asks envHttpManagerNoTimeout
   let cliEnv = (mkClientEnv mgr baseUrl)
   bs <- Le.WebClient.cliTestDownloadAndFilter cliEnv
   logInfo $ display $ "> testDownloadAndFilter got bs: " <> tshow (BL.length bs)
@@ -81,11 +81,11 @@ testDownloadAndFilter = do
 
 parseFilteredArticles :: Le ()
 parseFilteredArticles = do
-  cfg <- asks appConfig
+  cfg <- asks envConfig
   app <- ask
   filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
   speed <- Le.Speed.newSpeed (length filteredWarcPaths)
-  pooledForConcurrentlyN_ (appNumCapabilities app) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
+  pooledForConcurrentlyN_ (envNumCapabilities app) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
   where
     processWarc cfg speed (i, warcPath) = do
       Le.Speed.withProgress i speed $ \t -> do

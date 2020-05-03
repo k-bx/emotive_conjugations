@@ -7,6 +7,7 @@ import qualified Le.CommonCrawl.Cmd
 import Le.Import
 import qualified Le.Migrate
 import qualified Le.Python
+import qualified Le.Queue.Worker
 import qualified Le.Shake
 import qualified Le.WebApp
 import qualified Le.WebApp.Dev
@@ -42,6 +43,7 @@ commands ver =
       (flip withArgs Le.Shake.shake <$> many (strArgument (metavar "-- Shake arguments")))
     <> cmd "spacy-ner-articles" "Run NER on articles" (pure (run Le.CommonCrawl.Cmd.spacyNerArticles))
     <> cmd "spacy-pos-articles" "Run POS on articles" (pure (run Le.CommonCrawl.Cmd.spacyPosArticles))
+    <> cmd "queue-worker" "Consume the queue for a remote database" (pure (run Le.Queue.Worker.main))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))
