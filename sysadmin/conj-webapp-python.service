@@ -2,7 +2,7 @@
 Description=conj-webapp-python
 
 [Service]
-ExecStart=/home/kb/workspace/emotive_conjugations/venv/bin/gunicorn -w 5 -b 127.0.0.1:8082 --chdir /home/kb/workspace/emotive_conjugations/scripts/ webserver:app
+ExecStart=/home/kb/workspace/emotive_conjugations/venv/bin/gunicorn -w 2 -b 127.0.0.1:8082 --chdir /home/kb/workspace/emotive_conjugations/scripts/ webserver:app
 Restart=always
 User=kb
 Group=kb

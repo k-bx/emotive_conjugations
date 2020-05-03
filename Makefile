@@ -139,8 +139,8 @@ deploy:
 setup:
 	./sysadmin/setup.sh
 
-.PHONY: deploy-webapp-python
-deploy-webapp-python:
+.PHONY: setup-webapp-python
+setup-webapp-python:
 	sudo cp ./sysadmin/conj-webapp-python.service /etc/systemd/system/
 	sudo systemctl daemon-reload
 	# sudo systemctl enable conj-webapp-python.service
