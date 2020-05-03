@@ -171,12 +171,20 @@ data CmdParseNewsPleaseRes = CmdParseNewsPleaseRes
 
 deriveBoth (jsonOpts 3) ''CmdParseNewsPleaseRes
 
+data CmdDownloadUrlNewsPleaseOpts = CmdDownloadUrlNewsPleaseOpts
+  { cduUrl :: Text
+  }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''CmdDownloadUrlNewsPleaseOpts
+
 data Cmd
   = CmdPing
   | CmdParseArticle CmdParseArticleOpts
   | CmdParseNewsPlease CmdParseNewsPleaseOpts
   | CmdSpacyNer CmdSpacyNerOpts
   | CmdSpacyPos CmdSpacyPosOpts
+  | CmdDownloadUrlNewsPlease CmdDownloadUrlNewsPleaseOpts
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 0) ''Cmd
@@ -273,3 +281,6 @@ cmdSpacyNer opts = runPythonWeb (CmdSpacyNer opts)
 
 cmdSpacyPos :: CmdSpacyPosOpts -> Le CmdSpacyPosRes
 cmdSpacyPos opts = runPythonWeb (CmdSpacyPos opts)
+
+cmdDownloadUrlNewsPlease :: CmdDownloadUrlNewsPleaseOpts -> Le CmdParseNewsPleaseRes
+cmdDownloadUrlNewsPlease opts = runPythonParsing (CmdDownloadUrlNewsPlease opts)

@@ -82,7 +82,7 @@ getMigrationInfo = do
   case res of
     [] -> do
       miId <- P.insert $ MigrationInfo {migrationInfoVersion = 1}
-      mustFindMErr $ P.get miId
+      mustFindME $ P.get miId
     [mi] -> pure $ ev mi
     _ -> error "Impossible! More than one migration info"
 

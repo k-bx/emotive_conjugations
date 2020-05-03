@@ -6,12 +6,14 @@ import qualified Data.String.Class as S
 import qualified Database.Persist.Postgresql as P
 import qualified Dhall
 import GHC.Conc (numCapabilities)
+import qualified Le.Config
 import Le.Import
 import qualified Network.AWS as AWS
 import qualified Network.HTTP.Client
 import qualified Network.HTTP.Client.TLS
 import qualified RIO.Process
 import qualified System.Directory
+import qualified System.Environment
 
 withApp :: (Env -> IO a) -> IO a
 withApp f = do
@@ -27,31 +29,34 @@ withApp f = do
   liftIO $ System.Directory.createDirectoryIfMissing True dataDir
   withLogFunc lo $ \lf -> do
     awsEnv <- AWS.newEnv (AWS.FromFile "conj" "sysadmin/aws_credentials")
-    runNoLoggingT $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5 $ \pool -> do
-      runNoLoggingT $ P.withPostgresqlPool (S.fromText (cfgRemotePsqlConnString cfg)) 5 $ \poolRemote -> liftIO $ do
-        withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
-          let env =
-                Env
-                  { envLogFunc = lf,
-                    envProcessContext = pc,
-                    envConfig = cfg,
-                    envAwsEnv = awsEnv,
-                    envTempDir = tempDirPath,
-                    envHttpManager = httpManager,
-                    envHttpManagerNoTimeout = httpManagerNoTimeout,
-                    envHttpManagerPython = httpManagerPython,
-                    envDataDir = dataDir,
-                    envNumCapabilities = numCapabilities,
-                    envDb = pool,
-                    envDbRemote = poolRemote
-                  }
-          runRIO env $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
-          f env
+    runNoLoggingT $ P.withPostgresqlPool (S.fromText (cfgPsqlConnString cfg)) 5 $ \pool -> liftIO $ do
+      withSystemTempDirectory "conj-webapp" $ \tempDirPath -> do
+        let env =
+              Env
+                { envLogFunc = lf,
+                  envProcessContext = pc,
+                  envConfig = cfg,
+                  envAwsEnv = awsEnv,
+                  envTempDir = tempDirPath,
+                  envHttpManager = httpManager,
+                  envHttpManagerNoTimeout = httpManagerNoTimeout,
+                  envHttpManagerPython = httpManagerPython,
+                  envDataDir = dataDir,
+                  envNumCapabilities = numCapabilities,
+                  envDb = pool
+                }
+        runRIO env $ logInfo $ display $ "> tempDirPath: " <> S.toText tempDirPath
+        f env
 
 readConfig :: IO Config
 readConfig = do
-  h <- System.Directory.getHomeDirectory
-  Dhall.input Dhall.auto (S.toText (h <> "/conj.dhall"))
+  confPath <- System.Environment.getEnv Le.Config.confEnvVarName >>= \case
+    "" -> do
+      h <- System.Directory.getHomeDirectory
+      pure $ h <> "/conj.dhall"
+    p -> pure p
+
+  Dhall.input Dhall.auto (S.toText confPath)
 
 aws :: AWS.AWS a -> Le a
 aws action = do
@@ -61,16 +66,24 @@ aws action = do
 run :: Le a -> IO a
 run act = withApp $ \env -> runRIO env act
 
-runDb :: ReaderT P.SqlBackend IO b -> Le b
+runQueue :: Le a -> IO a
+runQueue act = do
+  h <- System.Directory.getHomeDirectory
+  let p = h <> "/conj-queue.dhall"
+  System.Environment.setEnv Le.Config.confEnvVarName p
+  run act
+
+-- runDb :: ReaderT P.SqlBackend IO b -> Le b
+runDb :: (MonadReader Env m, MonadUnliftIO m) => ReaderT P.SqlBackend m b -> m b
 runDb f = do
   env <- ask
-  liftIO $ flip P.runSqlPool (envDb env) $ f
+  flip P.runSqlPool (envDb env) $ f
 
--- | Run in a remote "queue" db
-runDbRemote :: ReaderT P.SqlBackend IO b -> Le b
-runDbRemote f = do
-  env <- ask
-  liftIO $ flip P.runSqlPool (envDbRemote env) $ f
+-- -- | Run in a remote "queue" db
+-- runDbRemote :: (MonadReader Env m , MonadUnliftIO m) => ReaderT P.SqlBackend m b -> m b
+-- runDbRemote f = do
+--   env <- ask
+--   flip P.runSqlPool (envDbRemote env) $ f
 
 forCondRes ::
   MonadUnliftIO m =>

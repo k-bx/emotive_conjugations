@@ -34,21 +34,17 @@ mustFind = maybe notFound pure
 mustFindM :: AppM (Maybe a) -> AppM a
 mustFindM = (=<<) mustFind
 
--- | Logs error
-mustFindE :: HasCallStack => Maybe a -> AppM a
-mustFindE = maybe (error "Couldn't find object") pure
+data ObjectNotFound = ObjectNotFound deriving (Show)
+
+instance Exception ObjectNotFound
 
 -- | Logs error
-mustFindME :: HasCallStack => AppM (Maybe a) -> AppM a
+mustFindE :: MonadIO m => Maybe a -> m a
+mustFindE = maybe (throwIO ObjectNotFound) pure
+
+-- | Logs error via `throwIO`
+mustFindME :: MonadIO m => m (Maybe a) -> m a
 mustFindME = (=<<) mustFindE
-
--- | Logs error via `error`
-mustFindErr :: (HasCallStack, Monad m) => Maybe a -> m a
-mustFindErr = maybe (error "Couldn't find object.") pure
-
--- | Logs error via `error`
-mustFindMErr :: (HasCallStack, Monad m) => m (Maybe a) -> m a
-mustFindMErr = (=<<) mustFindErr
 
 notFound :: AppM a
 notFound = throwM err404

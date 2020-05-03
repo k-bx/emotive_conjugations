@@ -12,6 +12,7 @@ import qualified Le.ApiTypes as AT
 import Le.App
 import Le.AppUtils
 import qualified Le.Article
+import qualified Le.Article.BL
 import Le.CommonCrawl
 import qualified Le.Config
 import qualified Le.Html
@@ -124,52 +125,10 @@ parseFilteredArticles = do
               mArticlePresent <- runDb $ P.selectFirst [ArticleWarcId P.==. Just warcRecId] []
               case mArticlePresent of
                 Just _ -> pure ()
-                Nothing -> runCmd speed i warcRecId host html uriText warcDt
-    runCmd speed i warcRecId host html uriText warcDt = do
+                Nothing -> runCmd speed i warcRecId html uriText warcDt
+    runCmd speed i warcRecId html uriText warcDt = do
       res <- Le.Python.cmdParseNewsPlease (Le.Python.CmdParseNewsPleaseOpts html uriText (utcTimeToPOSIXSeconds warcDt))
-      case Le.Python.cnrLanguage res of
-        Just "en" -> do
-          void $ runDb $ do
-            articleId <-
-              P.insert $
-                Article
-                  { articleWarcId = Just warcRecId,
-                    articleWarcDate = warcDt,
-                    articleUrl = uriText,
-                    articleHost = host
-                  }
-            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $
-              ArticlePlease
-                { articlePleaseUrl = uriText,
-                  articlePleaseHost = host,
-                  articlePleaseAuthors = JsonList (Le.Python.cnrAuthors res),
-                  articlePleaseDateDownload =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDateDownload res,
-                  articlePleaseDatePublish =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDatePublish res,
-                  articlePleaseDateModify =
-                    posixSecondsToUTCTime <$> Le.Python.cnrDateModify res,
-                  articlePleaseDescription = fromMaybe "" (Le.Python.cnrDescription res),
-                  articlePleaseFilename = Le.Python.cnrFilename res,
-                  articlePleaseImageUrl = Le.Python.cnrImageUrl res,
-                  articlePleaseLanguage = "en",
-                  articlePleaseLocalpath = Le.Python.cnrLocalpath res,
-                  articlePleaseTitle = Le.Python.cnrTitle res,
-                  articlePleaseTitlePage = Le.Python.cnrTitlePage res,
-                  articlePleaseTitleRss = Le.Python.cnrTitleRss res,
-                  articlePleaseSourceDomain = Le.Python.cnrSourceDomain res
-                }
-            P.repsert (P.toSqlKey (P.fromSqlKey articleId)) $
-              ArticlePleaseBig
-                { articlePleaseBigMaintext = fromMaybe "" (Le.Python.cnrMaintext res),
-                  articlePleaseBigSpacyNer = Nothing,
-                  articlePleaseBigSpacyPos = Nothing
-                }
-          Le.Speed.withProgress i speed $ \t -> do
-            logInfo $ display $ "> Processing WARC: " <> t
-          -- logInfo $ display $ "> URI: " <> uriText
-          pure ()
-        _ -> pure ()
+      void $ Le.Article.BL.repsertReceivedParseNewsPleaseRes uriText (Just warcRecId) (Just warcDt) i speed res
 
 spacyNerArticles :: Le ()
 spacyNerArticles = do
@@ -179,28 +138,9 @@ spacyNerArticles = do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner article: " <> t
     res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseBigMaintext (ev articlePleaseBig)))
-    runDb $ do
-      let articlePleaseId :: ArticlePleaseId
-          articlePleaseId = P.toSqlKey (P.fromSqlKey (entityKey articlePleaseBig))
-      P.update (entityKey articlePleaseBig) [ArticlePleaseBigSpacyNer P.=. (Just res)]
-      forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
-        when (cseLabel_ == "PERSON") $ do
-          let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
-          void $ P.insert $
-            NamedEntity
-              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
-                namedEntityEntity = cseText,
-                namedEntityStart = cseStart,
-                namedEntityStartChar = cseStartChar,
-                namedEntityEnd = cseEnd,
-                namedEntityEndChar = cseEndChar,
-                namedEntityLabel_ = cseLabel_,
-                namedEntitySearch1 = Just search1,
-                namedEntitySearch2 = Just search2,
-                namedEntitySearch3 = Just search3,
-                namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
-                namedEntityProper = Nothing
-              }
+    let articleId :: ArticleId
+        articleId = P.toSqlKey (P.fromSqlKey (entityKey articlePleaseBig))
+    Le.Article.BL.saveSpacyNer articleId res
   Le.Search.reindexProper
 
 spacyPosArticles :: Le ()

@@ -10,8 +10,8 @@ in  { Mode = Mode
       , cfgDataDir = "/home/kb/tmp/emotive_conjugations/data"
       , cfgPsqlConnString =
           "host=localhost port=5432 user=postgres dbname=conj password=password"
-      , cfgRemotePsqlConnString =
-          "host=localhost port=5442 user=postgres dbname=conj password=password"
+      -- , cfgRemotePsqlConnString =
+      --     "host=localhost port=5442 user=postgres dbname=conj password=password"
       , cfgPythonWebapp = "http://localhost:8082"
       , cfgMailgunDomain = "mg.emotive-conjugations.app"
       , cfgMailgunApiKey = "somekey"

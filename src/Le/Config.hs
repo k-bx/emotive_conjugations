@@ -21,14 +21,15 @@ type AppM = RIO Env
 
 type Le = RIO Env
 
+instance MonadFail (RIO Env) where
+  fail = liftIO . fail
+
 -- | Command line arguments
 data Config = Config
   { cfgHttpPort :: Maybe Natural,
     cfgMode :: Mode,
     cfgDataDir :: FilePath,
     cfgPsqlConnString :: Text,
-    -- | Connection from beefy worker to remote db with the queue in it
-    cfgRemotePsqlConnString :: Text,
     cfgPythonWebapp :: Text,
     cfgMailgunDomain :: Text,
     cfgMailgunApiKey :: Text,
@@ -59,8 +60,7 @@ data Env = Env
     envHttpManagerPython :: Network.HTTP.Client.Manager,
     envDataDir :: FilePath,
     envNumCapabilities :: Int,
-    envDb :: Pool P.SqlBackend,
-    envDbRemote :: Pool P.SqlBackend
+    envDb :: Pool P.SqlBackend
   }
 
 instance HasLogFunc Env where
@@ -73,6 +73,9 @@ instance HasProcessContext Env where
 instance MonadLogger IO where
   monadLoggerLog _loc _logSource _logLevel msg =
     liftIO (S.hPutStrLn stderr (fromLogStr (toLogStr msg)))
+
+confEnvVarName :: String
+confEnvVarName = "CONJ_CONFIG"
 
 newsHosts :: [Text]
 newsHosts =

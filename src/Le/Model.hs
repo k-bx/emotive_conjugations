@@ -37,9 +37,10 @@ LoginCode
     deriving Show
 Article
     warcId Text Maybe
-    warcDate UTCTime
+    warcDate UTCTime Maybe
     url Text
     host Text
+    createdAt UTCTime Maybe
 -- -- | Article extracted via Python newspaper library.
 -- -- Article.id == ArticleNp.id
 -- ArticleNp
