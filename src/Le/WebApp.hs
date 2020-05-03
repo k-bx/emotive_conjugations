@@ -7,6 +7,7 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Pool
 import qualified Data.String.Class as S
+import qualified Data.Text as T
 import qualified Database.Persist.Postgresql as P
 import GHC.Conc (numCapabilities)
 import GHC.Stack
@@ -114,6 +115,7 @@ run ver = do
   Prelude.putStrLn $ "> dir: " <> dir
   Le.App.withApp $ \env -> do
     let cfg = envConfig env
+    Prelude.putStrLn $ "> working with db: " <> S.toString (T.take 50 (cfgPsqlConnString cfg) <> "...")
     cacheContainer <- liftIO $ MStatic.initCaching MStatic.PublicStaticCaching
     let staticOptions =
           MStatic.defaultOptions {MStatic.cacheContainer = cacheContainer}
