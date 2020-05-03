@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6ea38f76442149904022654a9075def2d3162aeca907b1f4457fcc03a1200a5b
+-- hash: a8dc3e7a190bff2e41b0f3dc76ce6314b7b7ad714b2873ed8de4e698a926a0ec
 
 name:           emotive-conjugations
-version:        0.1.0.0
+version:        0.1.0.2
 description:    Please see the README on Github at <https://github.com/githubuser/emotive-conjugations#readme>
 homepage:       https://github.com/githubuser/emotive-conjugations#readme
 bug-reports:    https://github.com/githubuser/emotive-conjugations/issues
@@ -92,6 +92,7 @@ library
     , fsnotify
     , hailgun
     , http-client
+    , http-client-tls
     , http-media
     , http-types
     , lens
@@ -174,6 +175,7 @@ executable conj
     , fsnotify
     , hailgun
     , http-client
+    , http-client-tls
     , http-media
     , http-types
     , lens
@@ -260,6 +262,7 @@ test-suite emotive-conjugations-test
     , hailgun
     , hspec
     , http-client
+    , http-client-tls
     , http-media
     , http-types
     , lens

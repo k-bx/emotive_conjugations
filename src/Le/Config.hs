@@ -34,7 +34,7 @@ data Config = Config
     cfgMailgunApiKey :: Text,
     cfgFacebookAppId :: Text,
     cfgFacebookAppSecret :: Text,
-    cfgFacebookAppToken :: Text,
+    -- cfgFacebookAppToken :: Text,
     cfgGoogleOauthClientId :: Text,
     cfgGoogleOauthClientSecret :: Text
   }
@@ -143,7 +143,7 @@ projectEmail :: Text
 projectEmail = "emotive-conjugations@outlook.com"
 
 fbLoginCallbackAddr :: Text
-fbLoginCallbackAddr = "https://meetup.events/api/fb-login-callback"
+fbLoginCallbackAddr = "https://emotive-conjugations.app/api/fb-login-callback"
 
 googleLoginCallbackAddr :: Text
-googleLoginCallbackAddr = "https://meetup.events/api/google-login-callback"
+googleLoginCallbackAddr = "https://emotive-conjugations.app/api/google-login-callback"

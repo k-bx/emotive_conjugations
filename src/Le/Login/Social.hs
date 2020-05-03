@@ -53,6 +53,19 @@ instance J.ToJSON FbDebugTokenRspData where
 instance J.FromJSON FbDebugTokenRspData where
   parseJSON = J.genericParseJSON (jsonOpts 3)
 
+-- | Subset of the /me response
+data FbMe = FbMe
+  { fbmId :: Text,
+    fbmName :: Text
+  }
+  deriving (Show, Eq, Generic)
+
+instance J.ToJSON FbMe where
+  toEncoding = J.genericToEncoding (jsonOpts 3)
+
+instance J.FromJSON FbMe where
+  parseJSON = J.genericParseJSON (jsonOpts 3)
+
 data FbUser = FbUser
   { fbuName :: Text,
     fbuEmail :: Text,
@@ -115,22 +128,22 @@ fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
                   .~ [Le.Config.fbLoginCallbackAddr]
                 & W.param "client_secret" .~ [cfgFacebookAppSecret cfg]
                 & W.param "code" .~ [code]
-        res1 <-
-          liftIO $
-            W.getWith opts1 "https://graph.facebook.com/v3.2/oauth/access_token"
         oauth <-
-          mustBeRight
-            (\e -> "Error parsing Facebook Oauth response: " <> tshow e)
-            (J.eitherDecode (res1 ^. W.responseBody))
+          liftIO (W.getWith opts1 "https://graph.facebook.com/v6.0/oauth/access_token")
+            & fmap (\res -> J.eitherDecode (res ^. W.responseBody))
+            & (>>= (mustBeRight (\e -> "Error parsing Facebook Oauth response: " <> tshow e)))
         let opts2 =
-              opts & W.param "input_token" .~ [fboAccessToken oauth]
-                & W.param "access_token" .~ [cfgFacebookAppToken cfg]
-        res2 <-
-          liftIO $ W.getWith opts2 "https://graph.facebook.com/debug_token"
-        debugTokenRsp <-
-          mustBeRight
-            (\e -> "Error parsing Facebook debug_token response: " <> tshow e)
-            (J.eitherDecode (res2 ^. W.responseBody))
+              opts & W.param "access_token" .~ [fboAccessToken oauth]
+        meRspRaw <-
+          liftIO (W.getWith opts2 "https://graph.facebook.com/me")
+        logInfo $ display $ "> res ^. W.responseBody: " <> (S.toText (meRspRaw ^. W.responseBody))
+        meRsp <-
+          meRspRaw
+            & (\res -> J.eitherDecode (res ^. W.responseBody))
+            & (mustBeRight (\e -> "Error parsing /me response: " <> tshow e))
+        logInfo
+          $ display
+          $ "Success! Got user info: " <> S.toText (J.encode meRsp)
         let opts3 =
               opts & W.param "fields" .~ ["id,name,email,picture"]
                 & W.param "access_token" .~ [fboAccessToken oauth]
@@ -139,8 +152,8 @@ fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
             W.getWith
               opts3
               ( S.fromText
-                  ( "https://graph.facebook.com/v3.2/"
-                      <> fbdUserId (fbtData debugTokenRsp)
+                  ( "https://graph.facebook.com/v6.0/"
+                      <> fbmId meRsp
                       <> "/"
                   )
               )
@@ -151,9 +164,6 @@ fbLoginCallbackEndpoint mErrorCode mErrorMessage mCode _mState =
           mustBeRight
             (\e -> "Error parsing Facebook user data: " <> tshow e)
             (J.eitherDecode (res3 ^. W.responseBody))
-        logInfo
-          $ display
-          $ "Success! Got user info: " <> S.toText (J.encode fbUserRsp)
         t <- liftIO getCurrentTime
         user <- runDb $ Le.Login.Handlers.blGetOrCreateByEmail t (fbuEmail fbUserRsp)
         tval <- liftIO $ UUID.toText <$> UUID4.nextRandom

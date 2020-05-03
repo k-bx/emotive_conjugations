@@ -26,7 +26,7 @@ commands ver =
     <> cmd "version" "Show version" (pure (run $ logInfo $ "Version " <> display (S.toText ver)))
     <> cmd "extract-example-warc" "Extract example warc" (pure (run Le.CommonCrawl.extractExampleWarc))
     <> cmd "ls-news-warcs" "List common crawl news warcs" (pure (run Le.CommonCrawl.listNewsWarcsCmd))
-    <> cmd "webapp" "Run web app" (pure Le.WebApp.run)
+    <> cmd "webapp" "Run web app" (pure (Le.WebApp.run (S.toText ver)))
     <> cmd "download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.downloadAndFilter))
     <> cmd "test-download-and-filter" "Run workers to filter data" (pure (run Le.CommonCrawl.Cmd.testDownloadAndFilter))
     <> cmd "migrate" "Run migrations" (pure Le.Migrate.runMigrations)

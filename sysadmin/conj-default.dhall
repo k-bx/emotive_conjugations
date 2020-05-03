@@ -17,7 +17,7 @@ in  { Mode = Mode
       , cfgMailgunApiKey = "somekey"
       , cfgFacebookAppId = "750050712196580"
       , cfgFacebookAppSecret = "somesecret"
-      , cfgFacebookAppToken = "sometoken"
+      -- , cfgFacebookAppToken = "sometoken"
       , cfgGoogleOauthClientId = "313436810105-et1hm4ic03bao6ru2npk2i5qjkrca5am.apps.googleusercontent.com"
       , cfgGoogleOauthClientSecret = "somesecret"
       }

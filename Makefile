@@ -135,6 +135,10 @@ clean:
 deploy:
 	./sysadmin/deploy.sh
 
+.PHONY: setup
+setup:
+	./sysadmin/setup.sh
+
 .PHONY: deploy-webapp-python
 deploy-webapp-python:
 	sudo cp ./sysadmin/conj-webapp-python.service /etc/systemd/system/

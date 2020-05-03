@@ -104,11 +104,11 @@ onExceptionAct mReq exc = do
         <> S.toText (prettyCallStack callStack)
     )
 
-run :: IO ()
-run = do
+run :: Text -> IO ()
+run ver = do
   hSetBuffering stdout LineBuffering
   hSetBuffering stderr LineBuffering
-  Prelude.putStrLn "Starting webapp at https://emotive-conjugations.localhost:8080/ ..."
+  Prelude.putStrLn $ "Starting webapp version " <> S.toString ver <> " at https://emotive-conjugations.localhost:8080/ ..."
   Prelude.putStrLn $ "Running on N cores: " ++ show numCapabilities
   dir <- System.Directory.canonicalizePath "."
   Prelude.putStrLn $ "> dir: " <> dir

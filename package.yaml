@@ -1,5 +1,5 @@
 name:                emotive-conjugations
-version:             0.1.0.0
+version:             0.1.0.2
 github:              githubuser/emotive-conjugations
 license:             BSD3
 author:              Author name here
@@ -40,6 +40,7 @@ dependencies:
 - fsnotify
 - hailgun
 - http-client
+- http-client-tls
 - http-media
 - http-types
 - lens
