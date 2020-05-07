@@ -186,6 +186,11 @@ mainContent model =
                     span
                         [ class "badge"
                         , class statusBadgeClass
+                        , classList
+                            [ ( "animate-flicker"
+                              , not (queueItem.status == Api.QueueItemStatusDone) && not queueItem.errored
+                              )
+                            ]
                         ]
                         [ case queueItem.errored of
                             True ->
