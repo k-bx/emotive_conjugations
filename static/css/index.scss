@@ -336,6 +336,16 @@ main > .container {
       flex-shrink: 0;
       padding: 1rem;
       overflow-y: scroll;
+      transition: width .15s ease-in-out;
+      
+      .applemail__controlpanel__content-under-toggle {
+        transition: opacity .15s ease-in;
+      }
+
+      .applemail__controlpanel__content-under-toggle--shrinked {
+        opacity: 0;
+        transition: opacity .15s ease-in;
+      }
 
       .applemail__controlpanel__reltable {
         td {
@@ -347,6 +357,14 @@ main > .container {
           padding-right: .3rem;
         }
       }
+    }
+    .applemail__controlpanel--shrinked {
+      flex-shrink: 1;
+      width: 5rem;
+      overflow-x: hidden;
+      transition: width .15s ease-in-out;
+      overflow-y: hidden;
+      text-align: center;
     }
 
     .details-board {

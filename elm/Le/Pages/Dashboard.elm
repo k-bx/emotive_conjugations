@@ -68,6 +68,7 @@ type alias Model =
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
     , tokenCardExpanded : Bool
     , nerGroup : Maybe Api.NamedEntityGroup
+    , controlPanelExpanded : Bool
     }
 
 
@@ -92,6 +93,7 @@ init key ner active =
       , selectedNer = Nothing
       , tokenCardExpanded = False
       , nerGroup = Nothing
+      , controlPanelExpanded = True
       }
     , Cmd.batch <|
         [ Api.getApiAccountinfojson GotAccount
@@ -728,58 +730,86 @@ mainContent model =
                 ]
 
         articleControlPanel =
+            let
+                expandToggle =
+                    case model.controlPanelExpanded of
+                        True ->
+                            div [ class "d-flex flex-row justify-content-end cursor-pointer" ]
+                                [ i
+                                    [ class "far fa-chevron-double-right"
+                                    , onClick <| UpdateModel { model | controlPanelExpanded = not model.controlPanelExpanded }
+                                    ]
+                                    []
+                                ]
+
+                        False ->
+                            div [ class "d-flex flex-row justify-content-center cursor-pointer" ]
+                                [ i
+                                    [ class "far fa-chevron-double-left"
+                                    , onClick <| UpdateModel { model | controlPanelExpanded = not model.controlPanelExpanded }
+                                    ]
+                                    []
+                                ]
+            in
             div [] <|
-                [ div [ class "mt-2 d-flex flex-row justify-content-between" ]
-                    [ text "Highlight POS"
-                    , div [ class "switch" ]
-                        [ input
-                            [ class "switch-input"
-                            , id "highlight-pos-checkbox"
-                            , name "check"
-                            , type_ "checkbox"
-                            , checked model.highlightPos
-                            , onClick (UpdateModel { model | highlightPos = not model.highlightPos })
+                [ expandToggle
+                , div
+                    [ class "applemail__controlpanel__content-under-toggle"
+                    , classList [ ( "applemail__controlpanel__content-under-toggle--shrinked", not model.controlPanelExpanded ) ]
+                    ]
+                  <|
+                    [ div [ class "mt-3 d-flex flex-row justify-content-between" ]
+                        [ text "Highlight POS"
+                        , div [ class "switch" ]
+                            [ input
+                                [ class "switch-input"
+                                , id "highlight-pos-checkbox"
+                                , name "check"
+                                , type_ "checkbox"
+                                , checked model.highlightPos
+                                , onClick (UpdateModel { model | highlightPos = not model.highlightPos })
+                                ]
+                                []
+                            , label
+                                [ class "switch-label mb-0"
+                                , for "highlight-pos-checkbox"
+                                ]
+                                [ text "switch" ]
                             ]
-                            []
-                        , label
-                            [ class "switch-label mb-0"
-                            , for "highlight-pos-checkbox"
+                        ]
+                    , div [ class "mt-2 d-flex flex-row justify-content-between" ]
+                        [ text "Highlight all NERs"
+                        , div [ class "switch" ]
+                            [ input
+                                [ class "switch-input"
+                                , id "highlight-all-ners-checkbox"
+                                , name "check"
+                                , type_ "checkbox"
+                                , checked model.highlightAllNers
+                                , onClick (UpdateModel { model | highlightAllNers = not model.highlightAllNers })
+                                ]
+                                []
+                            , label
+                                [ class "switch-label mb-0"
+                                , for "highlight-all-ners-checkbox"
+                                ]
+                                [ text "switch" ]
                             ]
-                            [ text "switch" ]
                         ]
                     ]
-                , div [ class "mt-2 d-flex flex-row justify-content-between" ]
-                    [ text "Highlight all NERs"
-                    , div [ class "switch" ]
-                        [ input
-                            [ class "switch-input"
-                            , id "highlight-all-ners-checkbox"
-                            , name "check"
-                            , type_ "checkbox"
-                            , checked model.highlightAllNers
-                            , onClick (UpdateModel { model | highlightAllNers = not model.highlightAllNers })
-                            ]
-                            []
-                        , label
-                            [ class "switch-label mb-0"
-                            , for "highlight-all-ners-checkbox"
-                            ]
-                            [ text "switch" ]
-                        ]
-                    ]
+                        ++ (model.selectedToken
+                                |> Maybe.map renderSelectedToken
+                                |> Maybe.Extra.unwrap [] List.singleton
+                           )
+                        ++ (model.selectedNer
+                                |> Maybe.map renderSelectedNer
+                                |> Maybe.Extra.unwrap [] List.singleton
+                           )
+                        ++ (model.nerGroup
+                                |> Maybe.map renderNerGroup
+                                |> Maybe.Extra.unwrap [] List.singleton
+                           )
                 ]
-                    ++ (model.selectedToken
-                            |> Maybe.map renderSelectedToken
-                            |> Maybe.Extra.unwrap [] List.singleton
-                       )
-                    ++ (model.selectedNer
-                            |> Maybe.map renderSelectedNer
-                            |> Maybe.Extra.unwrap [] List.singleton
-                       )
-                    ++ (model.nerGroup
-                            |> Maybe.map renderNerGroup
-                            |> Maybe.Extra.unwrap [] List.singleton
-                       )
     in
     main_ [ class "main-content", attribute "role" "main" ]
         [ div [ class "applemail" ]
@@ -788,7 +818,10 @@ mainContent model =
             , div [ class "applemail__content" ]
                 [ articleFullDetailsBlock
                 ]
-            , div [ class "applemail__controlpanel" ]
+            , div
+                [ class "applemail__controlpanel"
+                , classList [ ( "applemail__controlpanel--shrinked", not model.controlPanelExpanded ) ]
+                ]
                 [ articleControlPanel
                 ]
             ]
@@ -834,7 +867,7 @@ view vps model =
             , SelectTwo.Html.select2Close SelectTwo
             ]
             [ Le.Block.Dashboard.view DashboardMsg vps.routeName model.accInfo <|
-                div [class "search-and-main"]
+                div [ class "search-and-main" ]
                     [ searchPanel model
                     , mainContent model
                     ]

@@ -10197,6 +10197,14 @@ main > .container {
   flex-shrink: 0;
   padding: 1rem;
   overflow-y: scroll;
+  transition: width 0.15s ease-in-out;
+}
+.page-dashboard .applemail .applemail__controlpanel .applemail__controlpanel__content-under-toggle {
+  transition: opacity 0.15s ease-in;
+}
+.page-dashboard .applemail .applemail__controlpanel .applemail__controlpanel__content-under-toggle--shrinked {
+  opacity: 0;
+  transition: opacity 0.15s ease-in;
 }
 .page-dashboard .applemail .applemail__controlpanel .applemail__controlpanel__reltable td {
   text-align: center;
@@ -10205,6 +10213,14 @@ main > .container {
 .page-dashboard .applemail .applemail__controlpanel .applemail__controlpanel__reltable .applemail__controlpanel__reltable__arrow {
   padding-left: 0.3rem;
   padding-right: 0.3rem;
+}
+.page-dashboard .applemail .applemail__controlpanel--shrinked {
+  flex-shrink: 1;
+  width: 5rem;
+  overflow-x: hidden;
+  transition: width 0.15s ease-in-out;
+  overflow-y: hidden;
+  text-align: center;
 }
 .page-dashboard .applemail .details-board {
   font-size: 0.8rem;
