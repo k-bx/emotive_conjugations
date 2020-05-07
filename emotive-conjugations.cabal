@@ -4,18 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e02c5492ec37cffc640f281b651a011bc034af464f49b04ec16d2d25a6508416
+-- hash: a4b5ff8e9d16aaf80a5acd3a849c9b0fedff74fbb7967b72b68c43e38cdcfa2e
 
 name:           emotive-conjugations
 version:        0.1.0.2
 description:    Please see the README on Github at <https://github.com/githubuser/emotive-conjugations#readme>
 homepage:       https://github.com/githubuser/emotive-conjugations#readme
 bug-reports:    https://github.com/githubuser/emotive-conjugations/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
-license:        BSD3
-license-file:   LICENSE
+author:         Konstantine Rybnikov
+maintainer:     k-bx@k-bx.com
+copyright:      2020 Konstantine Rybnikov
+license:        AllRightsReserved
 build-type:     Simple
 extra-source-files:
     README.md

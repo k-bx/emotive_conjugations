@@ -27,50 +27,78 @@ runCmd = case os of
   _ ->
     setWorkingDir "dist" (proc "./conj" ["webapp"])
 
+reloadStaticEndpoint :: ProcessConfig () () ()
+reloadStaticEndpoint = "curl --insecure -XPOST https://localhost:8081/api/dev/reload-static.json"
+
+data RebuildPart = PartWhole | PartElm | PartScss
+
+whatChanged :: Maybe FSNotify.Event -> RebuildPart
+whatChanged mLastSignal =
+  case mLastSignal of
+    Nothing -> PartWhole
+    Just ev ->
+      case getEvPath ev of
+        Nothing -> PartWhole
+        Just path ->
+          let pathT = S.toText path
+           in if ".elm" `T.isSuffixOf` pathT
+                then PartElm
+                else
+                  if ".scss" `T.isSuffixOf` pathT
+                    then PartScss
+                    else PartWhole
+
 main :: IO ()
 main = do
   lastSignalMV <- MVar.newEmptyMVar
+  webapps <- newTVarIO []
   forever $ do
     mLastSignal <- MVar.tryReadMVar lastSignalMV
     Prelude.putStrLn ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    c <-
-      case mLastSignal of
-        Nothing -> do
-          Prelude.putStrLn $ ">> NOTHING"
-          runProcess makeCmd
-        Just ev ->
-          case getEvPath ev of
-            Nothing -> do
-              Prelude.putStrLn $ ">> PATH IS NOTHING"
-              runProcess makeCmd
-            Just path ->
-              let x' = S.toText path
-               in if ".elm" `T.isSuffixOf` x'
-                    then do
-                      Prelude.putStrLn $ ">> elm"
-                      runProcess makeElm
-                    else
-                      if ".scss" `T.isSuffixOf` x'
-                        then do
-                          Prelude.putStrLn $ ">> sass"
-                          runProcess makeSass
-                        else do
-                          Prelude.putStrLn $ ">> NOMATCH"
-                          runProcess makeCmd
-    mWebApp <-
-      case c of
-        ExitSuccess -> do
-          Just
-            <$> startProcess runCmd
-        _ -> pure Nothing
-    Prelude.putStrLn $ ">> mWebApp: " ++ show mWebApp
+    exitStatus <-
+      rebuild mLastSignal
+    needsKillAndRestart lastSignalMV >>= \case
+      False -> do
+        Prelude.putStrLn $ ">> not starting the webapp (should be running already)"
+      True -> do
+        case exitStatus of
+          ExitSuccess -> do
+            p <- startProcess runCmd
+            atomically $ modifyTVar webapps (p :)
+          _ -> pure ()
     (mynotifywait lastSignalMV) >> threadDelay 10000 -- 10 ms
-    case mWebApp of
-      Just webApp -> do
-        Prelude.putStrLn ">> Killing the webapp...."
-        stopProcess webApp
-      Nothing -> pure ()
+    needsKillAndRestart lastSignalMV >>= \case
+      True -> tryStopWebapps =<< readTVarIO webapps
+      False -> Prelude.putStrLn $ ">> not killing the webapp"
     Prelude.putStrLn "==================================================="
+
+tryStopWebapps :: [Process stdin stdout stderr] -> IO ()
+tryStopWebapps webApps = do
+  case webApps of
+    [] -> pure ()
+    _ -> do
+      Prelude.putStrLn ">> Killing the webapp...."
+      mapM_ stopProcess webApps
+
+needsKillAndRestart :: MVar FSNotify.Event -> IO Bool
+needsKillAndRestart lastSignalMV = do
+  fmap whatChanged (MVar.tryReadMVar lastSignalMV) >>= \case
+    PartWhole -> pure True
+    PartElm -> pure False
+    PartScss -> pure False
+
+rebuild :: Maybe FSNotify.Event -> IO ExitCode
+rebuild mLastSignal =
+  case whatChanged mLastSignal of
+    PartWhole -> runProcess makeCmd
+    PartElm -> do
+      rv <- runProcess makeElm
+      -- void $ runProcess reloadStaticEndpoint
+      pure rv
+    PartScss -> do
+      rv <- runProcess makeSass
+      -- void $ runProcess reloadStaticEndpoint
+      pure rv
 
 getEvPath :: FSNotify.Event -> Maybe FilePath
 getEvPath ev =
@@ -94,6 +122,8 @@ mynotifywait lastSignal = do
               && not ("#" `T.isInfixOf` x')
               && not (".git" `T.isInfixOf` x')
               && not (".stack-work" `T.isInfixOf` x')
+              && not (".shake" `T.isInfixOf` x')
+              && not ("/dist/" `T.isInfixOf` x')
               then True
               else False
   Prelude.putStrLn $ "> Listening to directory: " <> dir
