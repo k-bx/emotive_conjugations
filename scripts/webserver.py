@@ -3,7 +3,7 @@ from flask import Flask, request
 import spacy
 
 app = Flask(__name__)
-nlp = spacy.load("en_core_web_lg")
+nlp = spacy.load("en_core_web_md")
 # nlp = spacy.load("en_core_web_sm")
 
 @app.route('/ping')
