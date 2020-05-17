@@ -88,8 +88,4 @@ saveSpacyNer articleId res = do
               namedEntityEndChar = cseEndChar,
               namedEntityLabel_ = cseLabel_,
               namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
-              -- namedEntitySearch1 = Just "",
-              -- namedEntitySearch2 = Just "",
-              -- namedEntitySearch3 = Just "",
-              -- namedEntityProper = Nothing
             }

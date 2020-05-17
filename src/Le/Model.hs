@@ -85,13 +85,8 @@ NamedEntity
     end Int
     endChar Int
     label_ Text
-    search1 Text Maybe
-    search2 Text Maybe
-    search3 Text Maybe
     -- | equivalence class, basically
     canonical Text Maybe
-    -- -- | most popular of this canonical's usages
-    proper Text Maybe
     deriving Show
 -- | Cache for named entity propers
 NamedPropers
