@@ -77,7 +77,7 @@ saveSpacyNer articleId res = do
     P.update articlePleaseBigId [ArticlePleaseBigSpacyNer P.=. (Just res)]
     forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
       when (cseLabel_ == "PERSON") $ do
-        let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
+        -- let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
         void $ P.insert $
           NamedEntity
             { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
@@ -87,9 +87,9 @@ saveSpacyNer articleId res = do
               namedEntityEnd = cseEnd,
               namedEntityEndChar = cseEndChar,
               namedEntityLabel_ = cseLabel_,
-              namedEntitySearch1 = Just search1,
-              namedEntitySearch2 = Just search2,
-              namedEntitySearch3 = Just search3,
-              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText),
-              namedEntityProper = Nothing
+              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
+              -- namedEntitySearch1 = Just "",
+              -- namedEntitySearch2 = Just "",
+              -- namedEntitySearch3 = Just "",
+              -- namedEntityProper = Nothing
             }

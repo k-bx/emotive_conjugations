@@ -20,11 +20,10 @@ queryPersonNamedEntities query page = do
       let offsetT = tshow @Int ((page - 1) * lim)
       let qry =
             [qc|
-      SELECT DISTINCT proper FROM "named_entity" ne
-      WHERE label_ = 'PERSON'
-        AND ((ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
-             and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
-             and (ne.search1 like ? or ne.search2 like ? or ne.search3 like ?)
+      SELECT DISTINCT proper FROM "named_propers" np
+       WHERE ((np.search1 like ? or np.search2 like ? or np.search3 like ?)
+             and (np.search1 like ? or np.search2 like ? or np.search3 like ?)
+             and (np.search1 like ? or np.search2 like ? or np.search3 like ?)
             )
       LIMIT ${limT}
       OFFSET ${offsetT}

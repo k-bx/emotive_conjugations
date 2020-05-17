@@ -161,3 +161,6 @@ recreate-db:
 	PGPASSWORD=password psql -h localhost -U postgres -c 'DROP DATABASE conj' || true
 	PGPASSWORD=password psql -h localhost -U postgres -c 'CREATE DATABASE conj' || true
 	$(CONJ) migrate
+
+copy-prod-db:
+	./sysadmin/copy-prod-db.sh

@@ -44,38 +44,27 @@ namedEntityCanonicalForm t =
       T.replace "'s" ""
         . T.replace "’s" ""
 
-reindexNers :: ReaderT P.SqlBackend IO ()
-reindexNers = do
-  ners <- P.selectList [] []
-  forM_ ners $ \ner -> do
-    let (s1, s2, s3) = computeSearchTerms (namedEntityEntity (ev ner))
-    P.update
-      (entityKey ner)
-      [ NamedEntitySearch1 P.=. Just s1,
-        NamedEntitySearch2 P.=. Just s2,
-        NamedEntitySearch3 P.=. Just s3,
-        NamedEntityCanonical
-          P.=. Just
-            ( namedEntityCanonicalForm
-                (namedEntityEntity (ev ner))
-            )
-      ]
-
 reindexProper :: Le ()
 reindexProper = do
-  ners <- Le.App.runDb $ P.selectList [NamedEntityProper P.==. Nothing] []
-  let overallLen = length ners
-  speed <- Le.Speed.newSpeed overallLen
-  app <- ask
-  pooledForConcurrentlyN_ (envNumCapabilities app) (zip [0 ..] ners) $ \(i, ner) -> do
+  logInfo $ display $ ("> reindexProper"::Text)
+  [P.Single lengthNamedEntities] <- Le.App.runDb $ E.rawSql [q|select count(*) from named_entity|] []
+  -- nersRes <- Le.App.runDb $ P.selectSourceRes [NamedEntityProper P.==. Nothing] []
+  nersRes <- Le.App.runDb $ P.selectSourceRes [] []
+  speed <- Le.Speed.newSpeed lengthNamedEntities
+  -- app <- ask
+  -- pooledForConcurrentlyN_ (envNumCapabilities app) (zip [0 ..] ners) $ \(i, ner) -> do
+  Le.App.forCondResEnum nersRes $ \(i, ner) -> do
     Le.Speed.withProgress i speed $ \t -> do
       logInfo $ display $ "> Processing ner: " <> t
-    Le.App.runDb $ do
-      -- mNEProp <- P.getBy (UniqueNamedPropersEntity (namedEntityEntity (ev ner)))
-      mNEProp <- P.get (NamedPropersKey (namedEntityEntity (ev ner)))
-      case mNEProp of
-        Just neProp -> do
-          P.update (entityKey ner) [NamedEntityProper P.=. Just (namedPropersProper neProp)]
+    ensureNerProper ner
+
+ensureNerProper :: Entity NamedEntity -> Le ()
+ensureNerProper ner = do
+  Le.App.runDb $ do
+      mProp <- P.get (NamedPropersKey (namedEntityEntity (ev ner)))
+      case mProp of
+        Just _prop -> do
+          pure ()
         Nothing -> do
           nersSameCanonical <- P.selectList [NamedEntityCanonical P.==. namedEntityCanonical (ev ner)] []
           let mostPopularEntity :: Text
@@ -88,16 +77,14 @@ reindexProper = do
                   |> Safe.headMay
                   |> fmap fst
                   |> fromMaybe (namedEntityEntity (ev ner))
-          P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
+          -- P.update (entityKey ner) [NamedEntityProper P.=. Just mostPopularEntity]
+          let (s1, s2, s3) = computeSearchTerms (namedEntityEntity (ev ner))
           E.rawExecute
-            [q|insert into named_propers (entity, proper) values (?, ?)
+            [q|insert into named_propers (entity, proper, search1, search2, search3, canonical) values (?, ?, ?, ?, ?, ?)
                on conflict do nothing|]
-            [P.PersistText (namedEntityEntity (ev ner)), P.PersistText mostPopularEntity]
-          -- P.repsert
-          --   (NamedPropersKey (namedEntityEntity (ev ner)))
-          --   ( NamedPropers
-          --       { namedPropersEntity = namedEntityEntity (ev ner),
-          --         namedPropersProper = mostPopularEntity
-          --       }
-          --   )
+            [ P.PersistText (namedEntityEntity (ev ner))
+            , P.PersistText mostPopularEntity
+            , P.PersistText s1, P.PersistText s2, P.PersistText s3
+            , P.PersistText (namedEntityCanonicalForm (namedEntityEntity (ev ner)))
+            ]
           pure ()

@@ -67,14 +67,24 @@ migrateData :: Env -> ReaderT P.SqlBackend IO ()
 migrateData app = do
   migrationInfo <- getMigrationInfo
   let version = migrationInfoVersion migrationInfo
-  when (version <= 1) Le.Search.reindexNers -- 1 -> 2
-  when (version <= 2) (runRIO app Le.Search.reindexProper) -- 2 -> 3
-  when (version <= 3) (pure ()) -- 3-> 4
+  -- when (version <= 1) Le.Search.reindexNers -- 1 -> 2
+  when (version <= 1) (pure ()) -- 1 -> 2
+  when (version <= 2) (pure ()) -- 2 -> 3
+  when (version <= 3) (pure ()) -- 3 -> 4
+  when (version <= 4) (runRIO app Le.Search.reindexProper) -- 4 -> 5
   when (version < latestVersion) (setMigrationVersion latestVersion)
+
+-- delete from named_propers;
+-- runRIO app Le.Search.reindexProper
+-- drop search1,2,3,proper from ner
+-- alter table named_entity drop column search1;
+-- alter table named_entity drop column search2;
+-- alter table named_entity drop column search3;
+-- alter table named_entity drop column proper;
 
 -- Update this when you add more migrations
 latestVersion :: Int
-latestVersion = 4
+latestVersion = 5
 
 getMigrationInfo :: ReaderT P.SqlBackend IO MigrationInfo
 getMigrationInfo = do
@@ -96,25 +106,18 @@ cleanDbData = Le.App.run $ do
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter ArticlePlease])
   Le.App.runDb $ P.deleteCascadeWhere ([] :: [P.Filter Article])
 
-migrate03 :: Env -> ReaderT P.SqlBackend IO ()
-migrate03 app = pure ()
+recalc_canonical :: Env -> ReaderT P.SqlBackend IO ()
+recalc_canonical app = do
+  runRIO app $ logInfo $ display $ ("> starting recalc_canonical" :: Text)
+  [Single lengthNers] <- E.rawSql [q|select count(*) from named_entity|] []
+  runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthNers)
+  speed <- Le.Speed.newSpeed lengthNers
+  nersRes <- selectSourceRes ([] :: [P.Filter NamedEntity]) []
+  Le.App.forCondResEnum nersRes (act speed)
   where
-    _legacy = do
-      runRIO app $ logInfo $ display $ ("> starting migrate03" :: Text)
-      [Single lengthArticlePleases] <- E.rawSql [q|select count(*) from article_please|] []
-      runRIO app $ logInfo $ display $ ("> length: " <> tshow lengthArticlePleases)
-      speed <- Le.Speed.newSpeed lengthArticlePleases
-      articlesRes <- selectSourceRes ([] :: [P.Filter ArticlePlease]) []
-      Le.App.forCondResEnum articlesRes (act speed)
-      where
-        act :: Le.Speed.Speed -> (Int, Entity ArticlePlease) -> ReaderT P.SqlBackend IO ()
-        act speed (i, _articlePlease) = do
-          Le.Speed.withProgress i speed $ \t -> do
-            runRIO app $ logInfo $ display $ "> Processing article please: " <> t
-          -- void $ P.insert $ undefined
-          -- ArticlePleaseBig
-          --   { articlePleaseBigMaintext = articlePleaseMaintext (ev articlePlease),
-          --     articlePleaseBigSpacyNer = articlePleaseSpacyNer (ev articlePlease),
-          --     articlePleaseBigSpacyPos = articlePleaseSpacyPos (ev articlePlease)
-          --   }
-          pure ()
+    act :: Le.Speed.Speed -> (Int, Entity NamedEntity) -> ReaderT P.SqlBackend IO ()
+    act speed (i, ner) = do
+      Le.Speed.withProgress i speed $ \t -> do
+        runRIO app $ logInfo $ display $ "> Processing ner: " <> t
+      P.update (entityKey ner) [NamedEntityCanonical P.=. Just (Le.Search.namedEntityCanonicalForm (namedEntityEntity (ev ner)))]
+      pure ()
