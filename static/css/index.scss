@@ -75,7 +75,8 @@ main > .container {
 .badge-highlighed-token {
   background-color: #fd884f;
   color: #fff;
-  font-size: 1rem;
+  // font-size: 1rem;
+  font-size: 90%;
   padding: 0.25em 0.4em;
   font-weight: 700;
   // padding: .25em .4em;
@@ -195,83 +196,86 @@ main > .container {
   height: 3rem;
 }
 
+// component-specific
+
+.article {
+  font-size: 1.2rem;
+
+  .content-token-wrap {
+    display: inline-block;
+  }
+  .content-token {
+    .content-token__pos {
+      font-size: .4rem;
+    }
+  }
+  .content-token--ADP {
+    border-bottom: 3px solid #1a7998;
+  }
+  .content-token--PROPN {
+    border-bottom: 3px solid #a2b870;
+  }
+  .content-token--VERB {
+    border-bottom: 3px solid #fd884f;
+  }
+  .content-token--NOUN {
+    border-bottom: 3px solid #5fa793;
+  }
+  .content-token--ADV {
+    border-bottom: 3px solid #feda5f;
+  }
+  .content-token--ADJ {
+    border-bottom: 3px solid #b0c2c4;
+  }
+  .content-token--ADV {
+    border-bottom: 3px solid #feda5f;
+  }
+  .content-token--CCONJ {
+    border-bottom: 3px solid #dcf3f5;
+  }
+  .content-token--AUX {
+    border-bottom: 3px solid #4c4f6a;
+  }
+  .content-token--DET {
+    border-bottom: 3px solid #ffe9da;
+  }
+  .content-token--NUM {
+    border-bottom: 3px solid #c62535;
+  }
+  .content-token--SCONJ {
+    border-bottom: 3px solid #003e21;
+  }
+  .content-token--PRON {
+    border-bottom: 3px solid #1b8057;
+  }
+  .content-token--PART {
+    border-bottom: 3px solid #55a44e;
+  }
+  .content-token--INTJ {
+    border-bottom: 3px solid #d7c37a;
+  }
+  // .content-token--? {
+  //   border-bottom: 3px solid #ede9a3;
+  // }
+
+  // must match .badge-highlighed-token
+  .content-token:hover {
+    background-color: #fd884f;
+    color: #fff;
+    font-size: 90%;
+    // font-size: 1rem;
+    padding: 0.25em 0.4em;
+    font-weight: 700;
+    // padding: .25em .4em;
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+}
+
 // page-specific stuff
 
 .page-dashboard {
-  .article {
-    font-size: 1.2rem;
-
-    .content-token-wrap {
-      display: inline-block;
-    }
-    .content-token {
-      .content-token__pos {
-        font-size: .4rem;
-      }
-    }
-    .content-token--ADP {
-      border-bottom: 3px solid #1a7998;
-    }
-    .content-token--PROPN {
-      border-bottom: 3px solid #a2b870;
-    }
-    .content-token--VERB {
-      border-bottom: 3px solid #fd884f;
-    }
-    .content-token--NOUN {
-      border-bottom: 3px solid #5fa793;
-    }
-    .content-token--ADV {
-      border-bottom: 3px solid #feda5f;
-    }
-    .content-token--ADJ {
-      border-bottom: 3px solid #b0c2c4;
-    }
-    .content-token--ADV {
-      border-bottom: 3px solid #feda5f;
-    }
-    .content-token--CCONJ {
-      border-bottom: 3px solid #dcf3f5;
-    }
-    .content-token--AUX {
-      border-bottom: 3px solid #4c4f6a;
-    }
-    .content-token--DET {
-      border-bottom: 3px solid #ffe9da;
-    }
-    .content-token--NUM {
-      border-bottom: 3px solid #c62535;
-    }
-    .content-token--SCONJ {
-      border-bottom: 3px solid #003e21;
-    }
-    .content-token--PRON {
-      border-bottom: 3px solid #1b8057;
-    }
-    .content-token--PART {
-      border-bottom: 3px solid #55a44e;
-    }
-    .content-token--INTJ {
-      border-bottom: 3px solid #d7c37a;
-    }
-    // .content-token--? {
-    //   border-bottom: 3px solid #ede9a3;
-    // }
-
-    // must match .badge-highlighed-token
-    .content-token:hover {
-      background-color: #fd884f;
-      color: #fff;
-      font-size: 1rem;
-      padding: 0.25em 0.4em;
-      font-weight: 700;
-      // padding: .25em .4em;
-      border-radius: .25rem;
-      cursor: pointer;
-      transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-  }
-
   .search-and-main {
     height: 100%;
     overflow-y: auto;

@@ -73,6 +73,13 @@ runQueue act = do
   System.Environment.setEnv Le.Config.confEnvVarName p
   run act
 
+runQueueLocal :: Le a -> IO a
+runQueueLocal act = do
+  h <- System.Directory.getHomeDirectory
+  let p = h <> "/conj-queue-local.dhall"
+  System.Environment.setEnv Le.Config.confEnvVarName p
+  run act
+
 -- runDb :: ReaderT P.SqlBackend IO b -> Le b
 runDb :: (MonadReader Env m, MonadUnliftIO m) => ReaderT P.SqlBackend m b -> m b
 runDb f = do

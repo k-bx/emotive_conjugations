@@ -53,10 +53,20 @@ main = forever $ do
             Just maintext -> do
               res2 <- lift $ Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts maintext)
               lift $ Le.Article.BL.saveSpacyNer articleId res2
-              P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusPos]
-              res <- lift $ Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts maintext)
               let articlePleaseBigId :: ArticlePleaseBigId
                   articlePleaseBigId = P.toSqlKey (P.fromSqlKey articleId)
+              case Le.Python.cnrTitle res1 of
+                Just title -> do
+                  resNerTitle <- lift $ Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts title)
+                  resPosTitle <- lift $ Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts title)
+                  P.update
+                    articlePleaseBigId
+                    [ ArticlePleaseBigTitleSpacyNer P.=. Just resNerTitle,
+                      ArticlePleaseBigTitleSpacyPos P.=. Just resPosTitle
+                    ]
+                Nothing -> pure ()
+              P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusPos]
+              res <- lift $ Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts maintext)
               P.update articlePleaseBigId [ArticlePleaseBigSpacyPos P.=. (Just res)]
               P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusDone]
       where

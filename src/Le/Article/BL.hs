@@ -58,7 +58,9 @@ repsertReceivedParseNewsPleaseRes uriText mWarcRecId mWarcDt i speed Le.Python.C
           ArticlePleaseBig
             { articlePleaseBigMaintext = fromMaybe "" cnrMaintext,
               articlePleaseBigSpacyNer = Nothing,
-              articlePleaseBigSpacyPos = Nothing
+              articlePleaseBigTitleSpacyNer = Nothing,
+              articlePleaseBigSpacyPos = Nothing,
+              articlePleaseBigTitleSpacyPos = Nothing
             }
         pure articleId
       Le.Speed.withProgress i speed $ \t -> do

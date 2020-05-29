@@ -69,7 +69,9 @@ articlePleaseDetailsBig bigId = sg $ do
       { arbId = bigId,
         arbMaintext = articlePleaseBigMaintext articlePleaseBig,
         arbSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseBigSpacyNer articlePleaseBig),
-        arbSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigSpacyPos articlePleaseBig)
+        arbTitleSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseBigTitleSpacyNer articlePleaseBig),
+        arbSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigSpacyPos articlePleaseBig),
+        arbTitleSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigTitleSpacyPos articlePleaseBig)
       }
 
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)

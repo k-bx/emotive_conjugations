@@ -75,7 +75,9 @@ ArticlePlease
 ArticlePleaseBig
     maintext Text
     spacyNer Le.Python.CmdSpacyNerRes Maybe
+    titleSpacyNer Le.Python.CmdSpacyNerRes Maybe
     spacyPos Le.Python.CmdSpacyPosRes Maybe
+    titleSpacyPos Le.Python.CmdSpacyPosRes Maybe
     deriving Show
 NamedEntity
     articlePleaseId ArticlePleaseId

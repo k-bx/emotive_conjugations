@@ -386,9 +386,31 @@ mainContent model =
                             [ text <| String.left 300 article.url ]
                         ]
                     ]
-                , div [ class "details-board__content__article" ]
-                    [ h2 [] [ text article.title ]
-                    , div [ class "article" ] <|
+                , div [ class "details-board__content__article article" ]
+                    [ h2 []
+                        [ case ( model.articlePlease, model.articlePleaseBig ) of
+                            ( Just articlePlease, Just articlePleaseBig ) ->
+                                Le.Article.renderContentNodes
+                                    { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
+                                    , highlightPos = model.highlightPos
+                                    , highlightAllNers = model.highlightAllNers
+                                    , onClickToken = TokenClicked
+                                    , onClickNer = NerClicked
+                                    , selectedToken = Maybe.map .i model.selectedToken
+                                    , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
+                                    , depParent = Maybe.map .i mDepHeadToken
+                                    , nodes =
+                                        Le.Article.computeContentNodes
+                                            { inputText = article.title
+                                            , mSpacyNers = articlePleaseBig.title_spacy_ner_ents
+                                            , mSpacyPoss = articlePleaseBig.title_spacy_pos_ents
+                                            }
+                                    }
+
+                            _ ->
+                                text article.title
+                        ]
+                    , div [] <|
                         case ( model.articlePlease, model.articlePleaseBig ) of
                             ( Just articlePlease, Just articlePleaseBig ) ->
                                 [ Le.Article.renderContentNodes

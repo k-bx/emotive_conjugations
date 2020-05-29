@@ -220,16 +220,20 @@ type alias ArticlePleaseBig  =
    { id: ArticlePleaseBigId
    , maintext: String
    , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
+   , title_spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
    , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
+   , title_spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
    }
 
 jsonDecArticlePleaseBig : Json.Decode.Decoder ( ArticlePleaseBig )
 jsonDecArticlePleaseBig =
-   Json.Decode.succeed (\pid pmaintext pspacy_ner_ents pspacy_pos_ents -> {id = pid, maintext = pmaintext, spacy_ner_ents = pspacy_ner_ents, spacy_pos_ents = pspacy_pos_ents})
+   Json.Decode.succeed (\pid pmaintext pspacy_ner_ents ptitle_spacy_ner_ents pspacy_pos_ents ptitle_spacy_pos_ents -> {id = pid, maintext = pmaintext, spacy_ner_ents = pspacy_ner_ents, title_spacy_ner_ents = ptitle_spacy_ner_ents, spacy_pos_ents = pspacy_pos_ents, title_spacy_pos_ents = ptitle_spacy_pos_ents})
    |> required "id" (jsonDecArticlePleaseBigId)
    |> required "maintext" (Json.Decode.string)
    |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
+   |> fnullable "title_spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
    |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
+   |> fnullable "title_spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
 
 jsonEncArticlePleaseBig : ArticlePleaseBig -> Value
 jsonEncArticlePleaseBig  val =
@@ -237,7 +241,9 @@ jsonEncArticlePleaseBig  val =
    [ ("id", jsonEncArticlePleaseBigId val.id)
    , ("maintext", Json.Encode.string val.maintext)
    , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
+   , ("title_spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.title_spacy_ner_ents)
    , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.spacy_pos_ents)
+   , ("title_spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.title_spacy_pos_ents)
    ]
 
 
