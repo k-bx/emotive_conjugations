@@ -3,7 +3,8 @@ STACK ?= stack
 DIST ?= ./dist
 pip=$(VIRTUAL_ENV)/bin/pip3
 python=$(VIRTUAL_ENV)/bin/python3
-CONJ=$$(stack exec -- which conj)
+# CONJ=$$(stack exec -- which conj)
+CONJ=$$(stack path --local-install-root)/bin/conj
 DIST ?= ./dist
 
 .PHONY: dev
@@ -115,6 +116,8 @@ install_python:
 	curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | $(python)
 	# this one is big, only do on desktop
 	$(python) -m spacy download en_core_web_lg
+	$(python) -m spacy download en_core_web_md
+	$(python) -m spacy download en_vectors_web_lg
 
 .PHONY: tags
 tags:
@@ -142,6 +145,10 @@ setup:
 .PHONY: setup-webapp-python
 setup-webapp-python:
 	cd sysadmin && ./setup-webapp-python.sh
+
+.PHONY: deploy-webapp-python
+deploy-webapp-python:
+	sudo systemctl restart conj-webapp-python
 
 .PHONY: setup-queue-worker
 setup-queue-worker:

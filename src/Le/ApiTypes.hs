@@ -86,8 +86,8 @@ data ArticlePleaseBig = ArticlePleaseBig
     arbMaintext :: Text,
     arbSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
     arbTitleSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
-    arbSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt],
-    arbTitleSpacyPosEnts :: Maybe [Le.Python.CmdSpacyPosResEnt]
+    arbSpacyPosEnts :: Maybe [Le.Python.SpacyToken],
+    arbTitleSpacyPosEnts :: Maybe [Le.Python.SpacyToken]
   }
   deriving (Show, Eq, Generic)
 

@@ -38,7 +38,7 @@ moduleDefs =
     DefineElm (Proxy :: Proxy AT.ArticlePleaseBig),
     DefineElm (Proxy :: Proxy AT.NamedEntityGroup),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
-    DefineElm (Proxy :: Proxy Le.Python.CmdSpacyPosResEnt),
+    DefineElm (Proxy :: Proxy Le.Python.SpacyToken),
     DefineElm (Proxy :: Proxy (AT.Paginated Text)),
     DefineElm (Proxy :: Proxy AT.QueueAddForm),
     DefineElm (Proxy :: Proxy AT.AccountInfo),

@@ -83,51 +83,53 @@ data CmdSpacyPosOpts = CmdSpacyPosOpts
 
 deriveBoth (jsonOpts 3) ''CmdSpacyPosOpts
 
-data CmdSpacyPosResEnt = CmdSpacyPosResEnt
-  { creText :: Text,
-    creLemma_ :: Text,
-    crePos_ :: Text,
-    creTag_ :: Text,
-    creDep_ :: Text,
-    creShape_ :: Text,
-    creIsAlpha :: Bool,
-    creIsAscii :: Bool,
-    creIsDigit :: Bool,
-    creIsPunct :: Bool,
-    creIsLeftPunct :: Bool,
-    creIsRightPunct :: Bool,
-    creIsSpace :: Bool,
-    creIsBracket :: Bool,
-    creIsQuote :: Bool,
-    creIsCurrency :: Bool,
-    creLikeUrl :: Bool,
-    creLikeNum :: Bool,
-    creLikeMail :: Bool,
-    creIsOov :: Bool,
-    creIsStop :: Bool,
-    creHeadI :: Int,
-    creLeftEdgeI :: Int,
-    creRightEdgeI :: Int,
-    creI :: Int,
-    creEntType_ :: Text,
-    creEntIob_ :: Text,
-    creEntKbId :: Int,
-    creEntKbId_ :: Text,
-    creNorm_ :: Text,
-    creLang_ :: Text,
-    creProb :: Double,
-    creIdx :: Int,
-    creSentiment :: Double,
-    creLexId :: Int,
-    creRank :: Int,
-    creCluster :: Int
+-- | Spacy's `Token` type encoded
+data SpacyToken = SpacyToken
+  { sptText :: Text,
+    sptOrth :: Integer, -- ^ note: too big for Int
+    sptLemma_ :: Text,
+    sptPos_ :: Text,
+    sptTag_ :: Text,
+    sptDep_ :: Text,
+    sptShape_ :: Text,
+    sptIsAlpha :: Bool,
+    sptIsAscii :: Bool,
+    sptIsDigit :: Bool,
+    sptIsPunct :: Bool,
+    sptIsLeftPunct :: Bool,
+    sptIsRightPunct :: Bool,
+    sptIsSpace :: Bool,
+    sptIsBracket :: Bool,
+    sptIsQuote :: Bool,
+    sptIsCurrency :: Bool,
+    sptLikeUrl :: Bool,
+    sptLikeNum :: Bool,
+    sptLikeMail :: Bool,
+    sptIsOov :: Bool,
+    sptIsStop :: Bool,
+    sptHeadI :: Int,
+    sptLeftEdgeI :: Int,
+    sptRightEdgeI :: Int,
+    sptI :: Int,
+    sptEntType_ :: Text,
+    sptEntIob_ :: Text,
+    sptEntKbId :: Int,
+    sptEntKbId_ :: Text,
+    sptNorm_ :: Text,
+    sptLang_ :: Text,
+    sptProb :: Double,
+    sptIdx :: Int,
+    sptSentiment :: Double,
+    sptLexId :: Int,
+    sptRank :: Int,
+    sptCluster :: Int
   }
   deriving (Generic, Show, Eq)
 
-deriveBoth (jsonOpts 3) ''CmdSpacyPosResEnt
+deriveBoth (jsonOpts 3) ''SpacyToken
 
 data CmdSpacyPosRes = CmdSpacyPosRes
-  { cprTokens :: [CmdSpacyPosResEnt]
+  { cprTokens :: [SpacyToken]
   }
   deriving (Generic, Show, Eq)
 

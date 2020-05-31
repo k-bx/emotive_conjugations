@@ -153,3 +153,9 @@ spacyPosArticles = do
     res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts (articlePleaseBigMaintext (ev articleBigNp)))
     runDb $ do
       P.update (entityKey articleBigNp) [ArticlePleaseBigSpacyPos P.=. (Just res)]
+
+testSpacyPos :: Le ()
+testSpacyPos = do
+  let article = "Elon Musk continues insisting he is a human, not an ORG"
+  res <- Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts article)
+  logInfo $ display $ tshow res
