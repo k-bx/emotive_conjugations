@@ -46,6 +46,7 @@ commands ver =
     <> cmd "queue-worker" "Consume the queue for a remote database" (pure (runQueue Le.Queue.Worker.main))
     <> cmd "queue-worker-local" "Like queue-worker but reads conj-queue-local.dhall" (pure (runQueueLocal Le.Queue.Worker.main))
     <> cmd "test-spacy-pos" "Test spacy POS" (pure (run Le.CommonCrawl.Cmd.testSpacyPos))
+    <> cmd "test-fasttext-sentiment-amazon" "Test spacy POS" (pure (run Le.Python.testFasttextSentimentAmazon))
 
 cmd :: String -> String -> Parser a -> Mod CommandFields a
 cmd n d p = command n (info p (progDesc d))

@@ -9,7 +9,7 @@ gunicorn
 jupyterlab
 # git+https://github.com/fhamborg/news-please.git
 ./vendor/news-please
-keras
+# keras
 cytoolz
 tensorflow
-
+fasttext

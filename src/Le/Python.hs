@@ -15,7 +15,9 @@ import qualified Le.Config
 import Le.Import
 import Le.Util
 import qualified Network.Wreq as W
+import qualified Safe
 import qualified UnliftIO.Process
+import qualified Prelude
 
 newtype PythonError = PythonError String
   deriving (Show)
@@ -86,7 +88,8 @@ deriveBoth (jsonOpts 3) ''CmdSpacyPosOpts
 -- | Spacy's `Token` type encoded
 data SpacyToken = SpacyToken
   { sptText :: Text,
-    sptOrth :: Integer, -- ^ note: too big for Int
+    -- | note: too big for Int
+    sptOrth :: Integer,
     sptLemma_ :: Text,
     sptPos_ :: Text,
     sptTag_ :: Text,
@@ -180,6 +183,28 @@ data CmdDownloadUrlNewsPleaseOpts = CmdDownloadUrlNewsPleaseOpts
 
 deriveBoth (jsonOpts 3) ''CmdDownloadUrlNewsPleaseOpts
 
+data CmdFasttextSentimentAmazonOpts = CmdFasttextSentimentAmazonOpts
+  { -- | preprocessing needs to be done by the calling site
+    cfaSentences :: [Text]
+  }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''CmdFasttextSentimentAmazonOpts
+
+data FasttextSentiment = FasttextSentiment
+  { -- | value in [-1.0, 1.0] range
+    fssLabel :: Float,
+    fssConfidence :: Maybe Float
+  }
+  deriving (Generic, Show)
+
+deriveBoth (jsonOpts 3) ''FasttextSentiment
+
+newtype CmdFasttextSentimentAmazonRes = CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
+  deriving (Generic, Show, FromJSON, ToJSON)
+
+instance Newtype CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
+
 data Cmd
   = CmdPing
   | CmdParseArticle CmdParseArticleOpts
@@ -187,6 +212,7 @@ data Cmd
   | CmdSpacyNer CmdSpacyNerOpts
   | CmdSpacyPos CmdSpacyPosOpts
   | CmdDownloadUrlNewsPlease CmdDownloadUrlNewsPleaseOpts
+  | CmdFasttextSentimentAmazon CmdFasttextSentimentAmazonOpts
   deriving (Generic, Show)
 
 deriveBoth (jsonOpts 0) ''Cmd
@@ -232,14 +258,15 @@ runPythonParsing c = do
   case J.eitherDecode out of
     Right v -> pure v
     Left e -> do
-      logError $ display $
-        "Python command failed. Command: " <> T.take 300 (tshow c)
-          <> "; \nerror: "
-          <> tshow e
-          <> "; \nout: "
-          <> T.take 300 (tshow out)
-          <> "; \nerr: "
-          <> S.toText err
+      logError $
+        display $
+          "Python command failed. Command: " <> T.take 300 (tshow c)
+            <> "; \nerror: "
+            <> tshow e
+            <> "; \nout: "
+            <> T.take 300 (tshow out)
+            <> "; \nerr: "
+            <> S.toText err
       error "runPythonParsing failure"
 
 runPythonWeb :: FromJSON a => Cmd -> Le a
@@ -286,3 +313,19 @@ cmdSpacyPos opts = runPythonWeb (CmdSpacyPos opts)
 
 cmdDownloadUrlNewsPlease :: CmdDownloadUrlNewsPleaseOpts -> Le CmdParseNewsPleaseRes
 cmdDownloadUrlNewsPlease opts = runPythonParsing (CmdDownloadUrlNewsPlease opts)
+
+cmdFasttextSentimentAmazon :: CmdFasttextSentimentAmazonOpts -> Le CmdFasttextSentimentAmazonRes
+cmdFasttextSentimentAmazon opts = runPythonWeb (CmdFasttextSentimentAmazon opts)
+
+testFasttextSentimentAmazon :: Le ()
+testFasttextSentimentAmazon = do
+  res <- cmdFasttextSentimentAmazon (CmdFasttextSentimentAmazonOpts {cfaSentences = ["wonderfully talented masterpiece deserving recognition", "despicably awful tasteless piece of garbage"]})
+  let fasttextSentiments = map (Safe.fromJustNote "bad") (unpack res)
+  when (length fasttextSentiments /= 2) $ error "Length must be 2"
+  case Prelude.head fasttextSentiments of
+    FasttextSentiment (1.0) _conf1 -> pure ()
+    _ -> error "Bad"
+  case Prelude.head (Prelude.tail fasttextSentiments) of
+    (FasttextSentiment (-1.0) _conf2) -> pure ()
+    _ -> error "Bad"
+  logInfo "All good!"

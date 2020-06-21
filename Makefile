@@ -117,7 +117,8 @@ install_python:
 	# this one is big, only do on desktop
 	$(python) -m spacy download en_core_web_lg
 	$(python) -m spacy download en_core_web_md
-	$(python) -m spacy download en_vectors_web_lg
+	# $(python) -m spacy download en_vectors_web_lg
+	mkdir -p ~/tmp/emotive_conjugations/data/fasttext/ && curl -C -o ~/tmp/emotive_conjugations/data/fasttext/amazon_review_full.ftz https://dl.fbaipublicfiles.com/fasttext/supervised-models/amazon_review_full.ftz
 
 .PHONY: tags
 tags:
