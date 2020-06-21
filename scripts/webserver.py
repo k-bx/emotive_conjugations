@@ -4,23 +4,23 @@ import json
 from pathlib import Path
 from flask import Flask, request
 import spacy
-from deep_learning_keras import SentimentAnalyser
+# from deep_learning_keras import SentimentAnalyser
 
 app = Flask(__name__)
 print('> loading spacy')
 # nlp = spacy.load("en_core_web_md")
 nlp = spacy.load("en_core_web_sm")
 cfg = json.loads(subprocess.check_output(["dhall-to-json", "--file", Path.home() / 'conj.dhall']))
-sentiment_keras_max_length = 200
-print('> loading en_vectors_web_lg')
-nlp2 = spacy.load("en_vectors_web_lg")
-print('> loading vocab')
-nlp2.vocab.from_disk(Path(cfg['cfgDataDir']) / 'spacy_keras_model' / 'vocab')
-print('> loading analyser')
-sentiment_analyser = SentimentAnalyser.load(
-    Path(cfg['cfgDataDir']) / 'spacy_keras_model',
-    nlp2,
-    max_length=sentiment_keras_max_length)
+# sentiment_keras_max_length = 200
+# print('> loading en_vectors_web_lg')
+# nlp2 = spacy.load("en_vectors_web_lg")
+# print('> loading vocab')
+# nlp2.vocab.from_disk(Path(cfg['cfgDataDir']) / 'spacy_keras_model' / 'vocab')
+# print('> loading analyser')
+# sentiment_analyser = SentimentAnalyser.load(
+#     Path(cfg['cfgDataDir']) / 'spacy_keras_model',
+#     nlp2,
+#     max_length=sentiment_keras_max_length)
 
 
 @app.route('/ping')
@@ -54,7 +54,7 @@ def spacy_ner():
             rv["tokens"].append(encode_token(token))
         for sent in doc.sents:
             rv["sents"].append(encode_span(sent))
-            rv["sent_sentiment"][sent.start] = sentiment_analyser(sent)
+            # rv["sent_sentiment"][sent.start] = sentiment_analyser(sent)
         return rv
     raise ValueError('Bad request: ' + str(args['tag']))
 
