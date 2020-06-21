@@ -15,7 +15,7 @@ sentiment_keras_max_length = 200
 print('> loading en_vectors_web_lg')
 nlp2 = spacy.load("en_vectors_web_lg")
 print('> loading vocab')
-nlp.vocab.from_disk(Path(cfg['cfgDataDir']) / 'spacy_keras_model' / 'vocab')
+nlp2.vocab.from_disk(Path(cfg['cfgDataDir']) / 'spacy_keras_model' / 'vocab')
 print('> loading analyser')
 sentiment_analyser = SentimentAnalyser.load(
     Path(cfg['cfgDataDir']) / 'spacy_keras_model',

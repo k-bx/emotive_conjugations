@@ -56,7 +56,8 @@ class SentimentAnalyser:
     def __call__(self, doc):
         X = get_features([doc], self.max_length)
         y = self._model.predict(X)
-        self.set_sentiment(doc, y)
+        # self.set_sentiment(doc, y)
+        return float(y[0])
 
     def pipe(self, docs, batch_size=1000):
         for minibatch in cytoolz.partition_all(batch_size, docs):
@@ -71,12 +72,12 @@ class SentimentAnalyser:
             for doc in minibatch:
                 yield doc
 
-    def set_sentiment(self, doc, y):
-        doc.sentiment = float(y[0])
-        # Sentiment has a native slot for a single float.
-        # For arbitrary data storage, there's:
-        # doc.user_data['my_data'] = y
-        return float(y[0])
+    # def set_sentiment(self, doc, y):
+    #     doc.sentiment = float(y[0])
+    #     # Sentiment has a native slot for a single float.
+    #     # For arbitrary data storage, there's:
+    #     # doc.user_data['my_data'] = y
+    #     return float(y[0])
 
 
 def get_labelled_sentences(docs, doc_labels):
