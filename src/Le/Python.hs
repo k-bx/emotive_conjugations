@@ -315,7 +315,12 @@ cmdDownloadUrlNewsPlease :: CmdDownloadUrlNewsPleaseOpts -> Le CmdParseNewsPleas
 cmdDownloadUrlNewsPlease opts = runPythonParsing (CmdDownloadUrlNewsPlease opts)
 
 cmdFasttextSentimentAmazon :: CmdFasttextSentimentAmazonOpts -> Le CmdFasttextSentimentAmazonRes
-cmdFasttextSentimentAmazon opts = runPythonWeb (CmdFasttextSentimentAmazon opts)
+cmdFasttextSentimentAmazon opts = do
+  let opts2 = CmdFasttextSentimentAmazonOpts {cfaSentences = map process (cfaSentences opts)}
+  runPythonWeb (CmdFasttextSentimentAmazon opts2)
+  where
+    process :: Text -> Text
+    process = T.toLower
 
 testFasttextSentimentAmazon :: Le ()
 testFasttextSentimentAmazon = do
