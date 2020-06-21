@@ -2,6 +2,8 @@
 
 module Le.Queue.Worker where
 
+import qualified Data.List
+import qualified Data.Text as T
 import qualified Database.Esqueleto as E
 import qualified Database.Persist.Postgresql as P
 import qualified Le.ApiTypes.Modeled as AT
@@ -40,8 +42,9 @@ main = forever $ do
           logI $ "> downloading..." <> tshow @Int64 (P.fromSqlKey queueItemId) <> "; status: " <> tshow (queueStatus (ev queueItem))
           P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusDownloading]
           res1 <-
-            lift $ Le.Python.cmdDownloadUrlNewsPlease $
-              Le.Python.CmdDownloadUrlNewsPleaseOpts {cduUrl = queueUrl (ev queueItem)}
+            lift $
+              Le.Python.cmdDownloadUrlNewsPlease $
+                Le.Python.CmdDownloadUrlNewsPleaseOpts {cduUrl = queueUrl (ev queueItem)}
           P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusExtracting]
           mArticleId <- lift $ Le.Article.BL.repsertReceivedParseNewsPleaseRes (queueUrl (ev queueItem)) Nothing Nothing i speed res1
           P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusNer]
@@ -55,6 +58,11 @@ main = forever $ do
               lift $ Le.Article.BL.saveSpacyNer articleId res2
               let articlePleaseBigId :: ArticlePleaseBigId
                   articlePleaseBigId = P.toSqlKey (P.fromSqlKey articleId)
+              P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusPos]
+              resPos <- lift $ Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts maintext)
+              P.update articlePleaseBigId [ArticlePleaseBigSpacyPos P.=. (Just resPos)]
+              resSentiment <- runSentiment resPos
+              P.update articlePleaseBigId [ArticlePleaseBigFasttextSentimentAmazon P.=. (Just resSentiment)]
               case Le.Python.cnrTitle res1 of
                 Just title -> do
                   resNerTitle <- lift $ Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts title)
@@ -64,17 +72,26 @@ main = forever $ do
                     [ ArticlePleaseBigTitleSpacyNer P.=. Just resNerTitle,
                       ArticlePleaseBigTitleSpacyPos P.=. Just resPosTitle
                     ]
+                  resSentimentTitle <-
+                    lift $
+                      Le.Python.cmdFasttextSentimentAmazon
+                        (Le.Python.CmdFasttextSentimentAmazonOpts [title])
+                  P.update articlePleaseBigId [ArticlePleaseBigTitleFasttextSentimentAmazon P.=. (Just resSentimentTitle)]
                 Nothing -> pure ()
-              P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusPos]
-              res <- lift $ Le.Python.cmdSpacyPos (Le.Python.CmdSpacyPosOpts maintext)
-              P.update articlePleaseBigId [ArticlePleaseBigSpacyPos P.=. (Just res)]
               P.update queueItemId [QueueStatus P.=. AT.QueueItemStatusDone]
       where
         onErr :: Entity Queue -> SomeException -> ReaderT P.SqlBackend Le ()
         onErr queueItem e = do
-          lift $ logError $ display $
-            "> error while downloading queueItem: "
-              <> tshow @Int64 (P.fromSqlKey (entityKey queueItem))
-              <> "; error: "
-              <> tshow e
+          lift $
+            logError $
+              display $
+                "> error while downloading queueItem: "
+                  <> tshow @Int64 (P.fromSqlKey (entityKey queueItem))
+                  <> "; error: "
+                  <> tshow e
           P.update (entityKey queueItem) [QueueErrored P.=. Just True]
+        runSentiment resPos = do
+          let toks = Le.Python.cprTokens resPos
+          let sentenceGroups = Data.List.groupBy (\_x y -> Le.Python.sptIsSentStart y /= Just True) toks
+          let sentences = map (\sentence -> T.concat (map Le.Python.sptText sentence)) sentenceGroups
+          lift $ Le.Python.cmdFasttextSentimentAmazon (Le.Python.CmdFasttextSentimentAmazonOpts sentences)

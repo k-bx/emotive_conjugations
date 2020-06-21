@@ -125,7 +125,8 @@ data SpacyToken = SpacyToken
     sptSentiment :: Double,
     sptLexId :: Int,
     sptRank :: Int,
-    sptCluster :: Int
+    sptCluster :: Int,
+    sptIsSentStart :: Maybe Bool
   }
   deriving (Generic, Show, Eq)
 
@@ -200,10 +201,19 @@ data FasttextSentiment = FasttextSentiment
 
 deriveBoth (jsonOpts 3) ''FasttextSentiment
 
-newtype CmdFasttextSentimentAmazonRes = CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
+newtype CmdFasttextSentimentAmazonRes
+  = CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
   deriving (Generic, Show, FromJSON, ToJSON)
 
 instance Newtype CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
+
+instance P.PersistField CmdFasttextSentimentAmazonRes where
+  toPersistValue = P.toPersistValueJSON
+
+  fromPersistValue = P.fromPersistValueJSON
+
+instance P.PersistFieldSql CmdFasttextSentimentAmazonRes where
+  sqlType _ = P.SqlString
 
 data Cmd
   = CmdPing

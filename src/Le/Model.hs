@@ -78,6 +78,8 @@ ArticlePleaseBig
     titleSpacyNer Le.Python.CmdSpacyNerRes Maybe
     spacyPos Le.Python.CmdSpacyPosRes Maybe
     titleSpacyPos Le.Python.CmdSpacyPosRes Maybe
+    fasttextSentimentAmazon Le.Python.CmdFasttextSentimentAmazonRes Maybe
+    titleFasttextSentimentAmazon Le.Python.CmdFasttextSentimentAmazonRes Maybe
     deriving Show
 NamedEntity
     articlePleaseId ArticlePleaseId

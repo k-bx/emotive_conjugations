@@ -134,6 +134,7 @@ def encode_token(token):
         "lex_id": token.lex_id,
         "rank": token.rank,
         "cluster": token.cluster,
+        "is_sent_start": token.is_sent_start,
     }
     return res
 

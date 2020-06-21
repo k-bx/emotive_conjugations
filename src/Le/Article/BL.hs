@@ -60,7 +60,9 @@ repsertReceivedParseNewsPleaseRes uriText mWarcRecId mWarcDt i speed Le.Python.C
               articlePleaseBigSpacyNer = Nothing,
               articlePleaseBigTitleSpacyNer = Nothing,
               articlePleaseBigSpacyPos = Nothing,
-              articlePleaseBigTitleSpacyPos = Nothing
+              articlePleaseBigTitleSpacyPos = Nothing,
+              articlePleaseBigFasttextSentimentAmazon = Nothing,
+              articlePleaseBigTitleFasttextSentimentAmazon = Nothing
             }
         pure articleId
       Le.Speed.withProgress i speed $ \t -> do
@@ -80,14 +82,15 @@ saveSpacyNer articleId res = do
     forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
       when (cseLabel_ == "PERSON") $ do
         -- let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
-        void $ P.insert $
-          NamedEntity
-            { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
-              namedEntityEntity = cseText,
-              namedEntityStart = cseStart,
-              namedEntityStartChar = cseStartChar,
-              namedEntityEnd = cseEnd,
-              namedEntityEndChar = cseEndChar,
-              namedEntityLabel_ = cseLabel_,
-              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
-            }
+        void $
+          P.insert $
+            NamedEntity
+              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
+                namedEntityEntity = cseText,
+                namedEntityStart = cseStart,
+                namedEntityStartChar = cseStartChar,
+                namedEntityEnd = cseEnd,
+                namedEntityEndChar = cseEndChar,
+                namedEntityLabel_ = cseLabel_,
+                namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
+              }
