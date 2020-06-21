@@ -43,7 +43,8 @@ type Msg
     | SelectNerAjax AjaxParams Bool
     | GotNers AjaxParams (Result Api.Error (Api.Paginated String))
     | NerClicked Api.CmdSpacyNerResEnt
-    | TokenClicked Api.CmdSpacyPosResEnt
+    | TokenClicked Api.SpacyToken
+    -- | TokenClicked Api.CmdSpacyPosResEnt
     | RenderedSomeTooltipsAndSlept ()
     | GotNerGroup (Result Api.Error Api.NamedEntityGroup)
 
@@ -64,7 +65,8 @@ type alias Model =
     , ner : String
     , highlightPos : Bool
     , highlightAllNers : Bool
-    , selectedToken : Maybe Api.CmdSpacyPosResEnt
+    -- , selectedToken : Maybe Api.CmdSpacyPosResEnt
+    , selectedToken : Maybe Api.SpacyToken
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
     , tokenCardExpanded : Bool
     , nerGroup : Maybe Api.NamedEntityGroup
@@ -436,7 +438,8 @@ mainContent model =
                     ]
                 ]
 
-        mDepHeadToken : Maybe Api.CmdSpacyPosResEnt
+        -- mDepHeadToken : Maybe Api.CmdSpacyPosResEnt
+        mDepHeadToken : Maybe Api.SpacyToken
         mDepHeadToken =
             case model.selectedToken of
                 Nothing ->
@@ -448,7 +451,8 @@ mainContent model =
                         |> List.filter (\x -> x.i == selectedToken.head_i)
                         |> List.head
 
-        depChildren : List Api.CmdSpacyPosResEnt
+        -- depChildren : List Api.CmdSpacyPosResEnt
+        depChildren : List Api.SpacyToken
         depChildren =
             case model.selectedToken of
                 Nothing ->
@@ -459,7 +463,8 @@ mainContent model =
                         |> Maybe.Extra.unwrap [] (.spacy_pos_ents >> Maybe.withDefault [])
                         |> List.filter (\x -> x.head_i == selectedToken.i)
 
-        renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
+        -- renderSelectedToken : Api.CmdSpacyPosResEnt -> Html Msg
+        renderSelectedToken : Api.SpacyToken -> Html Msg
         renderSelectedToken selectedToken =
             let
                 popoverKeyForDep dep =

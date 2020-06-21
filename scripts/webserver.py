@@ -60,7 +60,7 @@ def spacy_ner():
             # rv["sent_sentiment"][sent.start] = sentiment_analyser(sent)
         return rv
     elif args['tag'] == 'cmd_fasttext_sentiment_amazon':
-        print('> beginning')
+        # print('> beginning')
         def label_to_float(lbl):
             """Convert a label to a float in [-1.0, 1.0] range"""
             i = int(lbl[len('__label__'):])
@@ -88,7 +88,7 @@ def spacy_ner():
                         confidence=float(confidences[0]) if len(confidences) > 0 else None))
             else:
                 rv.append(None)
-        print('> rv: ', rv)
+        # print('> rv: ', rv)
         return json.dumps(rv)
 
     raise ValueError('Bad request: ' + str(args['tag']))

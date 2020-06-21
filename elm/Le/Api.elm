@@ -221,8 +221,8 @@ type alias ArticlePleaseBig  =
    , maintext: String
    , spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
    , title_spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
-   , spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
-   , title_spacy_pos_ents: (Maybe (List CmdSpacyPosResEnt))
+   , spacy_pos_ents: (Maybe (List SpacyToken))
+   , title_spacy_pos_ents: (Maybe (List SpacyToken))
    }
 
 jsonDecArticlePleaseBig : Json.Decode.Decoder ( ArticlePleaseBig )
@@ -232,8 +232,8 @@ jsonDecArticlePleaseBig =
    |> required "maintext" (Json.Decode.string)
    |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
    |> fnullable "title_spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
-   |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
-   |> fnullable "title_spacy_pos_ents" (Json.Decode.list (jsonDecCmdSpacyPosResEnt))
+   |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecSpacyToken))
+   |> fnullable "title_spacy_pos_ents" (Json.Decode.list (jsonDecSpacyToken))
 
 jsonEncArticlePleaseBig : ArticlePleaseBig -> Value
 jsonEncArticlePleaseBig  val =
@@ -242,8 +242,8 @@ jsonEncArticlePleaseBig  val =
    , ("maintext", Json.Encode.string val.maintext)
    , ("spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.spacy_ner_ents)
    , ("title_spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.title_spacy_ner_ents)
-   , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.spacy_pos_ents)
-   , ("title_spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyPosResEnt))) val.title_spacy_pos_ents)
+   , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncSpacyToken))) val.spacy_pos_ents)
+   , ("title_spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncSpacyToken))) val.title_spacy_pos_ents)
    ]
 
 
@@ -300,8 +300,9 @@ jsonEncCmdSpacyNerResEnt  val =
 
 
 
-type alias CmdSpacyPosResEnt  =
+type alias SpacyToken  =
    { text: String
+   , orth: Int
    , lemma_: String
    , pos_: String
    , tag_: String
@@ -338,12 +339,14 @@ type alias CmdSpacyPosResEnt  =
    , lex_id: Int
    , rank: Int
    , cluster: Int
+   , is_sent_start: (Maybe Bool)
    }
 
-jsonDecCmdSpacyPosResEnt : Json.Decode.Decoder ( CmdSpacyPosResEnt )
-jsonDecCmdSpacyPosResEnt =
-   Json.Decode.succeed (\ptext plemma_ ppos_ ptag_ pdep_ pshape_ pis_alpha pis_ascii pis_digit pis_punct pis_left_punct pis_right_punct pis_space pis_bracket pis_quote pis_currency plike_url plike_num plike_mail pis_oov pis_stop phead_i pleft_edge_i pright_edge_i pi pent_type_ pent_iob_ pent_kb_id pent_kb_id_ pnorm_ plang_ pprob pidx psentiment plex_id prank pcluster -> {text = ptext, lemma_ = plemma_, pos_ = ppos_, tag_ = ptag_, dep_ = pdep_, shape_ = pshape_, is_alpha = pis_alpha, is_ascii = pis_ascii, is_digit = pis_digit, is_punct = pis_punct, is_left_punct = pis_left_punct, is_right_punct = pis_right_punct, is_space = pis_space, is_bracket = pis_bracket, is_quote = pis_quote, is_currency = pis_currency, like_url = plike_url, like_num = plike_num, like_mail = plike_mail, is_oov = pis_oov, is_stop = pis_stop, head_i = phead_i, left_edge_i = pleft_edge_i, right_edge_i = pright_edge_i, i = pi, ent_type_ = pent_type_, ent_iob_ = pent_iob_, ent_kb_id = pent_kb_id, ent_kb_id_ = pent_kb_id_, norm_ = pnorm_, lang_ = plang_, prob = pprob, idx = pidx, sentiment = psentiment, lex_id = plex_id, rank = prank, cluster = pcluster})
+jsonDecSpacyToken : Json.Decode.Decoder ( SpacyToken )
+jsonDecSpacyToken =
+   Json.Decode.succeed (\ptext porth plemma_ ppos_ ptag_ pdep_ pshape_ pis_alpha pis_ascii pis_digit pis_punct pis_left_punct pis_right_punct pis_space pis_bracket pis_quote pis_currency plike_url plike_num plike_mail pis_oov pis_stop phead_i pleft_edge_i pright_edge_i pi pent_type_ pent_iob_ pent_kb_id pent_kb_id_ pnorm_ plang_ pprob pidx psentiment plex_id prank pcluster pis_sent_start -> {text = ptext, orth = porth, lemma_ = plemma_, pos_ = ppos_, tag_ = ptag_, dep_ = pdep_, shape_ = pshape_, is_alpha = pis_alpha, is_ascii = pis_ascii, is_digit = pis_digit, is_punct = pis_punct, is_left_punct = pis_left_punct, is_right_punct = pis_right_punct, is_space = pis_space, is_bracket = pis_bracket, is_quote = pis_quote, is_currency = pis_currency, like_url = plike_url, like_num = plike_num, like_mail = plike_mail, is_oov = pis_oov, is_stop = pis_stop, head_i = phead_i, left_edge_i = pleft_edge_i, right_edge_i = pright_edge_i, i = pi, ent_type_ = pent_type_, ent_iob_ = pent_iob_, ent_kb_id = pent_kb_id, ent_kb_id_ = pent_kb_id_, norm_ = pnorm_, lang_ = plang_, prob = pprob, idx = pidx, sentiment = psentiment, lex_id = plex_id, rank = prank, cluster = pcluster, is_sent_start = pis_sent_start})
    |> required "text" (Json.Decode.string)
+   |> required "orth" (Json.Decode.int)
    |> required "lemma_" (Json.Decode.string)
    |> required "pos_" (Json.Decode.string)
    |> required "tag_" (Json.Decode.string)
@@ -380,11 +383,13 @@ jsonDecCmdSpacyPosResEnt =
    |> required "lex_id" (Json.Decode.int)
    |> required "rank" (Json.Decode.int)
    |> required "cluster" (Json.Decode.int)
+   |> fnullable "is_sent_start" (Json.Decode.bool)
 
-jsonEncCmdSpacyPosResEnt : CmdSpacyPosResEnt -> Value
-jsonEncCmdSpacyPosResEnt  val =
+jsonEncSpacyToken : SpacyToken -> Value
+jsonEncSpacyToken  val =
    Json.Encode.object
    [ ("text", Json.Encode.string val.text)
+   , ("orth", Json.Encode.int val.orth)
    , ("lemma_", Json.Encode.string val.lemma_)
    , ("pos_", Json.Encode.string val.pos_)
    , ("tag_", Json.Encode.string val.tag_)
@@ -421,6 +426,7 @@ jsonEncCmdSpacyPosResEnt  val =
    , ("lex_id", Json.Encode.int val.lex_id)
    , ("rank", Json.Encode.int val.rank)
    , ("cluster", Json.Encode.int val.cluster)
+   , ("is_sent_start", (maybeEncode (Json.Encode.bool)) val.is_sent_start)
    ]
 
 

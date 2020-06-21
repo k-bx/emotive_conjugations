@@ -83,10 +83,10 @@ testDownloadAndFilter = do
 parseFilteredArticles :: Le ()
 parseFilteredArticles = do
   cfg <- asks envConfig
-  app <- ask
+  env <- ask
   filteredWarcPaths <- liftIO $ System.Directory.listDirectory (Le.Config.filteredDataDir cfg)
   speed <- Le.Speed.newSpeed (length filteredWarcPaths)
-  pooledForConcurrentlyN_ (envNumCapabilities app) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
+  pooledForConcurrentlyN_ (envNumCapabilities env) (zip [1 ..] filteredWarcPaths) (processWarc cfg speed)
   where
     processWarc cfg speed (i, warcPath) = do
       Le.Speed.withProgress i speed $ \t -> do

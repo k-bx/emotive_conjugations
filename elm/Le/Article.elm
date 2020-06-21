@@ -32,8 +32,8 @@ type ContentNode
     | CNTok
         { begin : Int
         , end : Int
-        , tok : Api.CmdSpacyPosResEnt
-
+        -- , tok : Api.CmdSpacyPosResEnt
+        , tok : Api.SpacyToken
         -- , tok : { idx : Int, pos_ : String }
         , children : List ContentNode
         }
@@ -42,7 +42,8 @@ type ContentNode
 computeContentNodes :
     { inputText : String
     , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
-    , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
+    -- , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
+    , mSpacyPoss : Maybe (List Api.SpacyToken)
     }
     -> List ContentNode
 computeContentNodes ps =
@@ -208,7 +209,8 @@ renderContentNodes :
     , highlightPos : Bool
     , highlightAllNers : Bool
     , nodes : List ContentNode
-    , onClickToken : Api.CmdSpacyPosResEnt -> msg
+    , onClickToken : Api.SpacyToken -> msg
+    -- , onClickToken : Api.CmdSpacyPosResEnt -> msg
     , onClickNer : Api.CmdSpacyNerResEnt -> msg
     , depChildren : Set Int
     , depParent : Maybe Int
