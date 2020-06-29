@@ -72,10 +72,11 @@ select ??
 from "article_please"
 where "article_please"."date_publish" is not null
   and "article_please".title is not null
-order by "article_please"."date_publish" desc, "article_please"."id" desc 
+order by "article_please"."id" desc 
 limit ${limT}
     |]
         []
+-- order by "article_please"."date_publish" desc, "article_please"."id" desc 
     person -> do
       mProper <- rawSql [qc|select proper from named_propers where entity=?|] [PersistText person]
       entities <- case mProper of
