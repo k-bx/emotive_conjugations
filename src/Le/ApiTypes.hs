@@ -16,6 +16,17 @@ data NoOp = NoOp
 
 deriveBoth (jsonOpts 3) ''NoOp
 
+data Tuple2 a b = Tuple2
+  { t2f1 :: a,
+    t2f2 :: b
+  }
+  deriving (Show, Eq, Generic)
+
+deriveBoth (jsonOpts 3) ''Tuple2
+
+toTuple2 :: (a, b) -> Tuple2 a b
+toTuple2 (a, b) = Tuple2 a b
+
 type IntZonedTime = Int
 
 data DownloadAndFilterForm = DownloadAndFilterForm
@@ -87,7 +98,12 @@ data ArticlePleaseBig = ArticlePleaseBig
     arbSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
     arbTitleSpacyNerEnts :: Maybe [Le.Python.CmdSpacyNerResEnt],
     arbSpacyPosEnts :: Maybe [Le.Python.SpacyToken],
-    arbTitleSpacyPosEnts :: Maybe [Le.Python.SpacyToken]
+    arbTitleSpacyPosEnts :: Maybe [Le.Python.SpacyToken],
+    arbFasttextSentimentAmazon :: Maybe [Maybe Le.Python.FasttextSentiment],
+    arbTitleFasttextSentimentAmazon :: Maybe [Maybe Le.Python.FasttextSentiment],
+    -- | Map token.i -> its sentence's sentiment '[-5;+5]' and confidence '[0;1]'
+    arbFasttextSentimentMap :: [Tuple2 Int Le.Python.FasttextSentiment],
+    arbTitleFasttextSentimentMap :: [Tuple2 Int Le.Python.FasttextSentiment]
   }
   deriving (Show, Eq, Generic)
 

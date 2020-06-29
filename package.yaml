@@ -82,6 +82,7 @@ dependencies:
 - uuid
 - unliftio
 - uri-encode
+- unordered-containers
 - warc
 - wai
 - wai-app-static

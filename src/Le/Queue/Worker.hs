@@ -79,6 +79,7 @@ processDownloadedItem ::
   Maybe Text ->
   ReaderT P.SqlBackend Le ()
 processDownloadedItem mQueueItem articleId mTitle mMainText = do
+  -- lift $ logInfo $ display $ "> processDownloadedItem: " <> tshow articleId
   whenQueueItem $ \qi ->
     P.update (entityKey qi) [QueueStatus P.=. AT.QueueItemStatusExtracting]
   whenQueueItem $ \qi ->
@@ -92,7 +93,7 @@ processDownloadedItem mQueueItem articleId mTitle mMainText = do
         P.update (entityKey qi) [QueueStatus P.=. AT.QueueItemStatusDone]
     Just maintext -> do
       res2 <- lift $ Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts maintext)
-      lift $ Le.Article.BL.saveSpacyNer articleId res2
+      Le.Article.BL.saveSpacyNer articleId res2
       let articlePleaseBigId :: ArticlePleaseBigId
           articlePleaseBigId = P.toSqlKey (P.fromSqlKey articleId)
       whenQueueItem $ \qi ->
@@ -123,24 +124,28 @@ processDownloadedItem mQueueItem articleId mTitle mMainText = do
       let toks = Le.Python.cprTokens resPos
       let sentenceGroups = Data.List.groupBy (\_x y -> Le.Python.sptIsSentStart y /= Just True) toks
       let sentences = map (\sentence -> T.concat (map Le.Python.sptText sentence)) sentenceGroups
-      lift $ Le.Python.cmdFasttextSentimentAmazon (Le.Python.CmdFasttextSentimentAmazonOpts sentences)
+      let sentences2 = map (T.replace "\n" " ") sentences
+      lift $ Le.Python.cmdFasttextSentimentAmazon (Le.Python.CmdFasttextSentimentAmazonOpts sentences2)
     whenQueueItem f =
       case mQueueItem of
         Nothing -> pure ()
         Just x -> f x
 
--- | Limited to latest 1000 articles for now
+-- | Limited to latest N articles for now
 reprocessDownloadedItems :: Le ()
 reprocessDownloadedItems = do
+  logInfo $ display $ ("> Beginning. Getting rows" :: Text)
   rows :: [(P.Single Int64, P.Single (Maybe Text))] <-
     runDb $
       E.rawSql
         [q|select id, title from article_please order by id desc limit ?|]
-        [P.PersistInt64 1000]
+        [P.PersistInt64 100]
+  logInfo $ display $ "> Got rows. Length: " <> tshow (length rows)
   speed <- Le.Speed.newSpeed (length rows)
   env <- ask
   pooledForConcurrentlyN_ (envNumCapabilities env) (zip [1 ..] rows) $ \(i, (P.Single articleId, P.Single mTitle)) -> do
-    Le.Speed.withProgress i speed $ \t -> do logInfo $ display $ "> Progress: " <> t
+    Le.Speed.withProgress i speed $ \t -> do
+      logInfo $ display $ "> Progress: " <> t
     let articlePleaseBigId :: ArticlePleaseBigId
         articlePleaseBigId = P.toSqlKey articleId
     big <- mustFindME $ runDb $ P.get articlePleaseBigId

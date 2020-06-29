@@ -140,7 +140,7 @@ spacyNerArticles = do
     res <- Le.Python.cmdSpacyNer (Le.Python.CmdSpacyNerOpts (articlePleaseBigMaintext (ev articlePleaseBig)))
     let articleId :: ArticleId
         articleId = P.toSqlKey (P.fromSqlKey (entityKey articlePleaseBig))
-    Le.Article.BL.saveSpacyNer articleId res
+    runDb $ Le.Article.BL.saveSpacyNer articleId res
   Le.Search.reindexProper
 
 spacyPosArticles :: Le ()

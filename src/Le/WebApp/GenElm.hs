@@ -9,6 +9,7 @@ import qualified Data.Text as T
 import qualified Elm.Json
 import Elm.Module
 import Elm.TyRep (ETCon (..))
+import qualified Elm.TyRep
 import qualified Le.ApiTypes as AT
 import qualified Le.ApiTypes.Modeled as AT
 import Le.Import
@@ -18,7 +19,6 @@ import Servant
 import Servant.API.Generic
 import Servant.Elm
 import Servant.Elm.Internal.Foreign
-import qualified Elm.TyRep
 import Servant.Foreign
 
 instance
@@ -39,6 +39,7 @@ moduleDefs =
     DefineElm (Proxy :: Proxy AT.NamedEntityGroup),
     DefineElm (Proxy :: Proxy Le.Python.CmdSpacyNerResEnt),
     DefineElm (Proxy :: Proxy Le.Python.SpacyToken),
+    DefineElm (Proxy :: Proxy Le.Python.FasttextSentiment),
     DefineElm (Proxy :: Proxy (AT.Paginated Text)),
     DefineElm (Proxy :: Proxy AT.QueueAddForm),
     DefineElm (Proxy :: Proxy AT.AccountInfo),
@@ -108,7 +109,7 @@ See `make generate-elm` and `GenElm.hs` for details.
 import Http
 import Json.Decode exposing (Value)
 import Json.Encode
-import Json.Helpers exposing (required, fnullable, maybeEncode, decodeSumUnaries)
+import Json.Helpers exposing (required, fnullable, maybeEncode, decodeSumUnaries, tuple2)
 import Dict exposing (Dict)
 import Url.Builder
 

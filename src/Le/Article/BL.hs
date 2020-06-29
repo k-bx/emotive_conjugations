@@ -71,26 +71,25 @@ repsertReceivedParseNewsPleaseRes uriText mWarcRecId mWarcDt i speed Le.Python.C
       pure (Just articleId)
     _ -> pure Nothing
 
-saveSpacyNer :: ArticleId -> Le.Python.CmdSpacyNerRes -> Le ()
+saveSpacyNer :: ArticleId -> Le.Python.CmdSpacyNerRes -> ReaderT P.SqlBackend Le ()
 saveSpacyNer articleId res = do
-  runDb $ do
-    let articlePleaseId :: ArticlePleaseId
-        articlePleaseId = P.toSqlKey (P.fromSqlKey articleId)
-    let articlePleaseBigId :: ArticlePleaseBigId
-        articlePleaseBigId = P.toSqlKey (P.fromSqlKey articleId)
-    P.update articlePleaseBigId [ArticlePleaseBigSpacyNer P.=. (Just res)]
-    forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
-      when (cseLabel_ == "PERSON") $ do
-        -- let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
-        void $
-          P.insert $
-            NamedEntity
-              { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
-                namedEntityEntity = cseText,
-                namedEntityStart = cseStart,
-                namedEntityStartChar = cseStartChar,
-                namedEntityEnd = cseEnd,
-                namedEntityEndChar = cseEndChar,
-                namedEntityLabel_ = cseLabel_,
-                namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
-              }
+  let articlePleaseId :: ArticlePleaseId
+      articlePleaseId = P.toSqlKey (P.fromSqlKey articleId)
+  let articlePleaseBigId :: ArticlePleaseBigId
+      articlePleaseBigId = P.toSqlKey (P.fromSqlKey articleId)
+  P.update articlePleaseBigId [ArticlePleaseBigSpacyNer P.=. (Just res)]
+  forM_ (Le.Python.csrEnts res) $ \Le.Python.CmdSpacyNerResEnt {..} -> do
+    when (cseLabel_ == "PERSON") $ do
+      -- let (search1, search2, search3) = Le.Search.computeSearchTerms cseText
+      void $
+        P.insert $
+          NamedEntity
+            { namedEntityArticlePleaseId = P.toSqlKey (P.fromSqlKey articlePleaseId),
+              namedEntityEntity = cseText,
+              namedEntityStart = cseStart,
+              namedEntityStartChar = cseStartChar,
+              namedEntityEnd = cseEnd,
+              namedEntityEndChar = cseEndChar,
+              namedEntityLabel_ = cseLabel_,
+              namedEntityCanonical = Just (Le.Search.namedEntityCanonicalForm cseText)
+            }

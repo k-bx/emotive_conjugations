@@ -8,7 +8,7 @@ See `make generate-elm` and `GenElm.hs` for details.
 import Http
 import Json.Decode exposing (Value)
 import Json.Encode
-import Json.Helpers exposing (required, fnullable, maybeEncode, decodeSumUnaries)
+import Json.Helpers exposing (required, fnullable, maybeEncode, decodeSumUnaries, tuple2)
 import Dict exposing (Dict)
 import Url.Builder
 
@@ -223,17 +223,25 @@ type alias ArticlePleaseBig  =
    , title_spacy_ner_ents: (Maybe (List CmdSpacyNerResEnt))
    , spacy_pos_ents: (Maybe (List SpacyToken))
    , title_spacy_pos_ents: (Maybe (List SpacyToken))
+   , fasttext_sentiment_amazon: (Maybe (List (Maybe FasttextSentiment)))
+   , title_fasttext_sentiment_amazon: (Maybe (List (Maybe FasttextSentiment)))
+   , fasttext_sentiment_map: (List (Tuple2 Int FasttextSentiment))
+   , title_fasttext_sentiment_map: (List (Tuple2 Int FasttextSentiment))
    }
 
 jsonDecArticlePleaseBig : Json.Decode.Decoder ( ArticlePleaseBig )
 jsonDecArticlePleaseBig =
-   Json.Decode.succeed (\pid pmaintext pspacy_ner_ents ptitle_spacy_ner_ents pspacy_pos_ents ptitle_spacy_pos_ents -> {id = pid, maintext = pmaintext, spacy_ner_ents = pspacy_ner_ents, title_spacy_ner_ents = ptitle_spacy_ner_ents, spacy_pos_ents = pspacy_pos_ents, title_spacy_pos_ents = ptitle_spacy_pos_ents})
+   Json.Decode.succeed (\pid pmaintext pspacy_ner_ents ptitle_spacy_ner_ents pspacy_pos_ents ptitle_spacy_pos_ents pfasttext_sentiment_amazon ptitle_fasttext_sentiment_amazon pfasttext_sentiment_map ptitle_fasttext_sentiment_map -> {id = pid, maintext = pmaintext, spacy_ner_ents = pspacy_ner_ents, title_spacy_ner_ents = ptitle_spacy_ner_ents, spacy_pos_ents = pspacy_pos_ents, title_spacy_pos_ents = ptitle_spacy_pos_ents, fasttext_sentiment_amazon = pfasttext_sentiment_amazon, title_fasttext_sentiment_amazon = ptitle_fasttext_sentiment_amazon, fasttext_sentiment_map = pfasttext_sentiment_map, title_fasttext_sentiment_map = ptitle_fasttext_sentiment_map})
    |> required "id" (jsonDecArticlePleaseBigId)
    |> required "maintext" (Json.Decode.string)
    |> fnullable "spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
    |> fnullable "title_spacy_ner_ents" (Json.Decode.list (jsonDecCmdSpacyNerResEnt))
    |> fnullable "spacy_pos_ents" (Json.Decode.list (jsonDecSpacyToken))
    |> fnullable "title_spacy_pos_ents" (Json.Decode.list (jsonDecSpacyToken))
+   |> fnullable "fasttext_sentiment_amazon" (Json.Decode.list (Json.Decode.maybe (jsonDecFasttextSentiment)))
+   |> fnullable "title_fasttext_sentiment_amazon" (Json.Decode.list (Json.Decode.maybe (jsonDecFasttextSentiment)))
+   |> required "fasttext_sentiment_map" (Json.Decode.list (jsonDecTuple2 (Json.Decode.int) (jsonDecFasttextSentiment)))
+   |> required "title_fasttext_sentiment_map" (Json.Decode.list (jsonDecTuple2 (Json.Decode.int) (jsonDecFasttextSentiment)))
 
 jsonEncArticlePleaseBig : ArticlePleaseBig -> Value
 jsonEncArticlePleaseBig  val =
@@ -244,6 +252,10 @@ jsonEncArticlePleaseBig  val =
    , ("title_spacy_ner_ents", (maybeEncode ((Json.Encode.list jsonEncCmdSpacyNerResEnt))) val.title_spacy_ner_ents)
    , ("spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncSpacyToken))) val.spacy_pos_ents)
    , ("title_spacy_pos_ents", (maybeEncode ((Json.Encode.list jsonEncSpacyToken))) val.title_spacy_pos_ents)
+   , ("fasttext_sentiment_amazon", (maybeEncode ((Json.Encode.list (maybeEncode (jsonEncFasttextSentiment))))) val.fasttext_sentiment_amazon)
+   , ("title_fasttext_sentiment_amazon", (maybeEncode ((Json.Encode.list (maybeEncode (jsonEncFasttextSentiment))))) val.title_fasttext_sentiment_amazon)
+   , ("fasttext_sentiment_map", (Json.Encode.list (jsonEncTuple2 (Json.Encode.int) (jsonEncFasttextSentiment))) val.fasttext_sentiment_map)
+   , ("title_fasttext_sentiment_map", (Json.Encode.list (jsonEncTuple2 (Json.Encode.int) (jsonEncFasttextSentiment))) val.title_fasttext_sentiment_map)
    ]
 
 
@@ -427,6 +439,26 @@ jsonEncSpacyToken  val =
    , ("rank", Json.Encode.int val.rank)
    , ("cluster", Json.Encode.int val.cluster)
    , ("is_sent_start", (maybeEncode (Json.Encode.bool)) val.is_sent_start)
+   ]
+
+
+
+type alias FasttextSentiment  =
+   { label: Float
+   , confidence: (Maybe Float)
+   }
+
+jsonDecFasttextSentiment : Json.Decode.Decoder ( FasttextSentiment )
+jsonDecFasttextSentiment =
+   Json.Decode.succeed (\plabel pconfidence -> {label = plabel, confidence = pconfidence})
+   |> required "label" (Json.Decode.float)
+   |> fnullable "confidence" (Json.Decode.float)
+
+jsonEncFasttextSentiment : FasttextSentiment -> Value
+jsonEncFasttextSentiment  val =
+   Json.Encode.object
+   [ ("label", Json.Encode.float val.label)
+   , ("confidence", (maybeEncode (Json.Encode.float)) val.confidence)
    ]
 
 

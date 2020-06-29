@@ -197,13 +197,13 @@ data FasttextSentiment = FasttextSentiment
     fssLabel :: Float,
     fssConfidence :: Maybe Float
   }
-  deriving (Generic, Show)
+  deriving (Generic, Show, Eq)
 
 deriveBoth (jsonOpts 3) ''FasttextSentiment
 
 newtype CmdFasttextSentimentAmazonRes
   = CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
-  deriving (Generic, Show, FromJSON, ToJSON)
+  deriving (Generic, Show, FromJSON, ToJSON, Eq)
 
 instance Newtype CmdFasttextSentimentAmazonRes [Maybe FasttextSentiment]
 

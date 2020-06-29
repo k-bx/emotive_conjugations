@@ -44,7 +44,7 @@ type Msg
     | GotNers AjaxParams (Result Api.Error (Api.Paginated String))
     | NerClicked Api.CmdSpacyNerResEnt
     | TokenClicked Api.SpacyToken
-    -- | TokenClicked Api.CmdSpacyPosResEnt
+      -- | TokenClicked Api.CmdSpacyPosResEnt
     | RenderedSomeTooltipsAndSlept ()
     | GotNerGroup (Result Api.Error Api.NamedEntityGroup)
 
@@ -65,6 +65,8 @@ type alias Model =
     , ner : String
     , highlightPos : Bool
     , highlightAllNers : Bool
+    , highlightSentiment : Bool
+
     -- , selectedToken : Maybe Api.CmdSpacyPosResEnt
     , selectedToken : Maybe Api.SpacyToken
     , selectedNer : Maybe Api.CmdSpacyNerResEnt
@@ -91,6 +93,7 @@ init key ner active =
       , ner = ner
       , highlightPos = False
       , highlightAllNers = False
+      , highlightSentiment = False
       , selectedToken = Nothing
       , selectedNer = Nothing
       , tokenCardExpanded = False
@@ -396,11 +399,16 @@ mainContent model =
                                     { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
                                     , highlightPos = model.highlightPos
                                     , highlightAllNers = model.highlightAllNers
+                                    , highlightSentiment = model.highlightSentiment
                                     , onClickToken = TokenClicked
                                     , onClickNer = NerClicked
                                     , selectedToken = Maybe.map .i model.selectedToken
                                     , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
                                     , depParent = Maybe.map .i mDepHeadToken
+                                    , mFasttextSentimentMap =
+                                        articlePleaseBig.title_fasttext_sentiment_map
+                                            |> List.map fromTuple2
+                                            |> Dict.fromList
                                     , nodes =
                                         Le.Article.computeContentNodes
                                             { inputText = article.title
@@ -419,11 +427,16 @@ mainContent model =
                                     { nersToHighlight = model.nerGroup |> Maybe.Extra.unwrap [] .group
                                     , highlightPos = model.highlightPos
                                     , highlightAllNers = model.highlightAllNers
+                                    , highlightSentiment = model.highlightSentiment
                                     , onClickToken = TokenClicked
                                     , onClickNer = NerClicked
                                     , selectedToken = Maybe.map .i model.selectedToken
                                     , depChildren = Set.fromList (List.map (\x -> x.i) depChildren)
                                     , depParent = Maybe.map .i mDepHeadToken
+                                    , mFasttextSentimentMap =
+                                        articlePleaseBig.fasttext_sentiment_map
+                                            |> List.map fromTuple2
+                                            |> Dict.fromList
                                     , nodes =
                                         Le.Article.computeContentNodes
                                             { inputText = articlePleaseBig.maintext
@@ -605,6 +618,10 @@ mainContent model =
                     , div []
                         [ text "is_currency: "
                         , span [] [ text <| boolYesNo selectedToken.is_currency ]
+                        ]
+                    , div []
+                        [ text "is_sent_start: "
+                        , span [] [ text <| Maybe.withDefault "Nothing" (Maybe.map boolYesNo selectedToken.is_sent_start) ]
                         ]
                     , div []
                         [ text "like_url: "
@@ -819,6 +836,25 @@ mainContent model =
                             , label
                                 [ class "switch-label mb-0"
                                 , for "highlight-all-ners-checkbox"
+                                ]
+                                [ text "switch" ]
+                            ]
+                        ]
+                    , div [ class "mt-2 d-flex flex-row justify-content-between" ]
+                        [ text "Highlight Sentiment"
+                        , div [ class "switch" ]
+                            [ input
+                                [ class "switch-input"
+                                , id "highlight-sentiment-checkbox"
+                                , name "check"
+                                , type_ "checkbox"
+                                , checked model.highlightSentiment
+                                , onClick (UpdateModel { model | highlightSentiment = not model.highlightSentiment })
+                                ]
+                                []
+                            , label
+                                [ class "switch-label mb-0"
+                                , for "highlight-sentiment-checkbox"
                                 ]
                                 [ text "switch" ]
                             ]

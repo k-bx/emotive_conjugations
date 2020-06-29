@@ -24,17 +24,13 @@ type ContentNode
     | CNNer
         { begin : Int
         , end : Int
-
-        -- , ner : { text : String, start_char : Int, label_ : String }
         , ner : Api.CmdSpacyNerResEnt
         , children : List ContentNode
         }
     | CNTok
         { begin : Int
         , end : Int
-        -- , tok : Api.CmdSpacyPosResEnt
         , tok : Api.SpacyToken
-        -- , tok : { idx : Int, pos_ : String }
         , children : List ContentNode
         }
 
@@ -42,7 +38,6 @@ type ContentNode
 computeContentNodes :
     { inputText : String
     , mSpacyNers : Maybe (List Api.CmdSpacyNerResEnt)
-    -- , mSpacyPoss : Maybe (List Api.CmdSpacyPosResEnt)
     , mSpacyPoss : Maybe (List Api.SpacyToken)
     }
     -> List ContentNode
@@ -105,8 +100,6 @@ computeContentNodes ps =
                                     { begin = ner.start_char
                                     , end = ner.start_char + String.length textNer
                                     , ner = ner
-
-                                    -- , ner = { text = textNer, start_char = ner.start_char, label_ = ner.label_ }
                                     , children = computeToks ner.start_char textNer
                                     }
                         in
@@ -167,8 +160,6 @@ computeContentNodes ps =
                                     { begin = pos.idx
                                     , end = pos.idx + String.length pos.text
                                     , tok = pos
-
-                                    -- , tok = { idx = pos.idx, pos_ = pos.pos_ }
                                     , children =
                                         [ CNText
                                             { begin = pos.idx
@@ -208,16 +199,18 @@ renderContentNodes :
     , selectedToken : Maybe Int -- tok.i
     , highlightPos : Bool
     , highlightAllNers : Bool
+    , highlightSentiment : Bool
     , nodes : List ContentNode
     , onClickToken : Api.SpacyToken -> msg
-    -- , onClickToken : Api.CmdSpacyPosResEnt -> msg
     , onClickNer : Api.CmdSpacyNerResEnt -> msg
     , depChildren : Set Int
     , depParent : Maybe Int
+    , mFasttextSentimentMap : Dict Int Api.FasttextSentiment
     }
     -> Html msg
 renderContentNodes ps =
     let
+        renderNode : ContentNode -> Html msg
         renderNode node =
             case node of
                 CNText nd ->
@@ -259,11 +252,49 @@ renderContentNodes ps =
 
                         isChild =
                             not isParent && Set.member nd.tok.i ps.depChildren
+
+                        sentimentClass =
+                            if ps.highlightSentiment then
+                                case Dict.get nd.tok.i ps.mFasttextSentimentMap of
+                                    Just fasttextSentiment ->
+                                        Just ("content-token--sentiment-" ++ sentimentSuffix fasttextSentiment.label)
+
+                                    Nothing ->
+                                        Nothing
+
+                            else
+                                Nothing
+
+                        -- turns sentiment from [-1;+1] float range into one of "-ng-2", "-ng-1", "-neutral", "-pos-1", "-pos-2"
+                        sentimentSuffix : Float -> String
+                        sentimentSuffix x =
+                            if x <= -0.5 then
+                                "ng-2"
+
+                            else if x < -0.1 then
+                                "ng-1"
+
+                            else if x < 0.1 then
+                                "neutral"
+
+                            else if x < 0.5 then
+                                "pos-1"
+
+                            else
+                                "pos-2"
+
+                        sentimentClassList =
+                            case sentimentClass of
+                                Nothing ->
+                                    []
+
+                                Just sentimentCls ->
+                                    [ class <| sentimentCls ]
                     in
                     span [ class "content-token-wrap" ]
                         [ span
-                            [ class "content-token"
-                            , classList
+                            ([ class "content-token"
+                             , classList
                                 [ ( "content-token--" ++ nd.tok.pos_
                                   , ps.highlightPos
                                   )
@@ -277,8 +308,10 @@ renderContentNodes ps =
                                   , isParent
                                   )
                                 ]
-                            , onClick <| ps.onClickToken nd.tok
-                            ]
+                             , onClick <| ps.onClickToken nd.tok
+                             ]
+                                ++ sentimentClassList
+                            )
                             (List.map renderNode nd.children)
                         ]
     in

@@ -1,5 +1,6 @@
 module Le.Article.Handlers where
 
+import qualified Data.HashMap.Strict as H
 import qualified Database.Persist.Postgresql as P
 import qualified Le.ApiTypes as AT
 import Le.App
@@ -64,15 +65,57 @@ articlePleaseDetails articleNpId = sg $ do
 articlePleaseDetailsBig :: ArticlePleaseBigId -> Le AT.ArticlePleaseBig
 articlePleaseDetailsBig bigId = sg $ do
   articlePleaseBig <- mustFindM $ runDb $ P.get bigId
+  let arbSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigSpacyPos articlePleaseBig)
+  let arbFasttextSentimentAmazon = fmap unpack (articlePleaseBigFasttextSentimentAmazon articlePleaseBig)
+  let arbTitleSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigTitleSpacyPos articlePleaseBig)
+  let arbTitleFasttextSentimentAmazon = fmap unpack (articlePleaseBigTitleFasttextSentimentAmazon articlePleaseBig)
   pure $
     AT.ArticlePleaseBig
       { arbId = bigId,
         arbMaintext = articlePleaseBigMaintext articlePleaseBig,
         arbSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseBigSpacyNer articlePleaseBig),
         arbTitleSpacyNerEnts = fmap Le.Python.csrEnts (articlePleaseBigTitleSpacyNer articlePleaseBig),
-        arbSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigSpacyPos articlePleaseBig),
-        arbTitleSpacyPosEnts = fmap Le.Python.cprTokens (articlePleaseBigTitleSpacyPos articlePleaseBig)
+        arbSpacyPosEnts = arbSpacyPosEnts,
+        arbTitleSpacyPosEnts = arbTitleSpacyPosEnts,
+        arbFasttextSentimentAmazon = arbFasttextSentimentAmazon,
+        arbTitleFasttextSentimentAmazon = arbTitleFasttextSentimentAmazon,
+        arbFasttextSentimentMap =
+          computeSentimentMap arbSpacyPosEnts arbFasttextSentimentAmazon
+            & H.toList
+            & map AT.toTuple2,
+        arbTitleFasttextSentimentMap =
+          computeSentimentMap arbTitleSpacyPosEnts arbTitleFasttextSentimentAmazon
+            & H.toList
+            & map AT.toTuple2
       }
+
+computeSentimentMap ::
+  Maybe [Le.Python.SpacyToken] ->
+  Maybe [Maybe Le.Python.FasttextSentiment] ->
+  HashMap Int Le.Python.FasttextSentiment
+computeSentimentMap mTokens mSentiments =
+  case (mTokens, mSentiments) of
+    (Just tokens, Just sentiments) ->
+      tokens
+        & go (Just pseudoSentiment : sentiments)
+        & H.fromList
+    _ -> H.empty
+  where
+    -- Never used
+    pseudoSentiment = Le.Python.FasttextSentiment {fssLabel = 0, fssConfidence = Nothing}
+    go [] _ = []
+    go _ [] = []
+    go sents@(mSentFst : mSentsLeft) (tok : toksLeft) =
+      let (mSent, sentsToGo) =
+            if Le.Python.sptIsSentStart tok == Just True
+              then case mSentsLeft of
+                mSentSnd : _ -> (mSentSnd, mSentsLeft)
+                _ -> (Nothing, [])
+              else (mSentFst, sents)
+       in case mSent of
+            Nothing -> go sentsToGo toksLeft
+            Just sent ->
+              (Le.Python.sptI tok, sent) : go sentsToGo toksLeft
 
 listNamedEntities :: Maybe Text -> Maybe Int -> Le (AT.Paginated Text)
 listNamedEntities mQuery mPage = sg $ do

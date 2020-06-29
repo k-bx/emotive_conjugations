@@ -80,7 +80,7 @@ ArticlePleaseBig
     titleSpacyPos Le.Python.CmdSpacyPosRes Maybe
     fasttextSentimentAmazon Le.Python.CmdFasttextSentimentAmazonRes Maybe
     titleFasttextSentimentAmazon Le.Python.CmdFasttextSentimentAmazonRes Maybe
-    deriving Show
+    deriving Show Eq
 NamedEntity
     articlePleaseId ArticlePleaseId
     entity Text

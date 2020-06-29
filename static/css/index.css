@@ -10144,6 +10144,21 @@ main > .container {
   cursor: pointer;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+.article .content-token--sentiment-ng-2 {
+  border-bottom: 3px solid #e53d3d;
+}
+.article .content-token--sentiment-ng-1 {
+  border-bottom: 3px solid #e86a6a;
+}
+.article .content-token--sentiment-neutral {
+  border-bottom: 3px solid #a6acd8;
+}
+.article .content-token--sentiment-pos-1 {
+  border-bottom: 3px solid #57c952;
+}
+.article .content-token--sentiment-pos-2 {
+  border-bottom: 3px solid #08c600;
+}
 
 .page-dashboard .search-and-main {
   height: 100%;
