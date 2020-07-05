@@ -143,6 +143,10 @@ deploy:
 setup:
 	./sysadmin/setup.sh
 
+.PHONY: setup-local
+setup-local:
+	./sysadmin/setup-local.sh
+
 .PHONY: setup-webapp-python
 setup-webapp-python:
 	cd sysadmin && ./setup-webapp-python.sh
