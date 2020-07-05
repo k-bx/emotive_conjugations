@@ -2,6 +2,8 @@
 
 set -ex;
 
+sudo apt-get -y install curl wget;
+
 if ! command -v stack &> /dev/null
 then
     echo "stack not found. installing..."

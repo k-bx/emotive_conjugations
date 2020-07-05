@@ -5,9 +5,14 @@ extra-deps:
 - warc-1.0.4
 - pipes-zlib-0.4.4.2@sha256:f23fb0695f5613d04566c53c16fe14c6cd674bb607b5874b5fd8c49fe6b78ed8,1836
 - monoidal-containers-0.6.0.1@sha256:7d776942659eb4d70d8b8da5d734396374a6eda8b4622df9e61e26b24e9c8e40,2501
-# https://github.com/brendanhay/amazonka/pull/570
-- ../amazonka-k-bx/amazonka
-- ../amazonka-k-bx/amazonka-s3
+# we're waiting for code from https://github.com/brendanhay/amazonka/pull/570 to be regenerated, meanwhile for some things to work (reading from commoncrawl S3) you'd need to build your own amazonka and amazonka-s3 with regenerated code
+- git: https://github.com/brendanhay/amazonka
+  commit: adf6afb09771d18ecb84bf1c7a2f00bce964c3c9
+  subdirs:
+  - amazonka
+  - amazonka-s3
+# - ../amazonka-k-bx/amazonka
+# - ../amazonka-k-bx/amazonka-s3
 - interpolatedstring-perl6-1.0.2@sha256:7ce49c8a69a2a1b89c001ed79db2aab656ffd0faf2a7a701a553b6deb5c8ba7f,1073
 - tz-0.1.3.3@sha256:b9de0c1b10825460ff14a237209a8bf7747f47979601d35621276556bf63d2ca,5086
 - deriving-aeson-0.2.2@sha256:6150cfdd6ae2083249ec387ec4bb808d99a6b730ce093b8920cd788e9e681c73,1210

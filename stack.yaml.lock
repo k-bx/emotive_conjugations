@@ -26,6 +26,32 @@ packages:
   original:
     hackage: monoidal-containers-0.6.0.1@sha256:7d776942659eb4d70d8b8da5d734396374a6eda8b4622df9e61e26b24e9c8e40,2501
 - completed:
+    subdir: amazonka
+    name: amazonka
+    version: 1.6.1
+    git: https://github.com/brendanhay/amazonka
+    pantry-tree:
+      size: 1038
+      sha256: 59c7840fe6c9609d1d5022149010e72db5778e4978b9384b6dee8a4a207c96b3
+    commit: adf6afb09771d18ecb84bf1c7a2f00bce964c3c9
+  original:
+    subdir: amazonka
+    git: https://github.com/brendanhay/amazonka
+    commit: adf6afb09771d18ecb84bf1c7a2f00bce964c3c9
+- completed:
+    subdir: amazonka-s3
+    name: amazonka-s3
+    version: 1.6.1
+    git: https://github.com/brendanhay/amazonka
+    pantry-tree:
+      size: 18431
+      sha256: a19d02da301bbcad502e6092d7418a59543747c8bb6f12932bcbc4606f7814ab
+    commit: adf6afb09771d18ecb84bf1c7a2f00bce964c3c9
+  original:
+    subdir: amazonka-s3
+    git: https://github.com/brendanhay/amazonka
+    commit: adf6afb09771d18ecb84bf1c7a2f00bce964c3c9
+- completed:
     hackage: interpolatedstring-perl6-1.0.2@sha256:7ce49c8a69a2a1b89c001ed79db2aab656ffd0faf2a7a701a553b6deb5c8ba7f,1073
     pantry-tree:
       size: 300
@@ -61,9 +87,6 @@ packages:
   original:
     hackage: hailgun-0.5.1@sha256:a8a302776850e780b08467c986ea7e5e7fdf46a25abae735ffc8802dbd32e105,3770
 - completed:
-    cabal-file:
-      size: 2458
-      sha256: 7eddd8f82a7765bbc65f5146ad3a4e00eb63ec9380ce3511d6c87144d1726bf1
     name: elm-bridge
     version: 0.6.0
     git: https://github.com/agrafix/elm-bridge
