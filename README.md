@@ -16,18 +16,16 @@ or simply `make` if you have `~/.local/bin` in your `$PATH` already.
 
 ## Running
 
-For development build which automatically rebuilds on file change:
-
-```
-$(stack path --local-install-root)/bin/conj dev-webapp
-```
-
 To just run webapp:
 
 ```
 (cd dist && ./conj webapp)
 ```
 
-
 ## Developing
 
+For development build which automatically rebuilds on file change:
+
+```
+$(stack path --local-install-root)/bin/conj dev-webapp
+```
