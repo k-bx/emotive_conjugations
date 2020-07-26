@@ -139,6 +139,10 @@ clean:
 deploy:
 	./sysadmin/deploy.sh
 
+.PHONY: sysadmin-setup
+sysadmin-setup:
+	./sysadmin/setup.sh
+
 .PHONY: setup
 setup:
 	./sysadmin/setup.sh
@@ -176,3 +180,8 @@ recreate-db:
 
 copy-prod-db:
 	./sysadmin/copy-prod-db.sh
+
+# Note: renewing letsencrypt cert
+# $ ssh conj
+# $ ubuntu@conj:~/conj$ sudo certbot certonly --force-renew -d emotive-conjugations.app
+# > enter web root: /home/ubuntu/conj
