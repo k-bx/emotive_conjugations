@@ -184,4 +184,5 @@ copy-prod-db:
 # Note: renewing letsencrypt cert
 # $ ssh conj
 # $ ubuntu@conj:~/conj$ sudo certbot certonly --force-renew -d emotive-conjugations.app
+# # choose "2"
 # > enter web root: /home/ubuntu/conj
